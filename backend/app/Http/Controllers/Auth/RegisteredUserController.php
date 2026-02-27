@@ -32,15 +32,27 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'surname' => 'required|string|max:255',
+            'nickname' => 'nullable|string|max:255|unique:'.User::class,
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'role' => 'required|string|in:spectator,artist',
         ]);
 
         $user = User::create([
             'name' => $request->name,
+            'surname' => $request->surname,
+            'nickname' => $request->nickname,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => $request->role,
         ]);
+
+        if($user->role === 'artist') {
+            $user->artistProfile()->create([
+                'bio' => '¡Hola! Soy un nuevo artista en Libitum.',
+            ]);
+        }
 
         event(new Registered($user));
 

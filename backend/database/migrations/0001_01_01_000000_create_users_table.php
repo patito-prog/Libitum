@@ -22,7 +22,7 @@ return new class extends Migration
             $table->boolean("phone_number_verified")->default(false);
             $table->string('password');
             $table->string("role")->default("spectator");
-            $table->
+            
             $table->string("avatar_url")->nullable();
             $table->string("city")->nullable();
             $table->rememberToken();
