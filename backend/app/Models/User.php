@@ -57,4 +57,17 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Los eventos a los que asiste el usuario (como espectador).
+     *
+     * Es importante por la relación muchos a muchos. Un usuario puede asistir a muchos eventos y un evento tiene muchos asistentes.
+     *
+     * Laravel necesita saber que para esta relación debe mirar la tabla `event_user`.
+     */
+    public function events(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Event::class, 'event_user')
+            ->withTimestamps();
+    }
 }
