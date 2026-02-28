@@ -31,6 +31,10 @@ class User extends Authenticatable
         'last_connection',
     ];
 
+    public function artistProfile()
+    {
+        return $this->hasOne(ArtistProfile::class);
+    }
     /**
      * The attributes that should be hidden for serialization.
      *
