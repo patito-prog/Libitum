@@ -22,7 +22,7 @@ class Event extends Model
         'is_highlighted' => 'boolean',
     ];
 
-    // Relación con el artista (Tu compañera creó la tabla users)
+    // Relación con el artista (Qué artista ha hecho este evento)
     public function artist(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -35,6 +35,7 @@ class Event extends Model
     }
 
     // Relación muchos a muchos con Espectadores (Asistentes)
+    // Los usuarios que estén apuntados o hayan asistido.
     public function attendees(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'event_user')

@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\ArtistProfileController;
+use App\Http\Controllers\EventController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -23,8 +25,19 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    //----------------------------------------- ROUTE ARTIST PROFILE  --------------------------------------------------
     //Rutas de perfil de artista (name sirve para ponerle un nombre a la ruta, así luego en React podemos usar ese nombre para hacer la petición, en vez de poner la URL completa).
     Route::patch('/artist-profile', [ArtistProfileController::class, 'update'])->name('artist-profile.update');
+
 });
+
+
+
+//------------------------ PRUEBA NO MIDDLEWARE ---------------------------------
+Route::get('/event', [EventController::class, 'index'])->name('event.index');
+Route::post('/event/create', [EventController::class, 'create'])->name('event.create');
+Route::put('/event/{id}',[EventController::class, 'update'])->name('event.update');
+//------------------------ <<PRUEBA>> ---------------------------------
+
 
 require __DIR__.'/auth.php';
