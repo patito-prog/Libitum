@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateEventRequest;
 use App\Models\Event;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -18,53 +19,28 @@ class EventController extends Controller
      */
     public function index(): Response
     {
-        /*
-         * 2. El tema de $user->events (¡Cuidado aquí!)
-
-        $events = $user->events; // Esto funciona si tienes definida la relación en el modelo User.
-
-            Tienes la relación events() definida en tu modelo User, pero fíjate en el comentario que pusiste: "Los eventos a los que asiste el usuario (como espectador)".
-
-                Esa relación usa la tabla intermedia event_user. Si usas $user->events en el controlador de artistas, lo que estarás trayendo son los conciertos a los que el artista va a ir como público, no los que él ha creado.
-
-                Para arreglarlo y que funcione como quieres, añade esta SEGUNDA relación en tu modelo User:
-
-                PHP
-                /**
-                 * Los eventos que el usuario HA CREADO (como artista).
-                 /
-                        //public function createdEvents(): \Illuminate\Database\Eloquent\Relations\HasMany
-                    {
-                        // Un usuario tiene muchos eventos creados (Foreign key: user_id en la tabla events)
-                        //return $this->hasMany(Event::class, 'user_id');
-                    }
-                        //Ahora sí, en tu EventController, puedes hacer esto (que es mucho más elegante):
-                public function index(): Response
-                    {
-                        $user = Auth::user();
-
-                        // Traemos solo los eventos que él ha creado
-                        $events = $user->createdEvents()->latest()->get();
-
-                        return Inertia::render('Events/Index', [
-                            'events' => $events
-                        ]);
-           }*/
-        // 1. Obtenemos el usuario que tiene la sesión abierta.
+        // 1. Obtenemos el usuario (que tiene la sesión abierta).
         $user = Auth::user();
 
-        // 2. Filtramos: "Tráeme los eventos donde la columna user_id coincida con el ID del usuario".
-        $events = Event::where('user_id', $user->id)
-            ->latest() // Los pone en orden, los más nuevos primero.
+        // Buscamos los eventos creados por el artista y los ordenamos por los más nuevos.
+        $events = $user->createdEvents()
+            ->latest()
             ->get();
-
-        /**
-         *  TENEMOS QUE PROBAR A HACER ESTO -> $events = $user->events; //Esto funciona si tenemos definida la relación en el modelo User
-         *
-         */
 
         return Inertia::render('Events/Index', [
             'events' => $events
+        ]);
+    }
+    public function show(int $id): Response
+    {
+
+        //2. Buscamos el evento por ID.
+        $event = Event::where('id', $id)
+            ->with('categories') // Cargamos categorías del evento.
+            ->firstOrFail(); // Si no existe lanza un 404.
+
+        return Inertia::render('Events/Show', [
+            'event' => $event
         ]);
     }
     public function create(): Response
@@ -92,11 +68,8 @@ class EventController extends Controller
             'status' => 'nullable|in:draft,published,cancelled',
         ]);
 
-        // 2. Recogemos al usuario que está logueado en este momento.
+        // 3. Recogemos el usuario.
         $user = Auth::user();
-        if(!$user || $user->role !== 'artist'){
-            abort(403, 'Acceso denegado. Solo los artistas pueden crear eventos.');
-        }
 
         // 4. Creamos el evento y mandamos a la base de datos (Eloquent ORM).
         Event::create([
@@ -122,26 +95,9 @@ class EventController extends Controller
      * @param $eventID
      * @return RedirectResponse|JsonResponse
      */
-    public function update(Request $request, $eventID): RedirectResponse
+    public function update(UpdateEventRequest $request, Event $event): RedirectResponse | Response
     {
-        // 1. Si no encuentra el evento lanza un 404(not found).
-        $event = Event::findOrFail($eventID);
-
-        // 2. Solo el dueño del evento puede editarlo. (¿Es el dueño del evento?)
-        $user = Auth::getUser();
-        if(!$user || $user->id !== $event->user_id) {
-            abort(403, 'No tienes permiso para editar este evento.');
-        }
-
-        // 3. Validamos los nuevos datos.
-        $request->validate([
-            'title'=>'required|string|max:255',
-            'description' => 'required|string',
-            'location' => 'required|string|max:255',
-            'event_date' => 'required|date',
-            'price' => 'nullable|numeric|min:0',
-            'status' => 'required|in:draft,published,cancelled',
-        ]);
+        //Los pasos anteriores están en UpdateEventRequest...
 
         // 4. Actualizamos el evento.
         $event->update([
@@ -154,6 +110,12 @@ class EventController extends Controller
             'price' => $request->price ?? 0.00,
             'status' => $request->status,
         ]);
+
+        if($request->accepts('json')){
+            //Respuestas API
+        }else{
+            //Respuestas Visuales
+        }
 
         return back()->with('success', 'Evento actualizado correctamente.');
     }
@@ -178,6 +140,58 @@ class EventController extends Controller
         $event->delete();
 
         return back()->with('success', "El evento '$event->title' ha sido eliminado");
+    }
+
+    public function categories(Request $request, Event $event): RedirectResponse
+    {
+        // 1. Validamos que las categorías existan en la tabla 'categories'
+        $validated = $request->validate([
+            'category_ids' => 'required|array',
+            'category_ids.*' => 'exists:categories,id'
+        ]);
+
+        // 2. Sincronizamos: elimina las que no estén en el array y añade las nuevas
+        $event->categories()->sync($validated['category_ids']);
+
+        return back()->with('success', 'Se han cambiado las categorías.');
+    }
+
+    /**
+     * Función que cambia el estado de un evento (draft(borrador),published(publicado),cancelled(cancelado))
+     * @param Request $request
+     * @param $eventoId
+     * @return void
+     */
+    public function status(Request $request, $eventoId)
+    {
+        $user = Auth::user();
+        // 1. Buscamos el evento que coincida con el ARTISTA que lo ha creado y con el ID de ese propio evento.
+        //  Si no existe mandamos un 404 - not found.
+        $event = Event::where('id', $eventoId)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+
+        //  2. Validamos que el estado que quiere asignarle está entre los requeridos.
+        $event->validate([
+            'status' => 'required|in:draft,published,cancelled',
+        ]);
+
+        // 3. Actualizamos el estado del evento.
+        $event->update([
+            'status' => $request->status,
+        ]);
+    }
+
+    //--------------------------- RUTAS SIN `es_artist` MIDDLEWARE -------------------------------------
+    public function inscription($eventId)
+    {
+        $user = Auth::user();
+        //  2. Si no encuentra el evento lanza un 404 - not found. (Si realmente no existe ese evento es porque el usuario se está inventando el ID, si no, no le saldría para poder inscribirse).
+        $event = Event::findOrFail($eventId);
+        //  Verificamos que ese usuario no tiene ya este evento inscrito.
+        $user->events()->attach($event->id);
+
+
     }
 
 }

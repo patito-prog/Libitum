@@ -70,4 +70,13 @@ class User extends Authenticatable
         return $this->belongsToMany(Event::class, 'event_user')
             ->withTimestamps();
     }
+
+    /**
+     * Eventos creados por el Artista.
+     */
+    public function createdEvents(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        //  Relación 1:N: Un usuario crea muchos eventos.
+        return $this->hasMany(Event::class, 'user_id');
+    }
 }
