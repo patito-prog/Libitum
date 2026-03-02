@@ -1,6 +1,10 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ArtistProfileController; 
+use App\Http\Controllers\FollowerController;      
+use App\Http\Controllers\AdminController;         
+use App\Http\Controllers\AdminUserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -29,7 +33,7 @@ Route::middleware('auth')->group(function () {
 
     //Rutas de perfil de artista (name sirve para ponerle un nombre a la ruta, así luego en React podemos usar ese nombre para hacer la petición, en vez de poner la URL completa).
     //Actualiza los detalles específicos del artista (bio, redes sociales, donation_url) en la tabla 'artist_profiles'.
-    Route::patch('/artist-profile', [ArtistProfileController::class, 'update'])->name('artist-profile.update');
+    Route::patch('/artist-profile', [ArtistProfileController::class, 'update'])->middleware('artist')->name('artist-profile.update');
 
     //Rutas favoritos / seguidores.
     //Recupera y muestra la lista de artistas a los que sigue el usuario actual.

@@ -18,14 +18,8 @@ class ArtistProfileController extends Controller
             'tiktok_url'=>'nullable|url|max:255',
             'donation_url'=>'nullable|url|max:255', 
         ]);
-        // 2. Recogemos al usuario que está logueado en este momento.
-        $user = Auth::user();
 
-        if($user->role !== 'artist' || !$user->artistProfile){
-            abort(403, 'Acceso denegado. No eres un artista.');
-        }
-
-        $user->artistProfile->update([
+        Auth::user()->artistProfile->update([
             'bio' => $request->bio,
             'spotify_url' =>$request->spotify_url,
             'instagram_url'=>$request->instagram_url,
