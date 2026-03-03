@@ -70,7 +70,7 @@ Route::patch('/user/event/{event}/remind_me', [EventController::class, 'remindMe
 Route::delete('/user/event/{id}/', [EventController::class, 'destroySignedUp'])->name('event.destroySignedUp');
 
 
-
-Route::resource('/friend', FriendController::class);
+// Al hacer Route::resource podemos usar all los métodos CRUD gracias a artisan.
+//Route::resource('/friend', FriendController::class);
 
 require __DIR__.'/auth.php';

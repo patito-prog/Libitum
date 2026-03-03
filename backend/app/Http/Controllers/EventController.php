@@ -113,11 +113,12 @@ class EventController extends Controller
 
         if($request->accepts('json')){
             //Respuestas API
+            //return response()->json([])
         }else{
             //Respuestas Visuales
         }
-
         return back()->with('success', 'Evento actualizado correctamente.');
+
     }
 
     /**
