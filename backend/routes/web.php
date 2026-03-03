@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\ArtistProfileController;
 use App\Http\Controllers\EventController;
-use App\Http\Controllers\FriendController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\FollowerController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminUserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -21,41 +23,55 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+
+
 Route::middleware('auth')->group(function () {
+    //Gestión básica del perfil de usuario (edit, update, destroy).
+    // Muestra el formulario para editar los datos básicos de la cuenta (Nombre, Email, Contraseña).
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    // Actualiza la información básica de la cuenta en la tabla 'users'.
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    // Borra permanentemente la cuenta del usuario de la base de datos.
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
 
-
-/**
- * Su ejecución será para que los que quieran solicitar estas rutas tengan que estar AUTENTICADOS y sean ARTISTAS.
- * Por ahora estamos haciendo las pruebas sin middleware.
- *
-Route::middleware(['auth', 'is_artist'])->group(function () {
- *
- */
-    //------------------------ PRUEBA NO MIDDLEWARE ---------------------------------
-    //----------------------------------------- ROUTE ARTIST PROFILE  --------------------------------------------------
     //Rutas de perfil de artista (name sirve para ponerle un nombre a la ruta, así luego en React podemos usar ese nombre para hacer la petición, en vez de poner la URL completa).
-    Route::patch('/artist-profile', [ArtistProfileController::class, 'update'])->name('artist-profile.update');
+    //Actualiza los detalles específicos del artista (bio, redes sociales, donation_url) en la tabla 'artist_profiles'.
+    Route::patch('/artist-profile', [ArtistProfileController::class, 'update'])->middleware('artist')->name('artist-profile.update');
 
-    //  Artista ver sus eventos.
-    Route::get('/event', [EventController::class, 'index'])->name('event.index');
-    //  Artista crea un evento.
-    Route::post('/event/create', [EventController::class, 'create'])->name('event.create');
-    //  Artista edita un evento.
-    Route::put('/event/{event}',[EventController::class, 'update'])->name('event.update');
-    //  Artista elimina un evento.
-    Route::delete('/event/{event}',[EventController::class, 'destroy'])->name('event.destroy');
-    //  Artista asigna/edita categorías de un evento.
-    Route::put('/event/{event}/categories', [EventController::class, 'categories'])->name('event.categories');
-    //  Artista cambia el estado de un evento.
-    Route::patch('/event/{id}/status', [EventController::class, 'status'])->name('event.status');
-    //------------------------ <<PRUEBA>> ---------------------------------
-/**
+    //Rutas favoritos / seguidores.
+    //Recupera y muestra la lista de artistas a los que sigue el usuario actual.
+    Route::get('/my-favorites', [FollowerController::class, 'index'])->name('followers.index');
+    // Crea una nueva relación de seguimiento entre el usuario y un artista.
+    Route::post('/artist/{id}/follow', [FollowerController::class, 'store'])->name('followers.store');
+    //Dejar de seguir al artista.
+    Route::delete('/artist/{id}/unfollow', [FollowerController::class, 'destroy'])->name('followers.destroy');
 });
-*/
+
+//Panel de administración.
+// Control de usuarios, estadísticas y moderación de la plataforma.
+Route::middleware(['auth', 'admin'])->group(function () {
+    //Renderiza el panel de control principal de administración con estadísticas globales.
+    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    // Recupera una lista paginada de todos los usuarios registrados.
+    Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
+    // Suspende (banea) la cuenta de un usuario específico, impidiendo futuros inicios de sesión.
+    Route::patch('/admin/users/{id}/ban', [AdminUserController::class, 'ban'])->name('admin.users.ban');
+    Route::patch('/artist-profile', [ArtistProfileController::class, 'update'])->name('artist-profile.update');
+});
+
+//  Artista ver sus eventos.
+Route::get('/event', [EventController::class, 'index'])->name('event.index');
+//  Artista crea un evento.
+Route::post('/event/create', [EventController::class, 'create'])->name('event.create');
+//  Artista edita un evento.
+Route::put('/event/{event}',[EventController::class, 'update'])->name('event.update');
+//  Artista elimina un evento.
+Route::delete('/event/{event}',[EventController::class, 'destroy'])->name('event.destroy');
+//  Artista asigna/edita categorías de un evento.
+Route::put('/event/{event}/categories', [EventController::class, 'categories'])->name('event.categories');
+//  Artista cambia el estado de un evento.
+Route::patch('/event/{id}/status', [EventController::class, 'status'])->name('event.status');
+//------------------------ <<PRUEBA>> ---------------------------------
 
 //RUTAS EN EVENTOS PARA LOS USUARIOS/ESPECTADORES.
 //  ARTISTA/USUARIO puede ver un evento. (CONSIDERO QUE NO HACE FALTA QUE SE AUTENTIQUE PARA ESTO)
