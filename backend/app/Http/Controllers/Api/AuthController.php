@@ -85,7 +85,7 @@ class AuthController extends Controller
         }else{
             return response([
                 "error"=>false,
-                "message"=>'Cierre de session correcto',
+                "message"=>'Cierre de sesión correcto',
                 "code"=>200
             ],200);
         }
