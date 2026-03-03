@@ -17,7 +17,7 @@ class EventController extends Controller
     /**
      * 1. Muestra la lista de eventos (GET)
      */
-    public function index(): Response
+    public function index(Request $request): Response | JsonResponse
     {
         // 1. Obtenemos el usuario (que tiene la sesión abierta).
         $user = Auth::user();
@@ -26,26 +26,33 @@ class EventController extends Controller
         $events = $user->createdEvents()
             ->latest()
             ->get();
-
+        //  Respuesta para la API.
+        if($request->is('api/*') || $request->expectsJson()) {
+            return response()->json($events);
+        }
+        //  Respuesta para React.
         return Inertia::render('Events/Index', [
             'events' => $events
         ]);
     }
-    public function show(int $id): Response
+    public function show(Request $request, Event $event): Response | JsonResponse
     {
-
         //2. Buscamos el evento por ID.
-        $event = Event::where('id', $id)
-            ->with('categories') // Cargamos categorías del evento.
-            ->firstOrFail(); // Si no existe lanza un 404.
+        $event = $event->with('categories'); // Cargamos categorías del evento.
 
+        //  Respuesta para la API.
+        if ($request->is('api/*') || $request->expectsJson()) {
+            return response()->json($event);
+        }
+        //  Respuesta para React.
         return Inertia::render('Events/Show', [
             'event' => $event
         ]);
     }
-    public function create(): Response
+    public function create(): void
     {
-        return Inertia::render('Events/Create');
+        //  Aquí solo hará falta la respuesta para React. Retorna nada más que una vista.
+        //return Inertia::render('Events/Create');
     }
 
 
@@ -55,7 +62,7 @@ class EventController extends Controller
      * @return RedirectResponse
      *
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse | JsonResponse
     {
         // 1. Validamos los datos que llegan del formulario de React
         $request->validate([
@@ -84,6 +91,14 @@ class EventController extends Controller
             // 'cover_image' => ... (La subida de imágenes la haremos en un paso aparte)
         ]);
 
+        //  Respuesta para la API.
+        if ($request->is('api/*') || $request->expectsJson()) {
+            return response()->json([
+                'error' => false,
+                'code' => 201,
+                'message' => 'Event created successfully.'
+            ]);
+        }
         // 5. Redirigimos al listado con un mensaje de éxito.
         return redirect()->route('event.index')->with('success', "Evento '$request->title' creado correctamente.");
     }
@@ -111,14 +126,17 @@ class EventController extends Controller
             'status' => $request->status,
         ]);
 
-        if($request->accepts('json')){
+        //  Respuesta para la API.
+        if ($request->is('api/*') || $request->expectsJson()){
             //Respuestas API
-            //return response()->json([])
-        }else{
-            //Respuestas Visuales
+            return response()->json([
+                'error' => false,
+                'code' => 201,
+                'message' => 'Event updated successfully.'
+            ]);
         }
+        //  Respuesta para React.
         return back()->with('success', 'Evento actualizado correctamente.');
-
     }
 
     /**
@@ -126,24 +144,30 @@ class EventController extends Controller
      * @param int $id
      * @return RedirectResponse
      */
-    public function destroy($id): RedirectResponse
+    public function destroy(Request $request, Event $event): RedirectResponse | JsonResponse
     {
-        // 1. Buscamos el evento (si no existe, 404 automático)
-        $event = Event::findOrFail($id);
-
-        // 2. Solo el dueño del evento puede borrarlo.
+        // 1. Solo el dueño del evento puede borrarlo.
         $user = Auth::user();
         if (!$user || $user->id !== $event->user_id) {
             abort(403, 'No tienes permiso para borrar este evento');
         }
 
-        // 3. Borrado del evento(Eloquent ORM)
+        // 2. Borrado del evento(Eloquent ORM)
         $event->delete();
 
+        //  Respuesta para la API.
+        if ($request->is('api/*') || $request->expectsJson()) {
+            return response()->json([
+                'error' => false,
+                'code' => 201,
+                'message' => 'Event deleted successfully.'
+            ]);
+        }
+        //  Respuesta para React.
         return back()->with('success', "El evento '$event->title' ha sido eliminado");
     }
 
-    public function categories(Request $request, Event $event): RedirectResponse
+    public function categories(Request $request, Event $event)
     {
         // 1. Validamos que las categorías existan en la tabla 'categories'
         $validated = $request->validate([
@@ -154,6 +178,15 @@ class EventController extends Controller
         // 2. Sincronizamos: elimina las que no estén en el array y añade las nuevas
         $event->categories()->sync($validated['category_ids']);
 
+        //  Respuesta para API.
+        if ($request->is('api/*') || $request->expectsJson()) {
+            return response()->json([
+                'error' => false,
+                'code' => 201,
+                'message' => 'Event categories added successfully.'
+            ]);
+        }
+
         return back()->with('success', 'Se han cambiado las categorías.');
     }
 
@@ -161,7 +194,6 @@ class EventController extends Controller
      * Función que cambia el estado de un evento (draft(borrador),published(publicado),cancelled(cancelado))
      * @param Request $request
      * @param $eventoId
-     * @return void
      */
     public function status(Request $request, $eventoId)
     {
@@ -181,18 +213,110 @@ class EventController extends Controller
         $event->update([
             'status' => $request->status,
         ]);
+
+        //  Respuesta para API.
+        if ($request->is('api/*') || $request->expectsJson()) {
+            return response()->json([
+                'error' => false,
+                'code' => 201,
+                'message' => 'Event status updated successfully.'
+            ], 201);
+        }
+        //  Respuesta para React.
+        return back();
     }
 
-    //--------------------------- RUTAS SIN `es_artist` MIDDLEWARE -------------------------------------
-    public function inscription($eventId)
+    //--------------------------- RUTAS SIN `artist` MIDDLEWARE -------------------------------------
+    public function inscription(Request $request)
+    {
+        // Validamos que el event_id venga en el body
+        $request->validate(['event_id' => 'required|exists:events,id']);
+
+        $user = Auth::user();
+        $eventId = $request->event_id;
+
+        // Verificamos si ya está inscrito para evitar duplicados y errores de Primary Key
+        if ($user->events()->where('event_id', $eventId)->exists()) {
+            return response()->json(['message' => 'Ya estás inscrito en este evento.'], 409);
+        }
+
+        // syncWithoutDetaching es más seguro que attach para evitar duplicados accidentales
+        $user->events()->attach($eventId);
+
+        //  Respuesta para la API.
+        if ($request->is('api/*') || $request->expectsJson()) {
+            return response()->json([
+                'error' => false,
+                'code' => 201,
+                'message' => 'Inscripción realizada con éxito.',
+                'event' => Event::find($eventId)
+            ], 201);
+        }
+
+        //  Respuesta para React.
+        return back();
+    }
+
+    public function signedUp(Request $request)
     {
         $user = Auth::user();
-        //  2. Si no encuentra el evento lanza un 404 - not found. (Si realmente no existe ese evento es porque el usuario se está inventando el ID, si no, no le saldría para poder inscribirse).
-        $event = Event::findOrFail($eventId);
-        //  Verificamos que ese usuario no tiene ya este evento inscrito.
-        $user->events()->attach($event->id);
+        $events = $user->events()->get();
 
+        //  Respuesta para la API.
+        if ($request->is('api/*') || $request->expectsJson()) {
+            return response()->json([
+                'error' => false,
+                'code' => 201,
+                'message' => 'Eventos signed up successfully.',
+                'events' => $events
+            ], 200);
+        }
+        //  Respuesta para React.
+        return back();
+    }
 
+    public function remindMe(Request $request, Event $event)
+    {
+        $user = Auth::user();
+
+        // Validamos que el usuario realmente esté inscrito en ese evento
+        if (!$user->events()->where('event_id', $event->id)->exists()) {
+            return response()->json(['message' => 'No estás inscrito en este evento.'], 404);
+        }
+
+        // Actualizamos el campo en la tabla pivote
+        $user->events()->updateExistingPivot($event->id, [
+            'remind_me' => $request->remind_me
+        ]);
+        //  Respuesta para la API.
+        if ($request->is('api/*') || $request->expectsJson()) {
+            return response()->json([
+                'message' => 'Preferencia de recordatorio actualizada.',
+                'remind_me' => $request->remind_me
+            ], 200);
+        }
+        //  Respuesta para React.
+        return back();
+    }
+
+    public function destroySignedUp(Resquest $request, Event $event)
+    {
+        $user = Auth::user();
+        // Verificamos si existe la relación antes de intentar borrar
+        if (!$user->events()->where('event_id', $event->id)->exists()) {
+            return response()->json(['message' => 'No se encontró la inscripción.'], 404);
+        }
+        // Eliminamos la fila en la tabla event_user (pivote)
+        $user->events()->detach($event->id);
+
+        //  Respuesta para la API.
+        if ($request->is('api/*') || $request->expectsJson()) {
+            return response()->json([
+                'message' => 'Te has dado de baja del evento con éxito.'
+            ], 200);
+        }
+        //  Respuesta para React.
+        return back();
     }
 
 }

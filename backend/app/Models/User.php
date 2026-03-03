@@ -88,7 +88,7 @@ class User extends Authenticatable
      */
     public function events(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->belongsToMany(Event::class, 'event_user')
+        return $this->belongsToMany(Event::class, 'event_user')->withPivot('remind_me')
             ->withTimestamps();
     }
 

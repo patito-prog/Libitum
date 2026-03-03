@@ -4,8 +4,8 @@ use App\Http\Controllers\ArtistProfileController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FollowerController;
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\AdminUserController;
+//use App\Http\Controllers\AdminController;
+//use App\Http\Controllers\AdminUserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -51,11 +51,11 @@ Route::middleware('auth')->group(function () {
 // Control de usuarios, estadísticas y moderación de la plataforma.
 Route::middleware(['auth', 'admin'])->group(function () {
     //Renderiza el panel de control principal de administración con estadísticas globales.
-    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    //Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     // Recupera una lista paginada de todos los usuarios registrados.
-    Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
+    //Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
     // Suspende (banea) la cuenta de un usuario específico, impidiendo futuros inicios de sesión.
-    Route::patch('/admin/users/{id}/ban', [AdminUserController::class, 'ban'])->name('admin.users.ban');
+    //Route::patch('/admin/users/{id}/ban', [AdminUserController::class, 'ban'])->name('admin.users.ban');
     Route::patch('/artist-profile', [ArtistProfileController::class, 'update'])->name('artist-profile.update');
 });
 
@@ -73,17 +73,21 @@ Route::put('/event/{event}/categories', [EventController::class, 'categories'])-
 Route::patch('/event/{id}/status', [EventController::class, 'status'])->name('event.status');
 //------------------------ <<PRUEBA>> ---------------------------------
 
+
 //RUTAS EN EVENTOS PARA LOS USUARIOS/ESPECTADORES.
-//  ARTISTA/USUARIO puede ver un evento. (CONSIDERO QUE NO HACE FALTA QUE SE AUTENTIQUE PARA ESTO)
-Route::get('/event/{event}', [EventController::class, 'show'])->name('event.show');
-//  Usuario puede inscribirse en un evento. (La hago petición patch porque en la base de datos por defecto se pone que le recordemos el evento)
-Route::put('/user/event', [EventController::class, 'inscription'])->name('event.inscription');
+//  Usuario puede inscribirse en un evento.
+Route::post('/user/event', [EventController::class, 'inscription'])->name('event.inscription');
 // Usuario puede ver a qué eventos está inscrito.
 Route::get('/user/events', [EventController::class, 'signedUp'])->name('event.signedUp');
 // Usuario puede activar que se le RECUERDE el evento.
-Route::patch('/user/event/{event}/remind_me', [EventController::class, 'remindMe'])->name('event.remindMe');
+Route::patch('/user/{event}/remind_me', [EventController::class, 'remindMe'])->name('event.remindMe');
 //  Usuario puede darse de baja de un evento.
-Route::delete('/user/event/{id}/', [EventController::class, 'destroySignedUp'])->name('event.destroySignedUp');
+Route::delete('/user/{event}/', [EventController::class, 'destroySignedUp'])->name('event.destroySignedUp');
+
+
+//PETICIÓN CON NO-AUTENTICACIÓN.
+//  ARTISTA/USUARIO puede ver un evento. (CONSIDERO QUE NO HACE FALTA QUE SE AUTENTIQUE PARA ESTO)
+Route::get('/event/{event}', [EventController::class, 'show'])->name('event.show');
 
 
 // Al hacer Route::resource podemos usar all los métodos CRUD gracias a artisan.
