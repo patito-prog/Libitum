@@ -18,13 +18,16 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
         $middleware->alias([
-            'is_artist' => \App\Http\Middleware\CheckArtist::class,
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'artist' => \App\Http\Middleware\IsArtist::class,
         ]);
         // Excepción para probar con Postman ------------>> TODO: QUITAR EN PRODUCCIÓN.
         $middleware->validateCsrfTokens(except: [
             'event/create',
             'event/*'
         ]);
+
+
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
