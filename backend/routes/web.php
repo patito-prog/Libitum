@@ -48,7 +48,7 @@ Route::middleware('auth')->group(function () {
 // Control de usuarios, estadísticas y moderación de la plataforma.
 Route::middleware(['auth', 'admin'])->group(function () {
     //Renderiza el panel de control principal de administración con estadísticas globales.
-    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/dashboard', [AdminUserController::class, 'index'])->name('admin.dashboard');
     // Recupera una lista paginada de todos los usuarios registrados.
     Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
     // Suspende (banea) la cuenta de un usuario específico, impidiendo futuros inicios de sesión.
