@@ -12,6 +12,14 @@ class DatabaseSeeder extends Seeder
 
     /**
      * Seed the application's database.
+     *
+     * EJECUCIÓN DEL SEEDER:
+     * A. Limpiar tod0 y empezar de cero (Borra las tablas y vuelve a crear con los datos nuevos.)
+     *      - ./vendor/bin/sail artisan migrate:fresh --seed
+     *
+     * B. Solo ejecuta el seeder (si ya tenemos las tablas y no queremos borrarlas.)
+     *      - ./vendor/bin/sail artisan db:seed
+     *
      */
     public function run(): void
     {
