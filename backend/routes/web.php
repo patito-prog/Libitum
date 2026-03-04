@@ -31,9 +31,9 @@ Route::middleware('auth')->group(function () {
     // Borra permanentemente la cuenta del usuario de la base de datos.
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    Route::get('/artists/{id}', [ArtistProfileController::class, 'show'])->name('artists.show');
     //Rutas de perfil de artista (name sirve para ponerle un nombre a la ruta, así luego en React podemos usar ese nombre para hacer la petición, en vez de poner la URL completa).
-    //Actualiza los detalles específicos del artista (bio, redes sociales, donation_url) en la tabla 'artist_profiles'.
-    Route::patch('/artist-profile', [ArtistProfileController::class, 'update'])->middleware('artist')->name('artist-profile.update');
+    
 
     //Rutas favoritos / seguidores.
     //Recupera y muestra la lista de artistas a los que sigue el usuario actual.
@@ -42,17 +42,25 @@ Route::middleware('auth')->group(function () {
     Route::post('/artist/{id}/follow', [FollowerController::class, 'store'])->name('followers.store');
     //Dejar de seguir al artista.
     Route::delete('/artist/{id}/unfollow', [FollowerController::class, 'destroy'])->name('followers.destroy');
+
+    Route::middleware('artist')->group(function () {
+        //Actualiza los detalles específicos del artista (bio, redes sociales, donation_url) en la tabla 'artist_profiles'.
+        Route::patch('/artist-profile', [ArtistProfileController::class, 'update'])->name('artist-profile.update');
+        //Recupera y muestra la lista de seguidores del artista actual.
+        Route::get('/my-followers', [FollowerController::class, 'followers'])->name('followers.followers');
+        //Muestra estadísticas del perfil de artista y sus eventos.
+        Route::get('/artist/statistics', [ArtistProfileController::class, 'statistics'])->name('artist.statistics');
+    });
+    //Panel de administración.
+    // Control de usuarios, estadísticas y moderación de la plataforma.
+    Route::middleware('admin')->group(function () {
+        Route::get('/admin/users', [AdminUserController::class, 'index']);
+        Route::get('/admin/users/{id}', [AdminUserController::class, 'show']);
+        Route::patch('/admin/users/{id}', [AdminUserController::class, 'update']); 
+        Route::delete('/admin/users/{id}', [AdminUserController::class, 'destroy']);
+    });
 });
 
-//Panel de administración.
-// Control de usuarios, estadísticas y moderación de la plataforma.
-Route::middleware(['auth', 'admin'])->group(function () {
-    //Renderiza el panel de control principal de administración con estadísticas globales.
-    Route::get('/admin/dashboard', [AdminUserController::class, 'index'])->name('admin.dashboard');
-    // Recupera una lista paginada de todos los usuarios registrados.
-    Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
-    // Suspende (banea) la cuenta de un usuario específico, impidiendo futuros inicios de sesión.
-    Route::patch('/admin/users/{id}/ban', [AdminUserController::class, 'ban'])->name('admin.users.ban');
-});
+
 
 require __DIR__.'/auth.php';

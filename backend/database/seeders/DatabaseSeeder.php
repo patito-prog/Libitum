@@ -3,50 +3,70 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-
+use \App\Models\Category;
+use \Spatie\Permission\PermissionRegistrar;
+use \App\Models\Event;
+use App\Models\ArtistProfile;
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
+   
 
     /**
      * Seed the application's database.
      */
     public function run(): void
     {
-        // Creamos 8 categorías de los eventos (Rock, Indie, Pop...)
-        $categories = \App\Models\Category::factory(8)-> create();
-        // Creamos 10 Artistas y sus Eventos.
-        \App\Models\User::factory(10)->create(['role' => 'artist'])->each(function ($artist) use ($categories) {
-            //Para cada artista crea entre 1 y 3 eventos...
-            \App\Models\Event::factory(rand(1, 3))->create([
+        //Borramos la caché de permisos para evitar problemas al ejecutar los seeders.
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+        $this->call([
+            PermissionSeeder::class,
+            RoleSeeder::class,
+        ]);
+
+        //Creamos 8 categorías de los eventos (Rock, Indie, Pop...)
+        $categories = Category::factory(8)-> create();
+        //Creamos 10 Artistas y sus Eventos.
+        User::factory(10)->create()->each(function ($artist) use ($categories) {
+        $artist->assignRole('artist');   
+        //Creamos su perfil de artista vacío.
+        ArtistProfile::create([
+                'user_id' => $artist->id
+            ]); 
+        //Para cada artista crea entre 1 y 3 eventos...
+            Event::factory(rand(1, 3))->create([
                 'user_id' => $artist->id
             ])->each(function ($event) use ($categories) {
-                // Cada evento vamos a asignarle entre 1 o 2 categorías aleatorias.
+                //Cada evento vamos a asignarle entre 1 o 2 categorías aleatorias.
                 $event->categories()->attach($categories->random(rand(1, 3))->pluck('id'));
             });
         });
 
         //Creamos 20 Espectadores que asisten a eventos aleatorios.
-        \App\Models\User::factory(20)->create(['role' => 'spectator'])->each(function ($spectator){
-            $events = \App\Models\Event::inRandomOrder()->take(rand(1, 3))->pluck('id');
+        User::factory(20)->create()->each(function ($spectator){
+            $spectator->assignRole('spectator');
+            $events = Event::inRandomOrder()->take(rand(1, 3))->pluck('id');
             $spectator->events()->attach($events);
         });
 
-        User::factory()->create([
+        $adminUser = User::create([
             'name' => 'Jefe',
             'email' => 'admin@libitum.com',
             'password' => Hash::make('123456'),
-            'role' => 'admin',
+            
         ]);
+        $adminUser->assignRole('admin');
 
-        User::factory()->create([
+       $artistUser = User::create([
             'name' => 'Mozart',
+            'surname' => 'Wolfgang',
             'email' => 'mozart@libitum.com',
             'password' => Hash::make('123456'),
-            'role' => 'artist',
+        ]);
+        $artistUser->assignRole('artist');
+        ArtistProfile::create([
+            'user_id' => $artistUser->id
         ]);
     }
 }

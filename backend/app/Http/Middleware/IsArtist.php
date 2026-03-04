@@ -16,9 +16,9 @@ class IsArtist
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::user()->role !== 'artist' || !Auth::user()->artistProfile) {
+        if (!Auth::user()->hasRole('artist') || !Auth::user()->artistProfile) {
             //Si la petición viene de Postman o React, devolvemos un error 403 Forbidden en formato JSON.
-            if($request->expectsJson() || $request->header('X-Inertia')){
+            if($request->expectsJson() || $request->is('api/*')){
                 return response()->json(['message'=>'Acceso denegado. Solo para artistas.'], 403);
             }
 

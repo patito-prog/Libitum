@@ -17,9 +17,9 @@ class AdminMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         //Verificamos que el usuario esté autenticado y que tenga el rol de 'admin' antes de permitir el acceso a las rutas protegidas por este middleware.
-        if(!Auth::check() || Auth::user()->role !== 'admin'){
+        if(!Auth::check() || !Auth::user()->hasRole('admin')){
             //Si la petición viene de Postman o React, devolvemos un error 403 Forbidden en formato JSON.
-            if($request->expectsJson() || $request->header('X-Inertia')){
+            if($request->expectsJson() || $request->is('api/*')){
                 return response()->json(['message'=>'Acceso denegado. Se requieren permisos de administración.'], 403);
             }
 

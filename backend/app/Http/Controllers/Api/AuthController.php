@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use \App\Models\ArtistProfile;
 
 class AuthController extends Controller
 {
@@ -38,7 +39,7 @@ class AuthController extends Controller
             "message" => 'Usuario autenticado correctamente',
             "token" => $token,
             "type_token" => "Bearer",
-            "role" => $usuario->role, 
+            "role" => $usuario->roles->pluck('name')->first(), //Obtenemos el nombre del rol del usuario (asumiendo que solo tiene un rol)
             "code" => 200
         ], 200);
     }
@@ -52,15 +53,21 @@ class AuthController extends Controller
             'password' => 'required|string|min:6',
         ]);
 
-        // 2. Creamos el usuario en la base de datos
-        $secureRole = ($request->role === 'artist') ? 'artist' : 'spectator';
+        //Creamos el usuario en la base de datos
+        
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $secureRole, // Por defecto le ponemos este rol
         ]);
-
+        $secureRole = ($request->role === 'artist') ? 'artist' : 'spectator';
+        $user->assignRole($secureRole);
+        if ($secureRole === 'artist') {
+            //Creamos el perfil de artista vacío para que el artista pueda editarlo después. Es importante crear el perfil de artista en el momento del registro, para evitar problemas de integridad referencial y para que el frontend siempre tenga un perfil de artista asociado al usuario, aunque esté vacío.
+            ArtistProfile::create([
+                'user_id' => $user->id,
+            ]);
+        }
         // 3. Le generamos el token directamente para que ya esté logueado
         $token = $user->createToken('auth_token')->plainTextToken;
 
