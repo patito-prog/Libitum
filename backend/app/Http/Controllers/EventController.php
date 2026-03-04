@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CategoriesRequest;
+use App\Http\Requests\RemindMeRequest;
 use App\Http\Requests\UpdateEventRequest;
 use App\Models\Event;
 use Illuminate\Http\JsonResponse;
@@ -11,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
+use function Laravel\Prompts\error;
 
 class EventController extends Controller
 {
@@ -72,13 +75,16 @@ class EventController extends Controller
             'price' => 'nullable|numeric|min:0',
             // De momento validamos que status sea uno de estos, ajústalo a tu lógica
             'status' => 'nullable|in:draft,published,cancelled',
+            // Validamos que 'categories' sea un array y que los IDs existan en la tabla
+            'categories' => 'nullable|array',
+            'categories.*' => 'exists:categories,id',
         ]);
 
-        // 3. Recogemos el usuario.
+        // 2. Recogemos el usuario.
         $user = Auth::user();
 
-        // 4. Creamos el evento y mandamos a la base de datos (Eloquent ORM).
-        Event::create([
+        // 3. Creamos el evento y mandamos a la base de datos (Eloquent ORM).
+        $event = Event::create([
             'user_id' => $user->id,
             'title' => $request->title,
             'slug' => Str::slug($request->title . '-' . uniqid()),
@@ -89,6 +95,12 @@ class EventController extends Controller
             'status' => isset($request->status) ? $request->status : 'published',
             // 'cover_image' => ... (La subida de imágenes la haremos en un paso aparte)
         ]);
+
+        // 4. Si vienen categorías en la $request, las asociamos
+        if ($request->has('categories')) {
+            // attach() inserta en la tabla category_event
+            $event->categories()->attach($request->categories);
+        }
 
         //  Respuesta para la API.
         if ($request->is('api/*') || $request->expectsJson()) {
@@ -124,6 +136,10 @@ class EventController extends Controller
             'status' => $request->status,
         ]);
 
+        // 2. Sincronizamos las categorías.
+        // sync() borrará las que ya no estén y añadirá las nuevas automáticamente.
+        $event->categories()->sync($request->categories ?? []);
+
         //  Respuesta para la API.
         if ($request->is('api/*') || $request->expectsJson()){
             //Respuestas API
@@ -139,7 +155,6 @@ class EventController extends Controller
 
     /**
      * Elimina un evento de la base de datos.
-     * @param int $id
      */
     public function destroy(Request $request, Event $event)
     {
@@ -164,16 +179,15 @@ class EventController extends Controller
         return back()->with('success', "El evento '$event->title' ha sido eliminado");
     }
 
-    public function categories(Request $request, Event $event)
+    public function categories(CategoriesRequest $request, Event $event)
     {
-        // 1. Validamos que las categorías existan en la tabla 'categories'
-        $validated = $request->validate([
-            'category_ids' => 'required|array',
-            'category_ids.*' => 'exists:categories,id'
-        ]);
+        //Las comprobaciones de sí el usuario puede insertar en categorías y las validaciones están en CategoríesRequest.
 
-        // 2. Sincronizamos: elimina las que no estén en el array y añade las nuevas
-        $event->categories()->sync($validated['category_ids']);
+        // 1. Sincronizamos las categorías
+        // El $request->validated() ya nos da los datos limpios y comprobados.
+
+        // 2. Sincronizamos: elimina las que no estén en el array y añade las nuevas.
+        $event->categories()->sync($request->validated()['category_ids']);
 
         //  Respuesta para API.
         if ($request->is('api/*') || $request->expectsJson()) {
@@ -188,9 +202,8 @@ class EventController extends Controller
     }
 
     /**
-     * Función que cambia el estado de un evento (draft(borrador),published(publicado),cancelled(cancelado))
+     * Función que cambia el estado de un evento (draft(borrador), published(publicado), cancelled(cancelado))
      * @param Request $request
-     * @param $eventoId
      */
     public function status(Request $request, Event $event)
     {
@@ -230,74 +243,73 @@ class EventController extends Controller
     //--------------------------- RUTAS SIN `artist` MIDDLEWARE -------------------------------------
     public function inscription(Request $request)
     {
-        // Validamos que el event_id venga en el body
         $request->validate(['event_id' => 'required|exists:events,id']);
 
         $user = Auth::user();
-        $eventId = $request->event_id;
 
-        // Verificamos si ya está inscrito para evitar duplicados y errores de Primary Key
-        if ($user->events()->where('event_id', $eventId)->exists()) {
+        // 1. Laravel comprueba internamente si ya existe la relación.
+        $result = $user->events()->syncWithoutDetaching([$request->event_id]);
+
+        // Si no se ha "adjuntado" nada nuevo (porque ya estaba), devolvemos el 409
+        if (empty($result['attached'])) {
             return response()->json(['message' => 'Ya estás inscrito en este evento.'], 409);
         }
 
-        // syncWithoutDetaching es más seguro que attach para evitar duplicados accidentales
-        $user->events()->attach($eventId);
+        // 2. Cargamos la relación actualizada de forma eficiente.
+        $user->load('events');
 
-        //  Respuesta para la API.
         if ($request->is('api/*') || $request->expectsJson()) {
             return response()->json([
                 'error' => false,
                 'code' => 201,
                 'message' => 'Inscripción realizada con éxito.',
-                'event' => Event::find($eventId)
+                // Devolvemos el último evento añadido o la lista actualizada
+                'events' => $user->events
             ], 201);
         }
 
-        //  Respuesta para React.
-        return back();
+        return Inertia::render('User/Events/SignedUp', [
+            'events' => $user->events
+        ]);
     }
 
     public function signedUp(Request $request)
     {
         $user = Auth::user();
+        //  1.  Hacemos la petición a la base de datos.
         $events = $user->events()->get();
 
         //  Respuesta para la API.
         if ($request->is('api/*') || $request->expectsJson()) {
             return response()->json([
                 'error' => false,
-                'code' => 201,
+                'code' => 200,
                 'message' => 'Eventos signed up successfully.',
                 'events' => $events
             ], 200);
         }
         //  Respuesta para React.
-        return back();
+        return Inertia::render('User/Events/SignedUp', ['events' => $user->events()]);
     }
 
-    public function remindMe(Request $request, Event $event)
+    public function remindMe(RemindMeRequest $request, Event $event)
     {
-        $user = Auth::user();
+        //Validamos los valores de la $request están bien en RemindMeRequest.
 
-        // Validamos que el usuario realmente esté inscrito en ese evento
-        if (!$user->events()->where('event_id', $event->id)->exists()) {
-            return response()->json(['message' => 'No estás inscrito en este evento.'], 404);
-        }
-
-        // Actualizamos el campo en la tabla pivote
-        $user->events()->updateExistingPivot($event->id, [
+        // 1. Sincronizamos el campo en la tabla pivote
+        Auth::user()->events()->updateExistingPivot($event->id, [
             'remind_me' => $request->remind_me
         ]);
-        //  Respuesta para la API.
+
         if ($request->is('api/*') || $request->expectsJson()) {
             return response()->json([
+                "error" => false,
                 'message' => 'Preferencia de recordatorio actualizada.',
-                'remind_me' => $request->remind_me
+                'remind_me' => (bool)$request->remind_me
             ], 200);
         }
-        //  Respuesta para React.
-        return back();
+
+        return back()->with('success', 'Recordatorio actualizado');
     }
 
     public function destroySignedUp(Request $request, Event $event)
@@ -305,7 +317,11 @@ class EventController extends Controller
         $user = Auth::user();
         // Verificamos si existe la relación antes de intentar borrar
         if (!$user->events()->where('event_id', $event->id)->exists()) {
-            return response()->json(['message' => 'No se encontró la inscripción.'], 404);
+            return response()->json([
+                'error' => true,
+                'status' => 404,
+                'message' => 'No estás inscrito en este evento',
+            ], 404);
         }
         // Eliminamos la fila en la tabla event_user (pivote)
         $user->events()->detach($event->id);
@@ -313,11 +329,13 @@ class EventController extends Controller
         //  Respuesta para la API.
         if ($request->is('api/*') || $request->expectsJson()) {
             return response()->json([
+                "error" => false,
+                "status" => 200,
                 'message' => 'Te has dado de baja del evento con éxito.'
             ], 200);
         }
         //  Respuesta para React.
-        return back();
+        return back()->with('success', 'Te has dado de baja del evento con éxito');
     }
 
 }

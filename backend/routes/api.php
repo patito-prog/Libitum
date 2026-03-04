@@ -62,15 +62,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/event/{event}/status', [EventController::class, 'status']);
     }); // -----------------    TERMINA EL MIDDLEWARE `artist`   --------------------------
 
-    });
-
-Route::middleware('admin')->group(function () {
-    // Ver todos los usuarios
-    Route::get('/admin/users', [AdminUserController::class, 'index']);
-    Route::get('/admin/users/{id}', [AdminUserController::class, 'show']);
-    Route::patch('/admin/users/{id}', [AdminUserController::class, 'update']);
-    Route::delete('/admin/users/{id}', [AdminUserController::class, 'destroy']);
-}); // -----------------    TERMINA EL MIDDLEWARE `admin`   --------------------------
+    Route::middleware('admin')->group(function () {
+        // Ver todos los usuarios
+        Route::get('/admin/users', [AdminUserController::class, 'index']);
+        Route::get('/admin/users/{id}', [AdminUserController::class, 'show']);
+        Route::patch('/admin/users/{id}', [AdminUserController::class, 'update']);
+        Route::delete('/admin/users/{id}', [AdminUserController::class, 'destroy']);
+    }); // -----------------    TERMINA EL MIDDLEWARE `admin`   --------------------------
 
 
     //  RUTAS EN EVENTOS PARA LOS USUARIOS/ESPECTADORES.
@@ -78,10 +76,9 @@ Route::middleware('admin')->group(function () {
     Route::post('/user/event', [EventController::class, 'inscription']);
     //  Usuario puede ver a qué eventos está inscrito.
     Route::get('/user/events', [EventController::class, 'signedUp']);
-    //  Usuario puede activar que se le RECUERDE el evento.
+    //  Usuario puede desactivar/activar que se le RECUERDE el evento. (Por predeterminado se le RECUERDA el evento).
     Route::patch('/user/{event}/remind_me', [EventController::class, 'remindMe']);
     //  Usuario puede darse de baja de un evento.
     Route::delete('/user/{event}/', [EventController::class, 'destroySignedUp']);
 
-
-}); // -----------------    TERMINA EL MIDDLEWARE `auth:sanctum`   --------------------------
+});// -----------------    TERMINA EL MIDDLEWARE `auth:sanctum`   --------------------------
