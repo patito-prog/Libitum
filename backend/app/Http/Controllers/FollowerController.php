@@ -32,7 +32,7 @@ class FollowerController extends Controller
     }
 
     public function followers(Request $request){
-        if(Auth::user()->role !== 'artist'){
+        if(!Auth::user()->hasRole('artist')){
             if ($request->is('api/*') || $request->expectsJson()) {
                 return response()->json(['error' => true, 'message' => 'Solo los artistas tienen seguidores.', 'code' => 403], 403);
             }
@@ -56,7 +56,7 @@ class FollowerController extends Controller
         $artist = User::findOrFail($id);
 
         //Verificamos que el usuario a quien quiere seguir sea un artista.
-        if($artist->role !== 'artist'){
+        if(!$artist->hasRole('artist')){
             if ($request->is('api/*') || $request->expectsJson()) {
                 return response()->json(['error' => true, 'message' => 'Solo puedes seguir a artistas.', 'code' => 403], 403);
             }

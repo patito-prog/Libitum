@@ -21,7 +21,6 @@ return new class extends Migration
             $table->string("phone_number", 15)->nullable();
             $table->boolean("phone_number_verified")->default(false);
             $table->string('password');
-            $table->string("role")->default("spectator");
             $table->string("avatar_url")->nullable();
             $table->string("city")->nullable();
             $table->rememberToken();

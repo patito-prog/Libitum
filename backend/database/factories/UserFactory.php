@@ -30,7 +30,6 @@ class UserFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'phone_number' => fake()->phoneNumber(),
             'password' => static::$password ??= Hash::make('password'),
-            'role' => fake()->randomElement(['artist', 'spectator', 'admin']),
             'city' => fake()->city(),
             'avatar_url' => 'https://i.pravatar.cc/150?u=' . fake()->uuid(),
             'last_connection' => now(),

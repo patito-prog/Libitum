@@ -11,7 +11,7 @@ class PermissionSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run()
+    public function run(): void
     {
         // Permisos generales
         Permission::create(['name' => 'ver artistas']);

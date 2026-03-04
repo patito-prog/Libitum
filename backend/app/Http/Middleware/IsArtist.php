@@ -16,11 +16,9 @@ class IsArtist
      */
     public function handle(Request $request, Closure $next): Response
     {
-        //  Dentro del if ---> || !Auth::user()->artistProfile
-        // ToDo: Un trigger cuando el usuario se registra como artista se crea un registro en la tabla artist_profiles con todo null(vacío).
-        if (Auth::user()->role !== 'artist') {
+        if (!Auth::user()->hasRole('artist') || !Auth::user()->artistProfile) {
             //Si la petición viene de Postman o React, devolvemos un error 403 Forbidden en formato JSON.
-            if($request->expectsJson() || $request->header('X-Inertia')){
+            if($request->expectsJson() || $request->is('api/*')){
                 return response()->json(['message'=>'Acceso denegado. Solo para artistas.'], 403);
             }
 
