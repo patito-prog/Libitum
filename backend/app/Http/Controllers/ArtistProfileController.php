@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 
 class ArtistProfileController extends Controller
 {
-    public function update(Request $request): RedirectResponse
+   
+    public function update(Request $request)
     {
         $request->validate([
             'bio'=>'nullable|string|max:1000',
@@ -27,7 +27,17 @@ class ArtistProfileController extends Controller
             'tiktok_url'=>$request->tiktok_url,
             'donation_url'=>$request->donation_url
         ]);
-        // 5. Le devolvemos a la página anterior (React interceptará esto y mostrará éxito).
+
+        // Respuesta para la API
+        if ($request->is('api/*') || $request->expectsJson()) {
+            return response()->json([
+                'error' => false,
+                'message' => 'Perfil de artista actualizado correctamente',
+                'code' => 200
+            ], 200);
+        }
+
+        // Respuesta para React
         return back();
     }
 }

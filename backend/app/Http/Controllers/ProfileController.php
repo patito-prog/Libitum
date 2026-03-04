@@ -18,6 +18,16 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
+        if ($request->is('api/*') || $request->expectsJson()) {
+            return response()->json([
+                'error' => false,
+                'data' => [
+                    'user' => $request->user(),
+                    'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
+                ],
+                'code' => 200
+            ], 200);
+        }
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
@@ -27,7 +37,7 @@ class ProfileController extends Controller
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(ProfileUpdateRequest $request)
     {
         $request->user()->fill($request->validated());
 
@@ -37,20 +47,36 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
+        if ($request->is('api/*') || $request->expectsJson()) {
+            return response()->json([
+                'error' => false,
+                'message' => 'Información de perfil actualizada',
+                'data' => $request->user(),
+                'code' => 200
+            ], 200);
+        }
         return Redirect::route('profile.edit');
     }
 
     /**
      * Delete the user's account.
      */
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request)
     {
         $request->validate([
             'password' => ['required', 'current_password'],
         ]);
 
         $user = $request->user();
-
+        if ($request->is('api/*') || $request->expectsJson()) {
+            $user->tokens()->delete(); 
+            $user->delete();
+            return response()->json([
+                'error' => false,
+                'message' => 'Cuenta eliminada permanentemente',
+                'code' => 200
+            ], 200);
+        }
         Auth::logout();
 
         $user->delete();

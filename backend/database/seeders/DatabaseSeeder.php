@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -41,5 +42,19 @@ class DatabaseSeeder extends Seeder
             $events = \App\Models\Event::inRandomOrder()->take(rand(1, 3))->pluck('id');
             $spectator->events()->attach($events);
         });
+
+        User::factory()->create([
+            'name' => 'Jefe',
+            'email' => 'admin@libitum.com',
+            'password' => Hash::make('123456'),
+            'role' => 'admin',
+        ]);
+
+        User::factory()->create([
+            'name' => 'Mozart',
+            'email' => 'mozart@libitum.com',
+            'password' => Hash::make('123456'),
+            'role' => 'artist',
+        ]);
     }
 }
