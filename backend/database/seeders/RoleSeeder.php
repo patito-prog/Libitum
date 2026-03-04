@@ -14,19 +14,25 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        Role::create(['name' => 'spectator']);
-        Role::create(['name' => 'artist']);
-        Role::create(['name' => 'admin']);
+        //Creamos los roles
+        $admin = Role::create(['name' => 'admin']);
+        $artist = Role::create(['name' => 'artist']);
+        $spectator = Role::create(['name' => 'spectator']);
 
-        $admin = Role::findPermissionTo('admin');
         $admin->givePermissionTo(Permission::all());
 
-        $artist = Role::findPermissionTo('artist');
         $artist->givePermissionTo([
-            'ver usuario',
-            'crear usuario',
-            'editar usuario',
+            'ver artistas', 'seguir artistas', 'editar perfil artista', 'ver mis seguidores',
+            'ver usuario','editar usuario',
+            'ver perfil','crear perfil','editar perfil','borrar perfil',
+            'ver evento','crear evento','editar evento','borrar evento',
+        ]);
 
+        $spectator->givePermissionTo([
+            'ver artistas','seguir artistas',
+            'ver usuario','editar usuario',
+            'ver perfil',
+            'ver evento',
         ]);
     }
 }

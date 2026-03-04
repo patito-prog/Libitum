@@ -13,6 +13,18 @@ class PermissionSeeder extends Seeder
      */
     public function run()
     {
+        // Permisos generales
+        Permission::create(['name' => 'ver artistas']);
+        Permission::create(['name' => 'seguir artistas']);
+
+        // Permisos de artista
+        Permission::create(['name' => 'editar perfil artista']);
+        Permission::create(['name' => 'ver mis seguidores']);
+
+        // Permisos de administrador
+        Permission::create(['name' => 'gestionar usuarios']);
+        Permission::create(['name' => 'banear usuarios']);
+
         Permission::create(['name' => 'ver usuario']);
         Permission::create(['name' => 'crear usuario']);
         Permission::create(['name' => 'editar usuario']);
