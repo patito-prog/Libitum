@@ -17,7 +17,7 @@ class EventController extends Controller
     /**
      * 1. Muestra la lista de eventos (GET)
      */
-    public function index(Request $request): Response | JsonResponse
+    public function index(Request $request)
     {
         // 1. Obtenemos el usuario (que tiene la sesión abierta).
         $user = Auth::user();
@@ -35,7 +35,7 @@ class EventController extends Controller
             'events' => $events
         ]);
     }
-    public function show(Request $request, Event $event): Response | JsonResponse
+    public function show(Request $request, Event $event)
     {
         //2. Buscamos el evento por ID.
         $event = $event->with('categories'); // Cargamos categorías del evento.
@@ -49,7 +49,7 @@ class EventController extends Controller
             'event' => $event
         ]);
     }
-    public function create(): void
+    public function create()
     {
         //  Aquí solo hará falta la respuesta para React. Retorna nada más que una vista.
         //return Inertia::render('Events/Create');
@@ -59,10 +59,9 @@ class EventController extends Controller
     /**
      * Función que crea un evento.
      * @param Request $request
-     * @return RedirectResponse
      *
      */
-    public function store(Request $request): RedirectResponse | JsonResponse
+    public function store(Request $request)
     {
         // 1. Validamos los datos que llegan del formulario de React
         $request->validate([
@@ -86,8 +85,8 @@ class EventController extends Controller
             'description' => $request->description,
             'location' => $request->location,
             'event_date' => $request->event_date,
-            'price' => $request->price ?? 0.00, // Si no pone precio, es gratis (0.00)
-            'status' => $request->status ?? 'published',
+            'price' => isset($request->price) ? $request->price : 0.00, // Si no pone precio, es gratis (0.00)
+            'status' => isset($request->status) ? $request->status : 'published',
             // 'cover_image' => ... (La subida de imágenes la haremos en un paso aparte)
         ]);
 
@@ -108,9 +107,8 @@ class EventController extends Controller
      *
      * @param Request $request //El cuerpo con todos o algunos datos editados del evento.
      * @param $eventID
-     * @return RedirectResponse|JsonResponse
      */
-    public function update(UpdateEventRequest $request, Event $event): RedirectResponse | Response
+    public function update(UpdateEventRequest $request, Event $event)
     {
         //Los pasos anteriores están en UpdateEventRequest...
 
@@ -122,7 +120,7 @@ class EventController extends Controller
             'description' => $request->description,
             'location' => $request->location,
             'event_date' => $request->event_date,
-            'price' => $request->price ?? 0.00,
+            'price' => isset($request->price) ? $request->price : 0.00,
             'status' => $request->status,
         ]);
 
@@ -142,9 +140,8 @@ class EventController extends Controller
     /**
      * Elimina un evento de la base de datos.
      * @param int $id
-     * @return RedirectResponse
      */
-    public function destroy(Request $request, Event $event): RedirectResponse | JsonResponse
+    public function destroy(Request $request, Event $event)
     {
         // 1. Solo el dueño del evento puede borrarlo.
         $user = Auth::user();
@@ -303,7 +300,7 @@ class EventController extends Controller
         return back();
     }
 
-    public function destroySignedUp(Resquest $request, Event $event)
+    public function destroySignedUp(Request $request, Event $event)
     {
         $user = Auth::user();
         // Verificamos si existe la relación antes de intentar borrar
