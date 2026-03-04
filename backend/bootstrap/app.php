@@ -21,11 +21,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'artist' => \App\Http\Middleware\IsArtist::class,
         ]);
-        // Excepción para probar con Postman ------------>> TODO: QUITAR EN PRODUCCIÓN.
-        $middleware->validateCsrfTokens(except: [
-            'event/create',
+        // Excepción para probar con Postman.
+        /*$middleware->validateCsrfTokens(except: [
             'event/*'
-        ]);
+        ]); */
 
 
     })

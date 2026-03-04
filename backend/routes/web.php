@@ -5,7 +5,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FollowerController;
 //use App\Http\Controllers\AdminController;
-//use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\AdminUserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -52,13 +52,13 @@ Route::middleware(['auth', 'admin'])->group(function () {
     //Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin/dashboard', [AdminUserController::class, 'index'])->name('admin.dashboard');
     // Recupera una lista paginada de todos los usuarios registrados.
-    //Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
+    Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
     // Suspende (banea) la cuenta de un usuario específico, impidiendo futuros inicios de sesión.
-    //Route::patch('/admin/users/{id}/ban', [AdminUserController::class, 'ban'])->name('admin.users.ban');
+    Route::patch('/admin/users/{id}/ban', [AdminUserController::class, 'ban'])->name('admin.users.ban');
     Route::patch('/artist-profile', [ArtistProfileController::class, 'update'])->name('artist-profile.update');
 });
 
-//  Artista ver sus eventos.
+//  Artista puede ver sus eventos.
 Route::get('/event', [EventController::class, 'index'])->name('event.index');
 //  Artista crea un evento.
 Route::post('/event/create', [EventController::class, 'create'])->name('event.create');

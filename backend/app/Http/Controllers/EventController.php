@@ -195,21 +195,25 @@ class EventController extends Controller
      * @param Request $request
      * @param $eventoId
      */
-    public function status(Request $request, $eventoId)
+    public function status(Request $request, Event $event)
     {
-        $user = Auth::user();
-        // 1. Buscamos el evento que coincida con el ARTISTA que lo ha creado y con el ID de ese propio evento.
-        //  Si no existe mandamos un 404 - not found.
-        $event = Event::where('id', $eventoId)
-            ->where('user_id', $user->id)
-            ->firstOrFail();
-
-        //  2. Validamos que el estado que quiere asignarle está entre los requeridos.
-        $event->validate([
+        // 1. Validamos que el estado sea uno de los permitidos.
+        $request->validate([
             'status' => 'required|in:draft,published,cancelled',
         ]);
 
-        // 3. Actualizamos el estado del evento.
+        //  2. Si el ID del usuario autenticado no coincide con el user_id del evento, denegamos el acceso.
+        if ($event->user_id !== $request->user()->id) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'error' => true,
+                    'message' => 'No tienes permiso para modificar este evento de Libitum.'
+                ], 403); // 403 Forbidden es el código correcto aquí.
+            }
+            abort(403);
+        }
+
+        // 3. Actualizamos el estado.
         $event->update([
             'status' => $request->status,
         ]);
