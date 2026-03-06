@@ -14,6 +14,8 @@ Route::post('/login', [AuthController::class, 'verify']);
 Route::post('/register', [AuthController::class, 'register']);
 //  ARTISTA/USUARIO puede ver un evento.
 Route::get('/event/{event}', [EventController::class, 'show']);
+// Cualquiera puede ver el perfil de un artista.
+Route::get('/artists/{id}', [ArtistProfileController::class, 'show']);
 
 // --- RUTAS PROTEGIDAS (Necesitan el token de Sanctum) ---
 Route::middleware('auth:sanctum')->group(function () {
@@ -35,7 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/profile', [\App\Http\Controllers\ProfileController::class, 'update']);
     Route::delete('/profile', [\App\Http\Controllers\ProfileController::class, 'destroy']);
 
-    Route::get('/artists/{id}', [ArtistProfileController::class, 'show']);
+    
 
     // Rutas de seguidores para la API
     Route::get('/my-favorites', [FollowerController::class, 'index']);

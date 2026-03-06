@@ -22,6 +22,9 @@ Route::get('/', function () {
 //  ARTISTA/USUARIO puede ver un evento. (CONSIDERO QUE NO HACE FALTA QUE SE AUTENTIQUE PARA ESTO)
 Route::get('/event/{event}', [EventController::class, 'show'])->name('event.show');
 
+Route::get('/artists/{id}', [ArtistProfileController::class, 'show'])->name('artists.show');
+//Rutas de perfil de artista (name sirve para ponerle un nombre a la ruta, así luego en React podemos usar ese nombre para hacer la petición, en vez de poner la URL completa).
+
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -35,8 +38,7 @@ Route::middleware('auth')->group(function () {
     // Borra permanentemente la cuenta del usuario de la base de datos.
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::get('/artists/{id}', [ArtistProfileController::class, 'show'])->name('artists.show');
-    //Rutas de perfil de artista (name sirve para ponerle un nombre a la ruta, así luego en React podemos usar ese nombre para hacer la petición, en vez de poner la URL completa).
+    
 
 
     //Rutas favoritos / seguidores.
