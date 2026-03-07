@@ -289,7 +289,7 @@ class EventController extends Controller
             ], 200);
         }
         //  Respuesta para React.
-        return Inertia::render('User/Events/SignedUp', ['events' => $user->events()]);
+        return Inertia::render('User/Events/SignedUp', ['events' => $user->events]);
     }
 
     public function remindMe(RemindMeRequest $request, Event $event)

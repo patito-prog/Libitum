@@ -15,7 +15,7 @@ return new class extends Migration
             $table->foreignId('event_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
 
-            // Campo extra por si quieres que el usuario pida recordatorio
+            // Campo extra por si quiere  el usuario un recordatorio.
             $table->boolean('remind_me')->default(true);
 
             $table->primary(['event_id', 'user_id']);
