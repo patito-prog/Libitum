@@ -8,33 +8,62 @@ use Mockery\Exception;
 use function PHPUnit\Framework\isEmpty;
 
 /**
- * Class ReturnHelper
- * * Esta clase actúa como un Unified Response Handler (Manejador Único de Respuestas).
- * * Su propósito es abstraer la lógica de decisión entre respuestas API (JSON) y
- * respuestas Web (Inertia/Redirect), permitiendo que los controladores permanezcan
- * limpios y no dependan de la inyección manual del objeto Request para decidir el formato.
- * * Características principales:
- * - Detección automática de contexto (API vs Web).
- * - Integración nativa con Inertia.js para renderizado de componentes.
- * - Gestión automática de mensajes Flash (success/error) para el frontend.
- * - Soporte para códigos de estado HTTP personalizados y envío de datos adicionales.
+ * # 🚀 ReturnHelper: Unified Response Handler
+ * * Esta clase es el núcleo de comunicación entre el Servidor y el Cliente.
+ * Abstrae la toma de decisiones sobre el formato de respuesta (**API JSON** o **Web Inertia/Redirect**)
+ * basándose en el contexto de la petición, permitiendo controladores más limpios y legibles.
+ *
+ * ---
+ * ### 🛠 Características Principales
+ * - **Context Awareness:** Detecta automáticamente si la petición viene de una API o del navegador.
+ * - **Inertia Native:** Integración fluida para renderizar vistas o volver atrás.
+ * - **Flash Management:** Sincronización automática de mensajes de éxito/error con el Middleware de la sesión.
+ * - **Zero Dependency:** No requiere inyectar `$request` en los métodos del controlador.
+ * * ---
+ * ### 📋 Cuándo usar cada método
+ * 1. `ok()`: Operaciones exitosas que requieren un Toast o redirección positiva.
+ * 2. `error()`: Fallos de lógica de negocio (el usuario se queda donde está y recibe un aviso).
+ * 3. `abort()`: Fallos críticos de seguridad o integridad (se detiene la ejecución inmediatamente).
+ *
+ * ---
+ * ### 💻 Ejemplo de Implementación
+ * ```php
+ * public function destroy(Event $event)
+ * {
+ * // [1] SEGURIDAD: Acceso no autorizado
+ * if (Auth::user()->id !== $event->user_id) {
+ * ReturnHelper::abort(403, 'No eres el propietario de este evento.');
+ * }
+ *
+ * // [2] LÓGICA: Validación de reglas de negocio
+ * if ($event->participants()->exists()) {
+ * return ReturnHelper::error('No puedes eliminar un evento con participantes.');
+ * }
+ *
+ * // [3] ÉXITO: Proceso completado
+ * $event->delete();
+ * return ReturnHelper::ok('Evento eliminado con éxito.');
+ * }
+ * ```
  * * @package App\Util
  * @author Carri1x
- * @version 1.0.0
+ * @version 1.0.1
+ * @see \App\Http\Middleware\HandleInertiaRequests :: Para la sincronización de props flash.
  */
+
 class ReturnHelper
 {
     /**
-     * Genera una respuesta de éxito (HTTP 200 por defecto).
-     * * Utilice este método cuando la operación se haya completado correctamente.
-     * Si se proporciona un componente, renderizará esa vista en Inertia;
-     * de lo contrario, realizará una redirección hacia atrás `back()` con un mensaje flash de éxito o error.
-     *
-     * @param string      $message   Mensaje descriptivo del éxito de la operación.
-     * @param array       $data      Datos adicionales que se enviarán (modelos, colecciones, etc.).
-     * @param string|null $component Nombre del componente Inertia (ej: 'User/Profile').
-     * * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse|\Inertia\Response
-     * * @example ReturnHelper::ok('Perfil actualizado', ['user' => $user]);
+     * ### ✅ ok()
+     * Genera una respuesta de éxito (HTTP 200).
+     * * **Parámetros:**
+     * - **string** `$message`: Mensaje que verá el usuario (Toast/Alert).
+     * - **array** `$data`: Modelos o colecciones adicionales.
+     * - **string|null** `$component`: Nombre del componente Inertia (opcional).
+     * * **Ejemplo:**
+     * ```php
+     * return ReturnHelper::ok('Perfil actualizado', ['user' => $user]);
+     * ```
      */
     public static function ok(string $message, array $data = [], ?string $component = null)
     {
@@ -51,17 +80,17 @@ class ReturnHelper
     }
 
     /**
-     * Genera una respuesta de error (HTTP 400 por defecto).
-     * * Utilice este método cuando ocurra un error de lógica, permisos o falta de recursos.
-     * Envía automáticamente la bandera 'error' como true para que el frontend pueda
-     * identificar el tipo de respuesta y mostrar la notificación adecuada.
-     *
-     * @param string      $message   Mensaje explicando el error ocurrido.
-     * @param int         $status    Código de estado HTTP (400, 403, 404, 500, etc.).
-     * @param array       $data      Información adicional sobre el error o contexto.
-     * @param string|null $component Si se desea redirigir a una página de error específica en Inertia.
-     * * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse|\Inertia\Response
-     * * @example ReturnHelper::error('No tienes permisos para borrar este evento', 403);
+     * ### ❌ error()
+     * Genera una respuesta de error controlada (HTTP 400+).
+     * * **Parámetros:**
+     * - **string** `$message`: Explicación del fallo.
+     * - **int** `$status`: Código HTTP (400, 403, 404, 500).
+     * - **array** `$data`: Contexto adicional del error.
+     * - **string|null** `$component`: Redirigir a una vista de error específica.
+     * * **Ejemplo:**
+     * ```php
+     * return ReturnHelper::error('No tienes fondos suficientes', 402);
+     * ```
      */
     public static function error(string $message, int $status = 400, array $data = [], ?string $component = null)
     {
@@ -76,6 +105,25 @@ class ReturnHelper
                 ]
             )
         );
+    }
+
+    /**
+     * ### 🛑 abort()
+     * Detiene la ejecución inmediatamente (Excepción HTTP).
+     * * Úselo para brechas de seguridad o recursos inexistentes donde no se debe permitir el `back()`.
+     * * En caso de ser una petición `/api` envia una Excepción HTTP con un `JsonResponse->send()`
+     */
+    public static function abort(int $status, string $message = '')
+    {
+        if (Request::is('api/*') || Request::expectsJson()) {
+            response()->json([
+                'error'   => true,
+                'status'  => $status,
+                'message' => $message ?: 'Error, Acceso denegado',
+            ], $status)->send();
+            exit;
+        }
+        abort($status, $message ?: 'Error, Acceso denegado');
     }
 
     /**
