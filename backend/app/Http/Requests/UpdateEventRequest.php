@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Util\ReturnHelper;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
@@ -35,21 +36,42 @@ class UpdateEventRequest extends FormRequest
     {
         return [
             'title'=>'required|string|max:255',
-            'description' => 'required|string',
+            'description' => 'string',
             'location' => 'required|string|max:255',
             'event_date' => 'required|date',
             'price' => 'nullable|numeric|min:0',
-            'status' => 'required|in:draft,published,cancelled',
+            'status_id' => 'required|in:statuses,id',
             // Validamos que llegue un array de categorías y que los IDs existan
             'categories' => 'nullable|array',
             'categories.*' => 'exists:categories,id',
         ];
     }
 
-    public function messages(): array{
+    public function messages(): array
+    {
         return [
-            'title.required' => 'Event title is required',
+            'title.required'      => 'El título del evento es obligatorio.',
+            'location.required'   => 'La ubicación es obligatoria.',
+            'event_date.required' => 'La fecha del evento es obligatoria.',
+            'status_id.required'  => 'El estado es obligatorio.',
+            'status_id.exists'    => 'El estado seleccionado no existe.',
             'categories.*.exists' => 'Una de las categorías seleccionadas no es válida.',
         ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'status_id'    => 'estado',
+            'event_date'   => 'fecha del evento',
+            'title'        => 'título',
+            'description'  => 'descripción',
+            'price'        => 'precio',
+        ];
+    }
+
+    protected function failedAuthorization()
+    {
+        ReturnHelper::abort(403, "Debes ser el dueño del evento o al menos tener permisos.");
     }
 }

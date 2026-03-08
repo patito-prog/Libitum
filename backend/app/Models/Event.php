@@ -13,7 +13,7 @@ class Event extends Model
 
     protected $fillable = [
         'user_id', 'title', 'slug', 'description',
-        'location', 'event_date', 'price', 'cover_image', 'status'
+        'location', 'event_date', 'price', 'cover_image', 'status_id'
     ];
 
     protected $casts = [
@@ -40,5 +40,10 @@ class Event extends Model
     {
         return $this->belongsToMany(User::class, 'event_user')
             ->withTimestamps(); // Para saber cuándo se apuntaron
+    }
+
+    public function status()
+    {
+        return $this->belongsTo(Status::class);
     }
 }

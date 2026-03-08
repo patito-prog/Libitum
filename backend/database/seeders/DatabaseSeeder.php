@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
         //Borramos la caché de permisos para evitar problemas al ejecutar los seeders.
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
         $this->call([
+            StatusSeeder::class,
             PermissionSeeder::class,
             RoleSeeder::class,
         ]);

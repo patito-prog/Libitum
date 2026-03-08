@@ -26,7 +26,7 @@ return new class extends Migration
 
             // Campos extra para lógica de negocio
             $table->integer('max_capacity')->nullable();
-            $table->enum('status', ['draft', 'published', 'live', 'finished', 'cancelled'])->default('published');
+            $table->foreignId('status_id')->default(1)->constrained(); //   Relación con el estado del evento.
 
             $table->timestamps();
         });

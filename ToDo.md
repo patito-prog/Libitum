@@ -36,3 +36,6 @@
 - [x] Control de Versiones: Resolución de conflictos de merge en archivos clave (README.md, package-lock.json).
 
 - [ ] Documentación Técnica: Actualizar el README.md con las instrucciones para levantar el proyecto con Docker y las rutas de la API.
+
+
+- 
