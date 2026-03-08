@@ -25,7 +25,7 @@ class EventFactory extends Factory
             'location' => fake()->streetAddress() . ', ' . fake()->city(),
             'event_date' => fake()->dateTimeBetween('now', '+1 month'),
             'price' => fake()->randomFloat(2, 0, 50),
-            'status' => 'published',
+            'status_id' => \App\Models\Status::inRandomOrder()->first()->id ?? 1,
             'cover_image' => 'https://picsum.photos/seed/' . fake()->uuid() . '/800/600',
         ];
     }

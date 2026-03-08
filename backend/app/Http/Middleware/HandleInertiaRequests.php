@@ -29,7 +29,7 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        //Queremos que el usuario se devuleva completo, con su perfil de artista si es artista y su rol por si hace falta acceder a el en el frontend.
+        //Queremos que el usuario se devuelva completo, con su perfil de artista si es artista y su rol por si hace falta acceder a el en el frontend.
         $user = $request->user();
         $userData = null;
         if($user){
@@ -44,6 +44,10 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 //CUALQUIER componente de React que programes, puedes acceder a toda la información del artista sin hacer ninguna petición al servidor.
                 'user' => $userData,
+            ],
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error'   => fn () => $request->session()->get('error'),
             ],
         ];
     }
