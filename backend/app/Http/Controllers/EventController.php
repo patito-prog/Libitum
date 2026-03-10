@@ -17,7 +17,9 @@ use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 use function Laravel\Prompts\error;
-
+/**
+* @author Carri1x
+*/
 class EventController extends Controller
 {
     /**
