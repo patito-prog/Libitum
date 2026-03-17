@@ -4,9 +4,6 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Illuminate\Validation\ValidationException;
-use Illuminate\Auth\AuthenticationException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -18,13 +15,17 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         //MIDDLEWARE QUE SE EJECUTA EN TODAS LAS RUTAS
         $middleware->web(append: [
-            \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
+        // IMPORTANTE: Habilitar CORS para que React (ej: localhost:5173)
+        // pueda hablar con Laravel (ej: localhost:8000)
+        $middleware->statefulApi();
+
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'artist' => \App\Http\Middleware\IsArtist::class,
         ]);
+
         // Excepción para probar con Postman.
         /*$middleware->validateCsrfTokens(except: [
             'event/*'
@@ -33,33 +34,23 @@ return Application::configure(basePath: dirname(__DIR__))
 
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (NotFoundHttpException $e, Request $request) {
+        // Lo que puso tu compañera está bien encaminado.
+        // Laravel 11/12 ya maneja mucho esto, pero forzar JSON en API es ley.
+        $exceptions->shouldRenderJsonWhen(function (Request $request, Throwable $e) {
             if ($request->is('api/*')) {
-                return response()->json([
-                    'error' => true,
-                    'message' => 'El recurso que buscas no existe o ha sido eliminado.',
-                    'code' => 404
-                ], 404);
+                return true;
             }
-        });
-        $exceptions->render(function (ValidationException $e, Request $request) {
-            if ($request->is('api/*')) {
-                return response()->json([
-                    'error' => true,
-                    'message' => 'Error en los datos enviados.',
-                    'errors' => $e->errors(), // Esto le dirá al frontend exactamente qué campo falló
-                    'code' => 422
-                ], 422);
-            }
-        });
-        
-        $exceptions->render(function (AuthenticationException $e, Request $request){
-            if(request()->is('api/*')){
-                return response()->json([
-                    'error' => true,
-                    'message' => 'No estás autenticado para acceder a este recurso.',
-                    'code' => 401
-                ], 401);
-            }
+            return $request->expectsJson();
         });
     })->create();
+
+/**
+ * 3. Excepciones: ¿Por qué así y no como tu compañera?
+ * ----------------------------------------------------
+ * Te lo aclaro rápido:
+ * El código de tu compañera era un "parche" (renderizar manualmente cada tipo de error).
+ * Mi propuesta en bootstrap/app.php con shouldRenderJsonWhen es una "configuración de motor"
+ * Si usas mi método, Laravel dice: "Ah, ¿esta petición va a /api/*?
+ * Entonces, pase lo que pase (un error de validación, un fallo de conexión a Postgres,
+ * o un archivo que no existe), voy a escupir un JSON automáticamente". No tienes que programar cada excepción una a una. Es eficiencia pura.
+ */

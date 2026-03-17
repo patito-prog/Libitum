@@ -12,8 +12,8 @@ use App\Http\Controllers\ProfileController;
 // --- RUTA PÚBLICA (No necesita token, porque venimos a pedirlo) ---
 Route::post('/login', [AuthController::class, 'verify']);
 Route::post('/register', [AuthController::class, 'register']);
-//  ARTISTA/USUARIO puede ver un evento.
-Route::get('/event/{event}', [EventController::class, 'show']);
+
+Route::get('/events/{event}', [EventController::class, 'show']); //  ARTISTA/USUARIO puede ver un evento.
 // Cualquiera puede ver el perfil de un artista.
 Route::get('/artists/{id}', [ArtistProfileController::class, 'show']);
 
@@ -37,7 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/profile', [\App\Http\Controllers\ProfileController::class, 'update']);
     Route::delete('/profile', [\App\Http\Controllers\ProfileController::class, 'destroy']);
 
-    
+
 
     // Rutas de seguidores para la API
     Route::get('/my-favorites', [FollowerController::class, 'index']);
@@ -50,18 +50,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/artist/statistics', [ArtistProfileController::class, 'statistics'])->name('artist.statistics');
 
 
-        //  Artista puede ver sus eventos.
-        Route::get('/event', [EventController::class, 'index']);
-        //  Artista crea un evento.
-        Route::post('/event/create', [EventController::class, 'store']);
-        //  Artista edita un evento.
-        Route::put('/event/{event}',[EventController::class, 'update']);
-        //  Artista elimina un evento.
-        Route::delete('/event/{event}',[EventController::class, 'destroy']);
-        //  Artista asigna/edita categorías de un evento.
-        Route::put('/event/{event}/categories', [EventController::class, 'categories']);
-        //  Artista cambia el estado de un evento.
-        Route::patch('/event/{event}/status', [EventController::class, 'status']);
+        //  CRUD de Eventos del Artista.
+
+        Route::get('/events', [EventController::class, 'index']); //  Artista puede ver sus eventos.
+        Route::post('/events', [EventController::class, 'store']); //  Artista crea un evento.
+        Route::put('/events/{event}',[EventController::class, 'update']); //  Artista edita un evento.
+        Route::delete('/events/{event}',[EventController::class, 'destroy']); //  Artista elimina un evento.
+
+        //Acciones específicas de eventos.
+        Route::put('/events/{event}/categories', [EventController::class, 'categories']); //  Artista asigna/edita categorías de un evento.
+        Route::patch('/events/{event}/status', [EventController::class, 'status']); //  Artista cambia el estado de un evento.
     }); // -----------------    TERMINA EL MIDDLEWARE `artist`   --------------------------
 
     Route::middleware('admin')->group(function () {
@@ -73,14 +71,11 @@ Route::middleware('auth:sanctum')->group(function () {
     }); // -----------------    TERMINA EL MIDDLEWARE `admin`   --------------------------
 
 
-    //  RUTAS EN EVENTOS PARA LOS USUARIOS/ESPECTADORES.
-    //  Usuario puede inscribirse en un evento.
-    Route::post('/user/event', [EventController::class, 'inscription']);
-    //  Usuario puede ver a qué eventos está inscrito.
-    Route::get('/user/events', [EventController::class, 'signedUp']);
-    //  Usuario puede desactivar/activar que se le RECUERDE el evento. (Por predeterminado se le RECUERDA el evento).
-    Route::patch('/user/{event}/remind_me', [EventController::class, 'remindMe']);
-    //  Usuario puede darse de baja de un evento.
-    Route::delete('/user/{event}/', [EventController::class, 'destroySignedUp']);
+    //  --- ACCIONES DEL ESPECTADOR ---
+
+    Route::get('/user/events', [EventController::class, 'signedUp']); //  Usuario puede ver a qué eventos está inscrito.
+    Route::post('/user/event', [EventController::class, 'inscription']); //  Usuario puede inscribirse en un evento.
+    Route::patch('/user/{event}/remind_me', [EventController::class, 'remindMe']); //  Usuario puede desactivar/activar que se le RECUERDE el evento. (Por predeterminado se le RECUERDA el evento).
+    Route::delete('/user/{event}/', [EventController::class, 'destroySignedUp']); //  Usuario puede darse de baja de un evento.
 
 });// -----------------    TERMINA EL MIDDLEWARE `auth:sanctum`   --------------------------
