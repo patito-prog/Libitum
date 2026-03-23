@@ -1,11 +1,14 @@
 import './App.css';
-import Router from './routes/Router';
+import EventProvider from './providers/EventProvider.jsx';
+import Router from './routes/Router.jsx';
 
 function App() {
 
   return (
     <>
-      <Router />
+      <EventProvider>
+        <Router />
+      </EventProvider>
     </> 
   )
 }

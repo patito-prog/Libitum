@@ -1,9 +1,10 @@
+import './Home.css';
 
 const Home = () => {
     return (
         <div className="home">
             <h1>Welcome to Libitum</h1>
-            <p>Discover your next favorite book with Libitum. Explore our extensive collection of books, read reviews from fellow book lovers, and share your own thoughts on the books you've read. Whether you're into fiction, non-fiction, fantasy, or mystery, Libitum has something for everyone. Join our community today and start your literary journey!</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
         </div>
     )
 }
