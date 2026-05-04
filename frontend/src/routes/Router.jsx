@@ -4,16 +4,24 @@ import About from '../pages/public/About.jsx';
 import Contact from '../pages/public/Contact.jsx';
 import Login from '../pages/public/Login.jsx';
 import Register from '../pages/public/Register.jsx';
+import ProtectedRoute from './guards/ProtectedRoute.jsx';
+import PublicRoute from './guards/PublicRoute.jsx';
 
 const Router = () => {
     return (
         <Routes>
-            <Route path="/*" element={<Error />} />
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route element={<PublicRoute/>}>
+                
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+            </Route>
+            
+            <Route element={<PrivateRoute/>}>
+                <Route path="*" element={<Error />} />
+                <Route path="/" element={<Home />} />
+            </Route>
         </Routes>
     );
 }
