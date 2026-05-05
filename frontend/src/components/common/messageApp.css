@@ -1,0 +1,65 @@
+/* Contenedor flotante en la esquina superior derecha */
+.messageApp_container {
+  position: fixed;
+  top: 90px; /* Debajo del header */
+  right: 20px;
+  z-index: 2000;
+  min-width: 300px;
+  max-width: 400px;
+  padding: 16px 20px;
+  background-color: var(--bg-white);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  border-left: 6px solid #ccc; /* Borde izquierdo de color por defecto */
+  animation: slideInRight 0.4s ease forwards;
+  font-family: 'Lato', sans-serif;
+}
+
+.messageApp_container p {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+/* ESTILOS ESPECÍFICOS SEGÚN EL TIPO DE MENSAJE */
+
+/* Éxito (Verde Salvia) */
+.messageApp_container.ok {
+  border-left-color: #27ae60;
+  background-color: #f6fff9; /* Fondo verde muy pálido */
+}
+.messageApp_container.ok p {
+  color: #1e8449;
+}
+
+/* Error (Rojo Terracota/Ladrillo - No rojo chillón) */
+.messageApp_container.error {
+  border-left-color: #c0392b;
+  background-color: #fff6f6; /* Fondo rojo muy pálido */
+}
+.messageApp_container.error p {
+  color: #922b21;
+}
+
+/* Info (Azul Grisáceo) */
+.messageApp_container.info {
+  border-left-color: #5d6d7e;
+  background-color: #f4f6f7;
+}
+.messageApp_container.info p {
+  color: #34495e;
+}
+
+/* Animación de entrada */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

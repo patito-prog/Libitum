@@ -1,18 +1,28 @@
 import { Routes, Route } from 'react-router-dom';
-import Home from '../pages/Home.jsx';
-import About from '../pages/About.jsx';
-import Contact from '../pages/Contact.jsx';
+import Home from '../pages/public/Home.jsx';
+import About from '../pages/public/About.jsx';
+import Contact from '../pages/public/Contact.jsx';
+import Login from '../pages/public/Login.jsx';
+import Register from '../pages/public/Register.jsx';
+import PublicRoute from './guards/PublicRoute.jsx';
 import PageEvents from '../pages/PageEvents.jsx';
-import Error from '../pages/Error.jsx';
 
 const Router = () => {
     return (
         <Routes>
-            <Route path="/*" element={<Error />} />
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/events" element={<PageEvents />} />
+            <Route element={<PublicRoute/>}>
+                
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+            </Route>
+            
+            <Route element={<PrivateRoute/>}>
+                <Route path="*" element={<Error />} />
+                <Route path="/" element={<Home />} />
+                <Route path="/events" element={<PageEvents />} />
+            </Route>
         </Routes>
     );
 }
