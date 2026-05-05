@@ -1,5 +1,5 @@
 import './App.css';
-import EventProvider from './providers/EventProvider.jsx';
+import EventProvider from './context/EventProvider.jsx';
 import Router from './routes/Router.jsx';
 
 function App() {

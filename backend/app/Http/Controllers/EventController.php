@@ -47,11 +47,6 @@ class EventController extends Controller
             'component' => 'Events/Show'
         ]);
     }
-    public function create()
-    {
-        //  Aquí solo hará falta la respuesta para React. Retorna nada más que una vista.
-        //return Inertia::render('Events/Create');
-    }
 
 
     /**
@@ -74,8 +69,10 @@ class EventController extends Controller
             'event_date' => $data['event_date'],
             'price' => $data['price'] ?? 0.00, // Si no pone precio, es gratis (0.00)
             'status_id' => $data['status_id'] ?? 2, //Este es el estado `published`.
-            // 'cover_image' => ... (La subida de imágenes la haremos en un paso aparte)
-        ]);
+            //toDo: 'cover_image' => ... (La subida de imágenes la haremos en un paso aparte)
+            //toDo: 'max_capacity'
+            //toDo: Actualizar el evento como evento y hacer ACTOS.
+         ]);
 
         // 4. Si vienen categorías en la $request, las asociamos.
         if (!empty($data['categories'])) {

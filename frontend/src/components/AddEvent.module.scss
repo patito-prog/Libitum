@@ -1,0 +1,117 @@
+$primary: #e91e8c;
+$primary-dark: #c2177a;
+$border-radius: 16px;
+$shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+
+.page {
+    max-width: 780px;
+    margin: 32px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 0 16px;
+}
+
+/* ── TOP CARD ── */
+.topCard {
+    border-radius: $border-radius;
+    border: 2px solid $primary;
+    overflow: hidden;
+    box-shadow: $shadow;
+}
+
+.imageUpload {
+    width: 100%;
+    min-height: 200px;
+    background-color: #fdf0f7;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    border-bottom: 1px dashed $primary;
+    transition: background-color 0.2s;
+
+    &:hover {
+        background-color: #fce4f3;
+    }
+
+    p {
+        color: $primary;
+        font-size: 15px;
+        text-align: center;
+    }
+
+    input[type='file'] {
+        display: none;
+    }
+}
+
+.imagePreview {
+    width: 100%;
+    max-height: 280px;
+    object-fit: cover;
+    display: block;
+}
+
+/* ── BOTTOM CARD ── */
+.bottomCard {
+    border-radius: $border-radius;
+    border: 2px solid #222;
+    padding: 24px;
+    box-shadow: $shadow;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 24px;
+
+    @media (max-width: 580px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.locationCol {
+    grid-row: span 3;
+    display: flex;
+    flex-direction: column;
+}
+
+.rightCol {
+    display: flex;
+    flex-direction: column;
+}
+
+.footer {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+
+    & > *:first-child {
+        flex: 1;
+    }
+}
+
+.submitBtn {
+    padding: 12px 28px;
+    background-color: $primary;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.2s;
+    align-self: flex-end;
+    height: 48px;
+
+    &:hover {
+        background-color: $primary-dark;
+    }
+}
