@@ -1,7 +1,5 @@
 "use strict";
 
-import useLibitumCRUD from "../hooks/useLibitumCRUD.js";
-
 
 /**
  * Function to validate if an event object has all required fields valids.
