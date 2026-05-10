@@ -1,32 +1,34 @@
+import { useState } from "react";
 import useEventContext from "../hooks/useEventContext.js";
 // Class
 import MiniEvents from "./MiniEvents.jsx";
+import Event from "./Event.jsx";
 
 const Events = () => {
     const {
         events,
     } = useEventContext();
 
-    const { eventToShow, setEventToShow} = useState({})
+    const [eventToShow, setEventToShow] = useState({})
     const [eventDetailSelected, setEventDetailSelected] = useState(false);
 
     const showEventDetail = (id) => {
-        if(!id) return;
-        setEventDetailSelected(!eventDetailSelected);
-        const eventTemp = events.filter((event) => {
-            return event.id == id;
-        });
-        setEventToShow(eventTemp);
+        const eventTemp = events.find((event) => event.id === id);
+        if (eventTemp) {
+            setEventToShow(eventTemp);
+            setEventDetailSelected(true);
+        }
     }
 
     return (
         <>
             <div className="" onClick={(e) => {
-                if (e.target.closest(".mini-events")) {
-                    showEventDetail(e.id);
+                const miniEvent = e.target.closest(".mini-event");
+                if (miniEvent) {
+                    showEventDetail(Number(miniEvent.id));
                 }
             }}>
-                { eventDetailSelected && <Event data={eventToShow}/>} 
+                { eventDetailSelected && <Event data={eventToShow}/>}
                 {
                     events && events.length > 0 ?
                     events.map((event, i, a) => {

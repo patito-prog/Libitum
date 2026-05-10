@@ -1,6 +1,7 @@
 
 const MiniEvents = (props) => {
     const { user_id, id, title, slug, description, location, event_date, price, cover_image, max_capacity, status_id } = props.data;
+    const {status} = props.data;
     return (
         <>
             <div id={id} className="mini-event">
@@ -11,7 +12,7 @@ const MiniEvents = (props) => {
                 </div>
                 <div className="">
                     <p>{event_date && event_date}</p>
-                    <p>{status_id && status_id}</p>
+                    <p>{status_id && status.name}</p>
                 </div>
             </div>
             
@@ -19,4 +20,4 @@ const MiniEvents = (props) => {
     )
 }
 
-export default MiniEvents;y
+export default MiniEvents;
