@@ -16,9 +16,7 @@ const PageEvents = () => {
         <>
             <div>
                 <h1>Mis eventos</h1>
-                {decisionAddEvent && <AddEvent />}
-
-                <Events />
+                { decisionAddEvent ? <AddEvent /> : <Events /> }
                 <button onClick={changeDecisionAddEvent}>
                     <img 
                         src="/image-add.png"

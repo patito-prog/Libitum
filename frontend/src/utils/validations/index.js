@@ -4,3 +4,4 @@
 //a todos los métodos y no a los archivos en concreto.
 export * from "./auth ";
 export * from "./events";
+export * from "./util"

@@ -31,7 +31,7 @@ class EventController extends Controller
             ->get();
 
         return ReturnHelper::return([
-            'events' => $events->load('categories, status'),
+            'events' => $events->load(['categories', 'status']),
             'component' => 'Events/Index'
         ]);
     }

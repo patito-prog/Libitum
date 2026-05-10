@@ -33,8 +33,9 @@ const useAPI = () => {
                 if(response.status === 401){
                     //En este caso será porque la sesión se ha caducado por lo que forzaremos un cierre de sesión.
                 }
-                throw new Error("Error al realizar la petición a la API.");
-
+                const errorBody = await response.json().catch(() => null);
+                const message = errorBody?.message ?? `HTTP ${response.status}`;
+                throw new Error(message);
             }
 
             const data = await response.json();

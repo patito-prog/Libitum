@@ -9,9 +9,6 @@
 export const eventIsValid = (event) => {
     let isEventValid = true;
     if (!event) isEventValid = false;
-    if (!isTitleValid(event.title)) isEventValid = false;
-    if (!isDescriptionValid(event.description)) isEventValid = false;
-    if (!isLocationValid(event.location)) isEventValid = false;
     if (!isEventDateValid(event.event_date)) isEventValid = false;
     if (!isPriceValid(event.price)) isEventValid = false;
     if (!isCoverImageValid(event.cover_image)) isEventValid = false;
@@ -20,20 +17,8 @@ export const eventIsValid = (event) => {
     return isEventValid;
 }
 
-const isTitleValid = (title) => {
-    console.log("Funcion validar titulo no programada");
-}
-
-const isDescriptionValid = (description) => {
-    console.log("Funcion validar descripcion no programada");
-}
-
-const isLocationValid = (location) => {
-    console.log("Funcion validar localizacion no programada");
-}
-
 const isEventDateValid = (dateEvent) => {
-    console.log("Funcion validar fecha del evento no programada");
+    
 }
 
 const isPriceValid = (price) => {

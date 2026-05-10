@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLoadScript, GoogleMap, Marker } from '@react-google-maps/api';
-import usePlacesAutocomplete, { getGeocode, getLatLng } from 'use-places-autocomplete';
+import usePlacesAutocomplete, { getDetails } from 'use-places-autocomplete';
 import styles from './LocationInput.module.scss';
 
 const LIBRARIES = ['places'];
@@ -36,12 +36,13 @@ const LocationInputInner = ({ onLocationChange }) => {
 
     const floating = focused || !!value;
 
-    const handleSelect = async (description) => {
+    const handleSelect = async (description, placeId) => {
         setValue(description, false);
         clearSuggestions();
 
-        const results = await getGeocode({ address: description });
-        const { lat, lng } = await getLatLng(results[0]);
+        const details = await getDetails({ placeId, fields: ['geometry'] });
+        const lat = details.geometry.location.lat();
+        const lng = details.geometry.location.lng();
 
         setCoords({ lat, lng });
         onLocationChange({ location: description, latitude: lat, longitude: lng });
@@ -70,7 +71,7 @@ const LocationInputInner = ({ onLocationChange }) => {
                         <li
                             key={place_id}
                             className={styles.suggestion}
-                            onMouseDown={() => handleSelect(main_text + (secondary_text ? `, ${secondary_text}` : ''))}
+                            onMouseDown={() => handleSelect(main_text + (secondary_text ? `, ${secondary_text}` : ''), place_id)}
                         >
                             <strong>{main_text}</strong>
                             {secondary_text && <span> — {secondary_text}</span>}

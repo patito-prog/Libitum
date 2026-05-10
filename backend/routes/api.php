@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\StatusController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
@@ -8,6 +9,7 @@ use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\ArtistProfileController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\CategoryController;
 
 // --- RUTA PÚBLICA (No necesita token, porque venimos a pedirlo) ---
 Route::post('/login', [AuthController::class, 'verify']);
@@ -16,6 +18,9 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::get('/events/{event}', [EventController::class, 'show']); //  ARTISTA/USUARIO puede ver un evento.
 // Cualquiera puede ver el perfil de un artista.
 Route::get('/artists/{id}', [ArtistProfileController::class, 'show']);
+
+Route::get('/categories',[CategoryController::class, 'index']); // Recoger todas las categorías que existen (básicamente para rellenar dinámicamente el select de categorías)
+Route::get('/statuses', [StatusController::class, 'index']); // Recoge todos los estados que existen en la base de datos.
 
 // --- RUTAS PROTEGIDAS (Necesitan el token de Sanctum) ---
 Route::middleware('auth:sanctum')->group(function () {
