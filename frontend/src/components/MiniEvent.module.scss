@@ -1,0 +1,15 @@
+
+.miniEvent {
+    display: flex;
+    justify-content: space-around;
+
+    div {
+        width: 100%;
+    }
+
+    .identificacion {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+}

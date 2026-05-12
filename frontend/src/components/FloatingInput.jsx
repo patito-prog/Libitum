@@ -111,7 +111,13 @@ const FloatingMultiSelect = ({ id, name, label, onChange, options = [] }) => {
                         ))}
                     </span>
                 }
-                <span className={styles.multiArrow}>{open ? '▲' : '▼'}</span>
+                <span className={`${styles.multiArrow} ${open ? styles.multiArrowOpen : ''}`}>
+                    <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M80 40 L160 100 L80 160" fill="none" stroke="currentColor" strokeWidth="24" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M160 40 L240 100 L160 160" fill="none" stroke="currentColor" strokeWidth="24" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M240 40 L320 100 L240 160" fill="none" stroke="currentColor" strokeWidth="24" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                </span>
             </div>
             {open && (
                 <div className={styles.multiDropdown}>

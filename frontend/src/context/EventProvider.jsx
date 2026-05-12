@@ -9,6 +9,7 @@ const EventProvider = ({ children }) => {
     const URL_EVENTS = `${URL_API}/events`;
 
     const {
+        loading,
         save,
         getData,
     } = useAPI();
@@ -76,7 +77,7 @@ const EventProvider = ({ children }) => {
                 setEvents(events);
             }
         } catch (error) {
-            showMessageWithTime(`Error EventProvider saveEvent: ${error}`, 'error');
+            showMessageWithTime(`Error EventProvider getEvents: ${error}`, 'error');
         }
     }
 
@@ -112,7 +113,7 @@ const EventProvider = ({ children }) => {
     };
 
     useEffect(() => {
-        getEvents();
+        // GetEvents no se puede hacer aquí porque previamente si no se a logeado salta el error de que !no está Autorizado!
         getCategories();
         getStatuses();
     }, []);
@@ -125,6 +126,7 @@ const EventProvider = ({ children }) => {
         changeStatusNewEvent,
         setLocation,
         saveEvent,
+        getEvents,
         getCategories,
         getStatuses,
     }

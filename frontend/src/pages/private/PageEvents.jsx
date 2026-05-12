@@ -1,10 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AddEvent from '../../components/AddEvent.jsx';
 import Events from '../../components/Events.jsx';
 import styles from  './PageEvents.module.scss';
+import useEventContext from '../../hooks/useEventContext.js';
 
 const PageEvents = () => {
-    const [ decisionAddEvent, setDecisionAddEvent ] = useState(false); // If the user want to add a Event. Here have a state to appear the form.
+    const { getEvents } = useEventContext();
+    const [ decisionAddEvent, setDecisionAddEvent ] = useState(false);
+
+    useEffect(() => {
+        getEvents();
+    }, []); // If the user want to add a Event. Here have a state to appear the form.
     /**
      * Function to appear o disappear the form of AddEvent to add it.
      */

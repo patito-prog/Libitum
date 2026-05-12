@@ -1,7 +1,7 @@
 import { useState } from "react";
 import useEventContext from "../hooks/useEventContext.js";
 // Class
-import MiniEvents from "./MiniEvents.jsx";
+import MiniEvent from "./MiniEvent.jsx";
 import Event from "./Event.jsx";
 
 const Events = () => {
@@ -37,7 +37,7 @@ const Events = () => {
                 { eventDetailSelected ? <Event data={eventToShow}/> :
                     events && events.length > 0 ?
                     events.map((event, i, a) => {
-                        return <MiniEvents key={event.id} data={event}/>
+                        return <MiniEvent key={event.id} data={event}/>
                     }) :
                     <p>No hay eventos registrados</p>
                 }

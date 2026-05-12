@@ -1,0 +1,26 @@
+
+/*
+    Estilo cristal ( como Apple Cristal )
+*/
+.cristal {
+    background: rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid rgba(255, 255, 255, 0.22);
+    border-left: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: clamp(0.75rem, 2vw, 1.25rem);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    padding: clamp(0.75rem, 2vw, 1rem) clamp(0.875rem, 2.5vw, 1.25rem);
+    color: white;
+    transition: background 0.2s, box-shadow 0.2s;
+    background-image:
+        radial-gradient(ellipse at 20% 30%, rgba(43, 104, 112, 0.30) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 70%, rgba(255, 201, 172, 0.18) 0%, transparent 50%),
+        radial-gradient(ellipse at 60% 10%, rgba(43, 104, 112, 0.12) 0%, transparent 45%);
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.211);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+}

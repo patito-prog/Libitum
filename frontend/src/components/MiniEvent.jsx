@@ -1,11 +1,13 @@
+import styles from './MiniEvent.module.scss';
+import appStyles from '../App.module.scss';
 
-const MiniEvents = (props) => {
+const MiniEvent = (props) => {
     const { user_id, id, title, slug, description, location, event_date, price, cover_image, max_capacity, status_id } = props.data;
     const {status} = props.data;
     return (
         <>
-            <div id={id} className="mini-event">
-                <div className="">
+            <div id={id} className={`${styles.miniEvent} ${appStyles.cristal}`}>
+                <div className={styles.identificacion}>
                     <p>{title && title}</p>
                     {/*Esta localización deberá ser la calle en pequeñito... */}
                     <p>{location && location}</p>
@@ -20,4 +22,4 @@ const MiniEvents = (props) => {
     )
 }
 
-export default MiniEvents;
+export default MiniEvent;

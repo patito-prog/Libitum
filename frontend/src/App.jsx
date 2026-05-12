@@ -3,9 +3,9 @@ import EventProvider from './context/EventProvider.jsx';
 import Router from './routes/Router';
 import MessageApp from "./components/common/MessageApp.jsx";
 import Container from "./components/layout/Container.jsx";
-import Header from "./components/layout/Container.jsx";
-import Content from "./components/layout/Container.jsx";
-import Footer from "./components/layout/Container.jsx";
+import Header from "./components/layout/Header.jsx";
+import Content from "./components/layout/Content.jsx";
+import Footer from "./components/layout/Footer.jsx";
 
 function App() {
 

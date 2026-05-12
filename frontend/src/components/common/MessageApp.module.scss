@@ -1,65 +1,61 @@
-/* Contenedor flotante en la esquina superior derecha */
-.messageApp_container {
-  position: fixed;
-  top: 90px; /* Debajo del header */
-  right: 20px;
-  z-index: 2000;
-  min-width: 300px;
-  max-width: 400px;
-  padding: 16px 20px;
-  background-color: var(--bg-white);
-  border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  display: flex;
-  align-items: center;
-  border-left: 6px solid #ccc; /* Borde izquierdo de color por defecto */
-  animation: slideInRight 0.4s ease forwards;
-  font-family: 'Lato', sans-serif;
+.container {
+    position: fixed;
+    top: clamp(4.5rem, 10vh, 6rem);
+    right: clamp(0.75rem, 3vw, 1.5rem);
+    z-index: 2000;
+    width: clamp(240px, 85vw, 360px);
+    padding: clamp(0.75rem, 2vw, 1rem) clamp(1rem, 2.5vw, 1.25rem);
+    display: flex;
+    align-items: center;
+    gap: clamp(0.5rem, 1.5vw, 0.75rem);
+    border-radius: clamp(0.5rem, 1.5vw, 0.75rem);
+    border-left: 4px solid transparent;
+    background: rgba(42, 43, 44, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+    p {
+        margin: 0;
+        font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+        font-weight: 600;
+        line-height: 1.4;
+    }
+
+    &.ok {
+        border-left-color: #27ae60;
+        .icon { color: #27ae60; }
+        p { color: #a8e6c0; }
+    }
+
+    &.error {
+        border-left-color: #c0392b;
+        .icon { color: #c0392b; }
+        p { color: #f1a9a0; }
+    }
+
+    &.info {
+        border-left-color: var(--color-principal);
+        .icon { color: var(--color-principal); }
+        p { color: var(--color-secundario-claro); }
+    }
 }
 
-.messageApp_container p {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 600;
+.icon {
+    font-size: clamp(1rem, 2vw, 1.1rem);
+    font-weight: 700;
+    flex-shrink: 0;
+    line-height: 1;
 }
 
-/* ESTILOS ESPECÍFICOS SEGÚN EL TIPO DE MENSAJE */
-
-/* Éxito (Verde Salvia) */
-.messageApp_container.ok {
-  border-left-color: #27ae60;
-  background-color: #f6fff9; /* Fondo verde muy pálido */
-}
-.messageApp_container.ok p {
-  color: #1e8449;
-}
-
-/* Error (Rojo Terracota/Ladrillo - No rojo chillón) */
-.messageApp_container.error {
-  border-left-color: #c0392b;
-  background-color: #fff6f6; /* Fondo rojo muy pálido */
-}
-.messageApp_container.error p {
-  color: #922b21;
-}
-
-/* Info (Azul Grisáceo) */
-.messageApp_container.info {
-  border-left-color: #5d6d7e;
-  background-color: #f4f6f7;
-}
-.messageApp_container.info p {
-  color: #34495e;
-}
-
-/* Animación de entrada */
 @keyframes slideInRight {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+    from {
+        transform: translateX(calc(100% + 2rem));
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }

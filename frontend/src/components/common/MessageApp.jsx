@@ -2,16 +2,24 @@ import React from "react";
 import useMessageContext from "../../hooks/useMessageContext.js";
 import styles from "./MessageApp.module.scss";
 
-const MensajeApp = () => {
-	const { message, messageType, activeMessage } = useMessageContext();
+const ICONS = {
+    ok:    "✓",
+    error: "✕",
+    info:  "ℹ",
+};
 
-	return (
-		activeMessage && (
-			<div className={`messageApp_container ${messageType.toLowerCase()}`}>
-				<p>{message}</p>
-			</div>
-		)
-	);
+const MensajeApp = () => {
+    const { message, messageType, activeMessage } = useMessageContext();
+    const type = messageType?.toLowerCase();
+
+    return (
+        activeMessage && (
+            <div className={`${styles.container} ${styles[type] ?? ''}`}>
+                <span className={styles.icon}>{ICONS[type] ?? "ℹ"}</span>
+                <p>{message}</p>
+            </div>
+        )
+    );
 };
 
 export default MensajeApp;

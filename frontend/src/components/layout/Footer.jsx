@@ -1,7 +1,7 @@
-import "./footer.css";
+import sytles from  "./Footer.module.scss";
 const Footer = () => {
 	return (
-		<footer className="footer_container">
+		<footer className={sytles.footerContainer}>
 			<small>Derechos reservados.</small>
 		</footer>
 	);

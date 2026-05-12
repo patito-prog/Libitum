@@ -1,12 +1,52 @@
+/**
+Clase de SCSS para los estilos más generales. (La clase App.module.scss es para estilos más personalizados de la web)
+*/
 :root {
-  --fondo-oscuro:#1e1f20;
+    --fondo-oscuro:#1e1f20;
+    --color-principal: #2b6870;
+    --color-secundario-claro: #e5efe6;
+    --color-letra-claro: #F2F0EF;
+    --color-rosa-contraste: #ffc9ac;
 }
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    color: var(--color-letra-claro);
 }
 body {
     font-family: sans-serif;
+    min-height: 100vh;
     background-color: var(--fondo-oscuro);
+}
+
+h1 {
+    color: var(--color-secundario-claro);
+}
+
+/*
+    Enlaces {con animación incluida} .
+*/
+a {
+    text-decoration: none;
+    color: var(--color-principal);
+    position: relative;
+    display: inline-block;
+    &::after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 1.4px;
+        bottom: -1.4px;
+        left: 0;
+        background-color: var(--color-principal);
+        transition: width 0.3s ease-in-out;
+    }
+    &:hover::after {
+        width: 100%;
+    }
+}
+
+ul {
+    list-style: none;
 }
