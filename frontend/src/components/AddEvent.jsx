@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import useEventContext from '../hooks/useEventContext.js';
-import { FloatingInput, FloatingTextarea, FloatingSelect } from './FloatingInput.jsx';
+import { FloatingInput, FloatingTextarea, FloatingSelect, FloatingMultiSelect } from './FloatingInput.jsx';
 import LocationInput from './LocationInput.jsx';
 import FloatingOptionsSelect from './FloatingOptionsSelect.jsx';
 import styles from './AddEvent.module.scss';
@@ -85,17 +85,13 @@ const AddEvent = () => {
                             onChange={changeStatusNewEvent}
                         />
                     </div>
-                    <FloatingSelect
+                    <FloatingMultiSelect
                         id="categories"
                         name="categories"
-                        label="Categorias"
+                        label="Categorías"
+                        options={categories}
                         onChange={changeStatusNewEvent}
-                    >   
-                        { 
-                            categories && categories.length > 0 && <FloatingOptionsSelect data={categories}/>
-                        }
-                        
-                    </FloatingSelect>
+                    />
                 </div>
 
                 <div className={styles.footer}>
@@ -108,8 +104,6 @@ const AddEvent = () => {
                         { 
                             statuses && statuses.length > 0 && <FloatingOptionsSelect data={statuses}/>
                         }
-                        <option value="1">Borrador</option>
-                        <option value="2">Publicado</option>
                     </FloatingSelect>
 
                     <button type="submit" className={styles.submitBtn} onClick={saveEvent}>

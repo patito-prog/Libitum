@@ -1,6 +1,6 @@
 import React from "react";
 import useMessageContext from "../../hooks/useMessageContext.js";
-import "./messageApp.css";
+import styles from "./MessageApp.module.scss";
 
 const MensajeApp = () => {
 	const { message, messageType, activeMessage } = useMessageContext();

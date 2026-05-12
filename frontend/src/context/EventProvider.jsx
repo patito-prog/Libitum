@@ -30,6 +30,7 @@ const EventProvider = ({ children }) => {
         cover_image: null,
         max_capacity: 0,
         status_id: 1,
+        categories: []
     }
 
     // ---------------- [ALL ABOUT EVENTS] ----------------
@@ -47,15 +48,15 @@ const EventProvider = ({ children }) => {
      */
     const changeStatusNewEvent = (e) => {
         const { name, value, type, files } = e.target;
-        setEvent({
-            ...event,
-            [name]: type === 'file' ? files[0] : value
-        });
+        let parsed = type === 'file' ? files[0] : value;
+        if (name === 'categories') parsed = Array.isArray(value) ? value : [parseInt(value, 10)];
+        setEvent({ ...event, [name]: parsed });
     };
 
     const saveEvent = async() => {
         try {
             if(event) {
+                console.log(event);
                 const data = await save(URL_EVENTS, event);
                 if(data?.event) {
                     setEvents([...events, data.event]);

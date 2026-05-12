@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import styles from './FloatingInput.module.scss';
 
 const ALWAYS_FLOAT_TYPES = ['datetime-local', 'date', 'time', 'month', 'week'];
@@ -76,4 +76,59 @@ const FloatingSelect = ({ id, name, label, onChange, children, ...props }) => (
     </div>
 );
 
-export { FloatingInput, FloatingTextarea, FloatingSelect };
+const FloatingMultiSelect = ({ id, name, label, onChange, options = [] }) => {
+    const [open, setOpen] = useState(false);
+    const [selected, setSelected] = useState([]);
+    const ref = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const toggle = (optId) => {
+        const next = selected.includes(optId)
+            ? selected.filter(x => x !== optId)
+            : [...selected, optId];
+        setSelected(next);
+        onChange?.({ target: { name, value: next } });
+    };
+
+    const selectedNames = options.filter(o => selected.includes(o.id)).map(o => o.name);
+
+    return (
+        <div className={`${styles.field} ${styles.multiField}`} ref={ref}>
+            <label htmlFor={id} className={`${styles.label} ${styles.floating}`}>{label}</label>
+            <div className={styles.multiTrigger} onClick={() => setOpen(o => !o)}>
+                {selectedNames.length === 0
+                    ? <span className={styles.multiPlaceholder}>Elige categorías…</span>
+                    : <span className={styles.multiChips}>
+                        {selectedNames.map(n => (
+                            <span key={n} className={styles.chip}>{n}</span>
+                        ))}
+                    </span>
+                }
+                <span className={styles.multiArrow}>{open ? '▲' : '▼'}</span>
+            </div>
+            {open && (
+                <div className={styles.multiDropdown}>
+                    {options.map(opt => (
+                        <label key={opt.id} className={styles.multiCheckItem}>
+                            <input
+                                type="checkbox"
+                                checked={selected.includes(opt.id)}
+                                onChange={() => toggle(opt.id)}
+                            />
+                            {opt.name}
+                        </label>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
+export { FloatingInput, FloatingTextarea, FloatingSelect, FloatingMultiSelect };

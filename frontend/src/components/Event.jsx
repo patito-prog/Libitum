@@ -1,12 +1,11 @@
 
 const Event = (props) => {
-    console.log(props.data)
     const {user_id, id,  title, slug, description, location, event_date, price, cover_image, max_capacity, status_id} = props.data;
     const {status} = props.data;
 
     return (
         <>
-            <div id={id} className="">
+            <div id={id} className="event-detail">
                 <div className="">
                     <div className="">
                         <p>{title && title}</p>

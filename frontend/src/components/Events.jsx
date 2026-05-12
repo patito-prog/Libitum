@@ -26,10 +26,15 @@ const Events = () => {
                 const miniEvent = e.target.closest(".mini-event");
                 if (miniEvent) {
                     showEventDetail(Number(miniEvent.id));
+                    return;
+                }
+                // si no ha entrado en el if de miniEvent es que está visualizandose el Evento con más detalles.
+                const eventDetail = e.target.closest(".event-detail");
+                if (eventDetail) {
+                    setEventDetailSelected(!eventDetailSelected); // Lo ponemos a false
                 }
             }}>
-                { eventDetailSelected && <Event data={eventToShow}/>}
-                {
+                { eventDetailSelected ? <Event data={eventToShow}/> :
                     events && events.length > 0 ?
                     events.map((event, i, a) => {
                         return <MiniEvents key={event.id} data={event}/>

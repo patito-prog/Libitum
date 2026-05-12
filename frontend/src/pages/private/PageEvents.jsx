@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import AddEvent from '../components/AddEvent.jsx';
-import Events from '../components/Events.jsx';
+import AddEvent from '../../components/AddEvent.jsx';
+import Events from '../../components/Events.jsx';
 import styles from  './PageEvents.module.scss';
 
 const PageEvents = () => {

@@ -2,7 +2,6 @@
 
 const FloatingOptionsSelect = (props) => {
     const options = props.data;
-
     return(
         <>
             {

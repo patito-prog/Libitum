@@ -1,4 +1,4 @@
-import './App.css';
+import styles from './App.module.scss';
 import EventProvider from './context/EventProvider.jsx';
 import Router from './routes/Router';
 import MessageApp from "./components/common/MessageApp.jsx";
