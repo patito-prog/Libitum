@@ -1,0 +1,21 @@
+.addBtn {
+    position: fixed;
+    bottom: clamp(4rem, 8vw, 5rem);
+    right: clamp(1.2rem, 3vw, 1.5rem);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: inline-flex;
+    z-index: 50;
+    transition: transform 0.2s ease;
+
+    &:hover {
+        transform: scale(1.1);
+    }
+}
+
+.addImg {
+    width: clamp(3rem, 8vw, 3.5rem);
+    display: block;
+}

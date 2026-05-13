@@ -1,0 +1,6 @@
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.5rem, 2vw, 0.75rem);
+    margin-top: clamp(0.75rem, 2vw, 1rem);
+}
