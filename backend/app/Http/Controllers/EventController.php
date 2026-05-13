@@ -66,9 +66,11 @@ class EventController extends Controller
             'slug' => Str::slug($data['title'] . '-' . uniqid()),
             'description' => $data['description'],
             'location' => $data['location'],
+            'latitude' => $data['latitude'] ?? null,
+            'longitude' => $data['longitude'] ?? null,
             'event_date' => $data['event_date'],
-            'price' => $data['price'] ?? 0.00, // Si no pone precio, es gratis (0.00)
-            'status_id' => $data['status_id'] ?? 2, //Este es el estado `published`.
+            'price' => $data['price'] ?? 0.00,
+            'status_id' => $data['status_id'] ?? 2,
             //toDo: 'cover_image' => ... (La subida de imágenes la haremos en un paso aparte)
             //toDo: 'max_capacity'
             //toDo: Actualizar el evento como evento y hacer ACTOS.
@@ -103,6 +105,8 @@ class EventController extends Controller
             'slug' => Str::slug($data['title'] . '-' . uniqid()),
             'description' => $data['description'],
             'location' => $data['location'],
+            'latitude' => $data['latitude'] ?? null,
+            'longitude' => $data['longitude'] ?? null,
             'event_date' => $data['event_date'],
             'price' => $data['price'] ?? 0.00,
             'status_id' => $data['status_id'],

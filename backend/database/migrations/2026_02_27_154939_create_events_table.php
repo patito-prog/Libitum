@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->text('description');
             $table->string('location'); // Ciudad o zona
+            $table->decimal('latitude', 10, 8)->nullable();
+            $table->decimal('longitude', 11, 8)->nullable();
             $table->dateTime('event_date');
             $table->decimal('price', 8, 2)->default(0.00);
             $table->string('cover_image')->nullable();

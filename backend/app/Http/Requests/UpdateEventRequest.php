@@ -38,6 +38,8 @@ class UpdateEventRequest extends FormRequest
             'title'=>'required|string|max:255',
             'description' => 'string',
             'location' => 'required|string|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'event_date' => 'required|date',
             'price' => 'nullable|numeric|min:0',
             'status_id' => 'required|in:statuses,id',
