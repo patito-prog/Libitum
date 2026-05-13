@@ -1,4 +1,11 @@
+.footer {
+    padding: clamp(0.75rem, 2vw, 1rem) clamp(0.75rem, 3vw, 1.5rem);
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    display: flex;
+    justify-content: center;
 
-.footerContainer {
-
+    small {
+        font-size: clamp(0.7rem, 1.5vw, 0.775rem);
+        color: rgba(242, 240, 239, 0.3);
+    }
 }

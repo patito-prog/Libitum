@@ -1,5 +1,7 @@
 $primary: #2b6870;
 $primary-dark: #1e4f56;
+$danger-color: var(--color-rojo-danger);
+$danger-color-dark: var(--color-rojo-danger-dark);
 $border-radius: clamp(0.75rem, 2vw, 1rem);
 $shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
 
@@ -113,5 +115,39 @@ $shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
 
     &:hover {
         background-color: $primary-dark;
+    }
+}
+
+.cancelBtn{
+    padding: clamp(0.625rem, 1.5vw, 0.75rem) clamp(1rem, 2.5vw, 1.75rem);
+    background-color: $danger-color;
+    color: var(--color-letra-claro);
+    border: none;
+    border-radius: clamp(0.375rem, 1vw, 0.5rem);
+    font-size: clamp(0.8rem, 1.5vw, 0.9375rem);
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.2s;
+    align-self: flex-end;
+    min-height: 2.75rem;
+
+    &:hover {
+        background-color: $danger-color-dark;
+    }
+}
+
+
+.acceptCancel {
+    display: flex;
+    flex-direction: row-reverse;
+    gap: clamp(0.5rem, 1.5vw, 0.75rem);
+
+    .submitBtn {
+        flex: 2;
+    }
+
+    .cancelBtn {
+        flex: 3;
     }
 }

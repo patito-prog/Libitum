@@ -12,6 +12,7 @@ const AddEvent = () => {
         saveEvent,
         categories,
         statuses,
+        changeDecisionAddEvent,
     } = useEventContext();
 
     const [preview, setPreview] = useState(null);
@@ -105,13 +106,17 @@ const AddEvent = () => {
                             statuses && statuses.length > 0 && <FloatingOptionsSelect data={statuses}/>
                         }
                     </FloatingSelect>
-
-                    <button type="submit" className={styles.submitBtn} onClick={saveEvent}>
-                        Guardar
-                    </button>
                 </div>
-
             </div>
+            <div className={styles.acceptCancel}>
+                <button className={styles.cancelBtn} onClick={changeDecisionAddEvent}>
+                    Cancelar
+                </button>
+                <button type="submit" className={styles.submitBtn} onClick={saveEvent}>
+                    Guardar
+                </button>
+            </div>
+            
         </div>
     );
 };

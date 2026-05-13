@@ -25,19 +25,21 @@ const Events = () => {
             <div className="" onClick={(e) => {
                 const miniEvent = e.target.closest(".mini-event");
                 if (miniEvent) {
+                    console.log("Entra")
                     showEventDetail(Number(miniEvent.id));
                     return;
                 }
                 // si no ha entrado en el if de miniEvent es que está visualizandose el Evento con más detalles.
                 const eventDetail = e.target.closest(".event-detail");
                 if (eventDetail) {
+                    console.log("object")
                     setEventDetailSelected(!eventDetailSelected); // Lo ponemos a false
                 }
             }}>
                 { eventDetailSelected ? <Event data={eventToShow}/> :
                     events && events.length > 0 ?
-                    events.map((event, i, a) => {
-                        return <MiniEvent key={event.id} data={event}/>
+                    events.map((event) => {
+                        return <MiniEvent key={event.id} data={event} onClick={() => showEventDetail(event.id)}/>
                     }) :
                     <p>No hay eventos registrados</p>
                 }

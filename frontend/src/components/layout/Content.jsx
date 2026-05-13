@@ -1,5 +1,7 @@
-const Content = (props) => {
-	return <div className="Content_container">{props.children}</div>;
-};
+import styles from './Content.module.scss';
+
+const Content = ({ children }) => (
+    <main className={styles.content}>{children}</main>
+);
 
 export default Content;

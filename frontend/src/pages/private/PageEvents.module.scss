@@ -1,3 +1,6 @@
-.btnAdd {
-    width: 20px;
+.pageEvents {
+    width: 100%;
+    max-width: clamp(320px, 90dvw, 900px);
+    margin: 0 auto;
+    padding: 0 clamp(0.75rem, 3vw, 1.5rem);
 }

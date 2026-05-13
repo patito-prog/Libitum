@@ -37,6 +37,8 @@ const EventProvider = ({ children }) => {
     // ---------------- [ALL ABOUT EVENTS] ----------------
     const [events, setEvents] = useState([]); // Los eventos de este mismo usuario.
     const [event, setEvent] = useState(initialEvent); // Evento para insertar en la base de datos.
+    const [decisionAddEvent, setDecisionAddEvent] = useState(false);
+
 
     // ---------------- [ALL ABOUT CATEGORIES AND STATUSES] ----------------
     const [categories, setCategories] = useState([]); // Categorías que tiene eventos
@@ -112,6 +114,8 @@ const EventProvider = ({ children }) => {
         setEvent(prev => ({ ...prev, location, latitude, longitude }));
     };
 
+    const changeDecisionAddEvent = () => setDecisionAddEvent(v => !v);
+
     useEffect(() => {
         // GetEvents no se puede hacer aquí porque previamente si no se a logeado salta el error de que !no está Autorizado!
         getCategories();
@@ -123,12 +127,14 @@ const EventProvider = ({ children }) => {
         event,
         categories,
         statuses,
+        decisionAddEvent,
         changeStatusNewEvent,
         setLocation,
         saveEvent,
         getEvents,
         getCategories,
         getStatuses,
+        changeDecisionAddEvent,
     }
 
     return (
