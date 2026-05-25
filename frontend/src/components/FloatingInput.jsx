@@ -5,7 +5,7 @@ const ALWAYS_FLOAT_TYPES = ['datetime-local', 'date', 'time', 'month', 'week'];
 
 const FloatingInput = ({ id, name, label, placeholder = '', type = 'text', onChange, ...props }) => {
     const [focused, setFocused] = useState(false);
-    const [hasValue, setHasValue] = useState(false);
+    const [hasValue, setHasValue] = useState(!!(props.defaultValue || props.value));
     const floating = focused || hasValue || ALWAYS_FLOAT_TYPES.includes(type);
 
     return (

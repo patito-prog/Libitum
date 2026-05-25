@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
-use App\Util\ReturnHelper;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Auth;
 
 class StoreEventRequest extends FormRequest
@@ -83,6 +83,8 @@ class StoreEventRequest extends FormRequest
 
     protected function failedAuthorization()
     {
-        ReturnHelper::abort(403, 'No tienes los permisos necesarios para crear un evento.');
+        throw new HttpResponseException(
+            response()->json(['error' => true, 'message' => 'No tienes los permisos necesarios para crear un evento.'], 403)
+        );
     }
 }

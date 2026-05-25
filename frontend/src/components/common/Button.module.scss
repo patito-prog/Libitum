@@ -1,0 +1,19 @@
+.btn {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    padding: 0.3rem 0.6rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    transition: background 0.2s;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    img {
+        width: clamp(1rem, 2.5vw, 1.25rem);
+        display: block;
+    }
+}

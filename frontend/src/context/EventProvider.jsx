@@ -8,15 +8,8 @@ const EventProvider = ({ children }) => {
     const URL_API = "http://localhost:8000/api";
     const URL_EVENTS = `${URL_API}/events`;
 
-    const {
-        loading,
-        save,
-        getData,
-    } = useAPI();
-
-    const {
-        showMessageWithTime,
-    } = useMessageContext();
+    const { save, getData, edit } = useAPI();
+    const { showMessageWithTime } = useMessageContext();
 
     const initialEvent = {
         user_id: null,
@@ -32,117 +25,131 @@ const EventProvider = ({ children }) => {
         max_capacity: 0,
         status_id: 1,
         categories: []
-    }
+    };
 
-    // ---------------- [ALL ABOUT EVENTS] ----------------
-    const [events, setEvents] = useState([]); // Los eventos de este mismo usuario.
-    const [event, setEvent] = useState(initialEvent); // Evento para insertar en la base de datos.
-    const [decisionAddEvent, setDecisionAddEvent] = useState(false);
+    const [events, setEvents] = useState([]);
+    const [event, setEvent] = useState(initialEvent);
+    const [addMode, setAddMode] = useState(false);
+    const [editMode, setEditMode] = useState(false);
+    const [categories, setCategories] = useState([]);
+    const [statuses, setStatuses] = useState([]);
 
-
-    // ---------------- [ALL ABOUT CATEGORIES AND STATUSES] ----------------
-    const [categories, setCategories] = useState([]); // Categorías que tiene eventos
-    const [statuses, setStatuses] = useState([]); // Estado en el que está el evento.
-
-
-    /**
-     * Change the state of a new event
-     * @param {Event} e 
-     */
     const changeStatusNewEvent = (e) => {
         const { name, value, type, files } = e.target;
         let parsed = type === 'file' ? files[0] : value;
         if (name === 'categories') parsed = Array.isArray(value) ? value : [parseInt(value, 10)];
-        setEvent({ ...event, [name]: parsed });
+        setEvent(prev => ({ ...prev, [name]: parsed }));
     };
 
-    const saveEvent = async() => {
+    const saveEvent = async () => {
         try {
-            if(event) {
-                console.log(event);
-                const data = await save(URL_EVENTS, event);
-                if(data?.event) {
-                    setEvents([...events, data.event]);
-                    return data.event;
-                }
+            const data = await save(URL_EVENTS, event);
+            if (data?.event) {
+                setEvents(prev => [...prev, data.event]);
+                setAddMode(false);
+                setEvent(initialEvent);
+                showMessageWithTime('Evento creado correctamente', 'ok');
+                return data.event;
             }
         } catch (error) {
-            showMessageWithTime(`Error EventProvider saveEvent: ${error}`, 'error');
+            showMessageWithTime(`Error al crear el evento: ${error}`, 'error');
         }
-    }
+    };
 
-    const getEvents = async() => {
+    const updateEvent = async () => {
+        try {
+            const data = await edit(`${URL_EVENTS}/${event.id}`, event);
+            if (data) {
+                setEvents(prev => prev.map(e => e.id === event.id ? { ...e, ...data.event } : e));
+                setEditMode(false);
+                setEvent(initialEvent);
+                showMessageWithTime('Evento actualizado correctamente', 'ok');
+            }
+        } catch (error) {
+            showMessageWithTime(`Error al actualizar el evento: ${error}`, 'error');
+        }
+    };
+
+    const setEventForEdit = (eventData) => {
+        setEvent({
+            ...initialEvent,
+            ...eventData,
+            categories: eventData.categories?.map(c => c.id) ?? [],
+        });
+        setEditMode(true);
+    };
+
+    const getEvents = async () => {
         try {
             const data = await getData(URL_EVENTS);
-            const events = data.events;
-            if(events && events.length > 0) {
-                setEvents(events);
-            }
+            if (data.events?.length > 0) setEvents(data.events);
         } catch (error) {
-            showMessageWithTime(`Error EventProvider getEvents: ${error}`, 'error');
+            showMessageWithTime(`Error al cargar eventos: ${error}`, 'error');
         }
-    }
+    };
 
-    /**
-     * Catch all of categories in our data base.
-     */
-    const getCategories = async() => {
+    const getCategories = async () => {
         try {
             const data = await getData(`${URL_API}/categories`);
-            const categories = data.categories;
-            if(categories && categories.length > 0) {
-                setCategories(categories);
-            }
+            if (data.categories?.length > 0) setCategories(data.categories);
         } catch (error) {
-            showMessageWithTime(`Error EventProvider getCategories: ${error}`, 'error');
+            showMessageWithTime(`Error al cargar categorías: ${error}`, 'error');
         }
-    }
+    };
 
-    const getStatuses = async() => {
+    const getStatuses = async () => {
         try {
             const data = await getData(`${URL_API}/statuses`);
-            const statuses = data.statuses;
-            if(statuses && statuses.length > 0) {
-                setStatuses(statuses);
-            }
+            if (data.statuses?.length > 0) setStatuses(data.statuses);
         } catch (error) {
-            showMessageWithTime(`Error EventProvider getStatuses: ${error}`, 'error');
+            showMessageWithTime(`Error al cargar estados: ${error}`, 'error');
         }
-    }
+    };
 
     const setLocation = ({ location, latitude, longitude }) => {
         setEvent(prev => ({ ...prev, location, latitude, longitude }));
     };
 
-    const changeDecisionAddEvent = () => setDecisionAddEvent(v => !v);
+    const changeDecisionAddEvent = () => {
+        setEvent(initialEvent);
+        setAddMode(v => !v);
+    };
+
+    const changeDecisionEditMode = () => {
+        setEvent(initialEvent);
+        setEditMode(v => !v);
+    };
+
+    const resetModes = () => {
+        setAddMode(false);
+        setEditMode(false);
+        setEvent(initialEvent);
+    };
 
     useEffect(() => {
-        // GetEvents no se puede hacer aquí porque previamente si no se a logeado salta el error de que !no está Autorizado!
         getCategories();
         getStatuses();
     }, []);
 
     const exportData = {
-        events,
-        event,
-        categories,
-        statuses,
-        decisionAddEvent,
+        events, event, categories, statuses,
+        addMode, editMode,
         changeStatusNewEvent,
         setLocation,
-        saveEvent,
+        saveEvent, updateEvent,
         getEvents,
-        getCategories,
-        getStatuses,
-        changeDecisionAddEvent,
-    }
+        getCategories, getStatuses,
+        changeDecisionAddEvent, changeDecisionEditMode,
+        resetModes,
+        setEventForEdit,
+    };
 
     return (
         <EventContext.Provider value={exportData}>
             {children}
         </EventContext.Provider>
     );
-}
+};
 
-export {EventContext};
+export { EventContext };
 export default EventProvider;

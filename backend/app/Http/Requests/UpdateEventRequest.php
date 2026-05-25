@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
-use App\Util\ReturnHelper;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Auth;
 
 class UpdateEventRequest extends FormRequest
@@ -42,7 +42,7 @@ class UpdateEventRequest extends FormRequest
             'longitude' => 'nullable|numeric|between:-180,180',
             'event_date' => 'required|date',
             'price' => 'nullable|numeric|min:0',
-            'status_id' => 'required|in:statuses,id',
+            'status_id' => 'required|exists:statuses,id',
             // Validamos que llegue un array de categorías y que los IDs existan
             'categories' => 'nullable|array',
             'categories.*' => 'exists:categories,id',
@@ -74,6 +74,8 @@ class UpdateEventRequest extends FormRequest
 
     protected function failedAuthorization()
     {
-        ReturnHelper::abort(403, "Debes ser el dueño del evento o al menos tener permisos.");
+        throw new HttpResponseException(
+            response()->json(['error' => true, 'message' => 'Debes ser el dueño del evento o al menos tener permisos.'], 403)
+        );
     }
 }

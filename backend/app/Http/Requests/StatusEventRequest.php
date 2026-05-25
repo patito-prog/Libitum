@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
-use App\Util\ReturnHelper;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Auth;
 
 class StatusEventRequest extends FormRequest
@@ -44,6 +44,8 @@ class StatusEventRequest extends FormRequest
 
     protected function failedAuthorization()
     {
-        ReturnHelper::abort(403, 'No tienes permiso para modificar el estado de este evento.');
+        throw new HttpResponseException(
+            response()->json(['error' => true, 'message' => 'No tienes permiso para modificar el estado de este evento.'], 403)
+        );
     }
 }
