@@ -4,6 +4,7 @@ import About from '../pages/public/About.jsx';
 import Contact from '../pages/public/Contact.jsx';
 import Login from '../pages/public/Login.jsx';
 import Register from '../pages/public/Register.jsx';
+import Error from '../pages/public/Error.jsx';
 import PublicRoute from './guards/PublicRoute.jsx';
 import PrivateRoute from './guards/ProtectedRoute.jsx'
 import PageEvents from '../pages/private/PageEvents.jsx';
