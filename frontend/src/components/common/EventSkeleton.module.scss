@@ -1,37 +1,27 @@
 .skeletonCard {
-    background-color: var(--bg-card);
+    background: var(--bg-card);
     border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
     padding: 1.5rem;
     width: 100%;
-    max-width: 600px;
-    margin-bottom: 1rem;
+    max-width: 520px;
     position: relative;
     overflow: hidden;
-    
-    /* El brillo que pasa de izquierda a derecha */
+
     &::after {
         content: "";
         position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
+        inset: 0;
         transform: translateX(-100%);
-        background-image: linear-gradient(
+        background: linear-gradient(
             90deg,
-            rgba(255, 255, 255, 0) 0,
-            rgba(255, 255, 255, 0.05) 20%,
-            rgba(255, 255, 255, 0.1) 60%,
-            rgba(255, 255, 255, 0)
+            transparent 0,
+            rgba(255, 255, 255, 0.04) 20%,
+            rgba(255, 255, 255, 0.08) 60%,
+            transparent
         );
-        animation: shimmer 2s infinite;
+        animation: shimmer 1.8s infinite;
     }
-}
-
-/* Las "piezas" falsas */
-.skeletonTitle, .skeletonIcon, .skeletonText, .skeletonPill {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
 }
 
 .skeletonHeader {
@@ -40,16 +30,21 @@
     margin-bottom: 1rem;
 }
 
-.skeletonTitle { width: 60%; height: 28px; }
-.skeletonIcon { width: 32px; height: 32px; border-radius: 50%; }
-.skeletonText { width: 80%; height: 16px; margin-bottom: 1.5rem; }
+.skeletonTitle, .skeletonIcon, .skeletonText, .skeletonPill {
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
+}
+
+.skeletonTitle { width: 60%; height: 26px; }
+.skeletonIcon  { width: 32px; height: 32px; border-radius: 50%; }
+.skeletonText  { width: 80%; height: 14px; margin-bottom: 1.5rem; }
 
 .skeletonFooter {
     display: flex;
     gap: 1rem;
 }
 
-.skeletonPill { width: 80px; height: 24px; border-radius: 12px; }
+.skeletonPill { width: 80px; height: 22px; border-radius: var(--radius-pill); }
 
 @keyframes shimmer {
     100% { transform: translateX(100%); }

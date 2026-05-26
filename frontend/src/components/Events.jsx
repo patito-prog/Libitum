@@ -36,7 +36,7 @@ const Events = () => {
                     setEventDetailSelected(!eventDetailSelected); // Lo ponemos a false
                 }
             }}>
-                { eventDetailSelected ? <Event data={eventToShow}/> :
+                { eventDetailSelected ? <Event data={eventToShow} editable={true} /> :
                     events && events.length > 0 ?
                     events.map((event) => {
                         return <MiniEvent key={event.id} data={event} onClick={() => showEventDetail(event.id)}/>

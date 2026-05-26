@@ -47,29 +47,44 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        // 1. Validamos los datos que nos envían por Postman
+        $trustedDonationDomains = [
+            'ko-fi.com', 'buymeacoffee.com', 'paypal.com', 'paypal.me',
+            'patreon.com', 'gofundme.com', 'stripe.com', 'twitch.tv',
+            'streamlabs.com', 'github.com', 'opencollective.com',
+        ];
+
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6',
+            'donation_url' => [
+                'nullable', 'url', 'max:255',
+                function ($attribute, $value, $fail) use ($trustedDonationDomains) {
+                    if (!$value) return;
+                    $host = strtolower(parse_url($value, PHP_URL_HOST) ?? '');
+                    $host = ltrim($host, 'www.');
+                    foreach ($trustedDonationDomains as $domain) {
+                        if ($host === $domain || str_ends_with($host, '.' . $domain)) return;
+                    }
+                    $fail('La URL de donación debe ser de una plataforma de confianza: Ko-fi, Buy Me a Coffee, PayPal, Patreon, GoFundMe, Stripe o Twitch.');
+                },
+            ],
         ]);
 
-        //Creamos el usuario en la base de datos
-        //Usamos DB::transaction para asegurarnos de que si algo falla, no se quede un usuario sin rol o sin perfil de artista.
         $user = DB::transaction(function () use ($request) {
-            
             $newUser = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
+                'name'     => $request->name,
+                'email'    => $request->email,
                 'password' => Hash::make($request->password),
             ]);
-            
+
             $secureRole = ($request->role === 'artist') ? 'artist' : 'spectator';
             $newUser->assignRole($secureRole);
-            
+
             if ($secureRole === 'artist') {
                 ArtistProfile::create([
-                    'user_id' => $newUser->id,
+                    'user_id'      => $newUser->id,
+                    'donation_url' => $request->filled('donation_url') ? $request->donation_url : null,
                 ]);
             }
 

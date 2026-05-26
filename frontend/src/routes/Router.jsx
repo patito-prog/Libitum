@@ -18,12 +18,13 @@ import Feed from "../pages/private/Feed.jsx";
 const Router = () => {
     return (
         <Routes>
+            {/* Accesibles para todos sin importar si han iniciado sesión */}
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+
             <Route element={<PublicRoute/>}>
-                
-                <Route path="/about" element={<About />} />
-                <Route path="/contact" element={<Contact />} />
                 <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />    
+                <Route path="/register" element={<Register />} />
             </Route>
 
             {/**Esta ruta es a la que acceden los espectadores con el QR para donar, debe ser una ruta libre ya que puede acceder todo el mundo.*/}

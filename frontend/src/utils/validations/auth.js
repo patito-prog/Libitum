@@ -32,5 +32,13 @@ export const validateRegister = (formData) => {
         return "Las contraseñas no coinciden.";
     }
 
+    if (formData.role === 'artist' && formData.donation_url) {
+        try {
+            new URL(formData.donation_url);
+        } catch {
+            return "La URL de donación no es válida. Debe empezar por https://.";
+        }
+    }
+
     return null;
 }

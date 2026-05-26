@@ -11,15 +11,34 @@ use Inertia\Inertia;
 class ArtistProfileController extends Controller
 {
    
+    // Plataformas de pago/donación reconocidas. Solo se permiten URLs de estos dominios
+    // para evitar que artistas pongan enlaces fraudulentos que roben a sus seguidores.
+    private const TRUSTED_DONATION_DOMAINS = [
+        'ko-fi.com', 'buymeacoffee.com', 'paypal.com', 'paypal.me',
+        'patreon.com', 'gofundme.com', 'stripe.com', 'twitch.tv',
+        'streamlabs.com', 'github.com', 'opencollective.com',
+    ];
+
     public function update(Request $request)
     {
         $request->validate([
-            'bio'=>'nullable|string|max:1000',
-            'spotify_url'=>'nullable|url|max:255',
-            'instagram_url'=>'nullable|url|max:255',
-            'youtube_url'=>'nullable|url|max:255',
-            'tiktok_url'=>'nullable|url|max:255',
-            'donation_url'=>'nullable|url|max:255', 
+            'bio'           => 'nullable|string|max:1000',
+            'spotify_url'   => 'nullable|url|max:255',
+            'instagram_url' => 'nullable|url|max:255',
+            'youtube_url'   => 'nullable|url|max:255',
+            'tiktok_url'    => 'nullable|url|max:255',
+            'donation_url'  => [
+                'nullable', 'url', 'max:255',
+                function ($attribute, $value, $fail) {
+                    if (!$value) return;
+                    $host = strtolower(parse_url($value, PHP_URL_HOST) ?? '');
+                    $host = ltrim($host, 'www.');
+                    foreach (self::TRUSTED_DONATION_DOMAINS as $domain) {
+                        if ($host === $domain || str_ends_with($host, '.' . $domain)) return;
+                    }
+                    $fail('La URL de donación debe ser de una plataforma de confianza: Ko-fi, Buy Me a Coffee, PayPal, Patreon, GoFundMe, Stripe o Twitch.');
+                },
+            ],
         ]);
 
         Auth::user()->artistProfile->update([
@@ -45,25 +64,32 @@ class ArtistProfileController extends Controller
     }
 
     public function show(Request $request, $id){
-        $artist = User::with(['artistProfile', 'events'])->findOrFail($id);
+        $currentUserId = Auth::id();
+
+        $artist = User::with([
+            'artistProfile',
+            'events' => function ($q) {
+                $q->with('status')
+                  ->whereHas('status', fn($s) => $s->whereIn('name', ['published', 'live']))
+                  ->latest();
+            }
+        ])->findOrFail($id);
 
         if (!$artist->hasRole('artist')) {
-            if ($request->is('api/*') || $request->expectsJson()) {
-                return response()->json(['error' => true, 'message' => 'El usuario no es un artista', 'code' => 404], 404);
-            }
-            abort(404, 'Artista no encontrado');
+            return response()->json(['error' => true, 'message' => 'El usuario no es un artista'], 404);
         }
 
-        if ($request->is('api/*') || $request->expectsJson()) {
-            return response()->json([
-                'error' => false,
-                'message' => 'Perfil del artista recuperado',
-                'data' => $artist,
-                'code' => 200
-            ], 200);
-        }
+        $data = $artist->toArray();
+        $data['total_followers'] = $artist->followers()->count();
+        $data['is_following'] = $currentUserId
+            ? $artist->followers()->where('user_id', $currentUserId)->exists()
+            : false;
 
-        return \Inertia\Inertia::render('Artist/Profile', ['artist' => $artist]);
+        return response()->json([
+            'error' => false,
+            'message' => 'Perfil del artista recuperado',
+            'data' => $data,
+        ]);
     }
 
     //Esta función hay que ir ampliándola poco a poco, porque es la más compleja de todas. Aquí se irán añadiendo estadísticas y gráficos para que el artista pueda ver el impacto que tiene su perfil y sus eventos en la plataforma.

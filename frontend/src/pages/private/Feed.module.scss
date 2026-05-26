@@ -1,49 +1,96 @@
 .feedWrapper {
     position: relative;
     width: 100%;
-    /* 100vh menos lo que mida tu Header superior */
-    height: calc(100vh - 70px); 
-    background-color: var(--bg-main);
+    height: calc(100vh - 64px);
+    background: var(--bg-main);
     overflow: hidden;
 }
 
+/* Barra "Siguiendo | Para Ti" flotante */
 .topNav {
     position: absolute;
-    top: 1.5rem;
+    top: 1.25rem;
     left: 50%;
     transform: translateX(-50%);
     z-index: 10;
     display: flex;
     align-items: center;
-    gap: 1rem;
-    /* Fondo cristalino para los botones superiores */
-    background: rgba(18, 18, 18, 0.7);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    padding: 0.6rem 1.5rem;
-    border-radius: 50px;
+    gap: 0.75rem;
+    background: rgba(19, 21, 22, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 0.55rem 1.5rem;
+    border-radius: var(--radius-pill);
     border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-md);
 }
 
 .navBtn {
     background: none;
     border: none;
     color: var(--text-secondary);
-    font-size: 1rem;
+    font-size: 0.92rem;
     font-weight: 600;
     cursor: pointer;
+    padding: 0.1rem 0.25rem;
     transition: color var(--transition-speed);
 
     &.active {
         color: var(--text-primary);
-        text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+        text-shadow: 0 0 12px var(--color-primary-glow);
     }
 
-    &:hover { color: var(--text-primary); }
+    &:hover:not(.active) { color: var(--text-primary); }
 }
 
-.separator { color: var(--border-color); }
+.separator { color: var(--border-color); font-size: 0.8rem; }
 
+/* Barra de filtros de estado */
+.filterBar {
+    position: absolute;
+    top: 4.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex;
+    gap: 0.4rem;
+    padding: 0 1rem;
+    max-width: 100vw;
+    overflow-x: auto;
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+}
+
+.filterChip {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: rgba(19, 21, 22, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-pill);
+    padding: 0.28rem 0.75rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--transition-speed);
+
+    &:hover { color: var(--text-primary); border-color: rgba(255,255,255,0.18); }
+}
+
+.filterChipActive {
+    color: var(--text-primary) !important;
+    border-color: rgba(255,255,255,0.25) !important;
+    background: rgba(255,255,255,0.08) !important;
+}
+
+/* Color de acento por estado cuando está activo */
+.chip_live.filterChipActive         { border-color: #f97316 !important; color: #f97316 !important; background: rgba(249,115,22,0.1) !important; }
+.chip_published.filterChipActive    { border-color: #22c55e !important; color: #22c55e !important; background: rgba(34,197,94,0.1) !important; }
+.chip_finished.filterChipActive     { border-color: var(--text-muted) !important; }
+.chip_cancelled.filterChipActive    { border-color: #ef4444 !important; color: #ef4444 !important; background: rgba(239,68,68,0.1) !important; }
+
+/* Scroll tipo TikTok */
 .feedContainer {
     width: 100%;
     height: 100%;
@@ -53,7 +100,6 @@
     scroll-snap-type: y mandatory;
     scroll-behavior: smooth;
 
-    /* Ocultar barra de scroll nativa */
     &::-webkit-scrollbar { display: none; }
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -67,8 +113,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    /* El padding top 80px evita que el topNav tape el evento */
-    padding: 80px 1rem 2rem 1rem; 
+    padding: 130px 1rem 2rem;
 }
 
 .messageBox {
@@ -77,7 +122,50 @@
     align-items: center;
     justify-content: center;
     color: var(--text-secondary);
-    font-size: 1.1rem;
+    font-size: 1rem;
     text-align: center;
     padding: 2rem;
+    max-width: 380px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* Spinner TikTok-style al cargar más */
+.loadingMoreContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    min-height: 80px;
+    flex-shrink: 0;
+}
+
+.endMessage {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+}
+
+.loadingMore {
+    display: flex;
+    gap: 7px;
+    align-items: center;
+}
+
+.dot {
+    width: 7px;
+    height: 7px;
+    background: var(--color-primary);
+    border-radius: 50%;
+    animation: dotBounce 1.2s infinite ease-in-out both;
+
+    &:nth-child(1) { animation-delay: -0.32s; }
+    &:nth-child(2) { animation-delay: -0.16s; }
+    &:nth-child(3) { animation-delay: 0s; }
+}
+
+@keyframes dotBounce {
+    0%, 80%, 100% { transform: scale(0.55); opacity: 0.35; }
+    40%            { transform: scale(1);    opacity: 1; }
 }

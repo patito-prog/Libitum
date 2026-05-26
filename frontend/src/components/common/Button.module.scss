@@ -1,19 +1,22 @@
 .btn {
-    background: none;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 6px;
-    padding: 0.3rem 0.6rem;
+    background: var(--color-primary-light);
+    border: 1px solid rgba(33, 115, 119, 0.3);
+    border-radius: var(--radius-sm);
+    padding: 0.4rem 0.7rem;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    transition: background 0.2s;
-
-    &:hover {
-        background: rgba(255, 255, 255, 0.08);
-    }
+    transition: all var(--transition-speed);
 
     img {
-        width: clamp(1rem, 2.5vw, 1.25rem);
+        width: clamp(1rem, 2.5vw, 1.2rem);
         display: block;
+    }
+
+    &:hover {
+        background: var(--color-primary);
+        border-color: var(--color-primary);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px var(--color-primary-glow);
     }
 }

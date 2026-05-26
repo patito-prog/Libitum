@@ -63,13 +63,18 @@ const useAPI = () => {
         return callAPI(url, {method:"PUT", body: JSON.stringify(body)});
     }
 
+    const patch = (url, body) => {
+        return callAPI(url, {method:"PATCH", body: JSON.stringify(body)});
+    }
+
     return {
         loading,
         error,
         getData,
         deleteData,
         save,
-        edit
+        edit,
+        patch
     }
 };
 

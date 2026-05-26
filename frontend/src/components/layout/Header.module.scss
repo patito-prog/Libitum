@@ -1,53 +1,238 @@
 .header {
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 200;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: clamp(0.75rem, 2vw, 1rem) clamp(0.75rem, 3vw, 1.5rem);
-    background: rgba(30, 31, 32, 0.88);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0 clamp(1rem, 3vw, 2rem);
+    height: 64px;
+    background: rgba(19, 21, 22, 0.85);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid var(--border-color);
+    gap: 1rem;
 }
 
+/* ── Logo ── */
 .logo {
-    font-size: clamp(1.1rem, 3vw, 1.35rem);
+    font-size: clamp(1.1rem, 3vw, 1.4rem);
     font-weight: 800;
-    letter-spacing: -0.02em;
-    color: var(--color-principal);
+    letter-spacing: -0.03em;
+    color: var(--color-primary);
     text-decoration: none;
+    flex-shrink: 0;
 
+    span { color: var(--color-accent); }
     &::after { display: none; }
 }
 
+/* ── Nav central ── */
 .nav {
     display: flex;
     align-items: center;
-    gap: clamp(1rem, 3vw, 2rem);
-    list-style: none;
+    gap: clamp(0.4rem, 1.5vw, 1.2rem);
+    flex: 1;
+    justify-content: center;
+}
 
-    a {
-        font-size: clamp(0.8rem, 2vw, 0.9rem);
-        font-weight: 500;
-        color: var(--color-letra-claro);
+.link {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    padding: 0.3rem 0.6rem;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-speed), background var(--transition-speed);
+    white-space: nowrap;
+    text-decoration: none;
+
+    &::after { display: none; }
+
+    &:hover {
+        color: var(--text-primary);
+        background: rgba(255, 255, 255, 0.05);
     }
 }
 
-.logoutBtn {
-    background: none;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 6px;
-    padding: 0.3rem clamp(0.5rem, 1.5vw, 0.75rem);
-    font-size: clamp(0.8rem, 2vw, 0.875rem);
-    font-weight: 500;
-    color: var(--color-letra-claro);
-    cursor: pointer;
-    transition: background 0.2s, border-color 0.2s;
+.active {
+    color: var(--color-primary) !important;
+    background: var(--color-primary-light) !important;
+}
+
+/* ── Admin badge (salmon) ── */
+.adminBadge {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    background: rgba(255, 201, 172, 0.1);
+    border: 1px solid rgba(255, 201, 172, 0.2);
+    padding: 0.3rem 0.75rem;
+    border-radius: var(--radius-pill);
+    transition: all var(--transition-speed);
+    white-space: nowrap;
+    text-decoration: none;
+
+    &::after { display: none; }
 
     &:hover {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.3);
+        background: rgba(255, 201, 172, 0.18);
+        border-color: var(--color-accent);
     }
+}
+
+/* ── Register button (teal pill) ── */
+.registerBtn {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+    border: 1px solid rgba(33, 115, 119, 0.3);
+    padding: 0.3rem 0.75rem;
+    border-radius: var(--radius-pill);
+    transition: all var(--transition-speed);
+    white-space: nowrap;
+    text-decoration: none;
+
+    &::after { display: none; }
+
+    &:hover {
+        background: var(--color-primary);
+        color: #fff;
+        border-color: var(--color-primary);
+    }
+}
+
+/* ── Dropdown "Más" ── */
+.dropdown {
+    position: relative;
+}
+
+.dropdownTrigger {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: transparent;
+    border: none;
+    padding: 0.3rem 0.6rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: color var(--transition-speed), background var(--transition-speed);
+    white-space: nowrap;
+
+    &:hover {
+        color: var(--text-primary);
+        background: rgba(255, 255, 255, 0.05);
+    }
+}
+
+.chevron {
+    font-size: 0.75rem;
+    display: inline-block;
+    transition: transform var(--transition-speed);
+    line-height: 1;
+}
+
+.chevronUp {
+    transform: rotate(180deg);
+}
+
+.dropdownMenu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(19, 21, 22, 0.97);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.4rem;
+    min-width: 180px;
+    box-shadow: var(--shadow-lg);
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.dropdownItem {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    padding: 0.55rem 0.8rem;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-speed), background var(--transition-speed);
+    white-space: nowrap;
+    text-decoration: none;
+    display: block;
+
+    &::after { display: none; }
+
+    &:hover {
+        color: var(--text-primary);
+        background: rgba(255, 255, 255, 0.06);
+    }
+}
+
+/* ── Sección derecha ── */
+.userSection {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+}
+
+.profileInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.1rem;
+
+    @media (max-width: 580px) { display: none; }
+}
+
+.name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.role {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.logoutBtn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 0.35rem 0.8rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    white-space: nowrap;
+
+    &:hover {
+        border-color: var(--color-danger);
+        color: var(--color-danger);
+        background: rgba(232, 74, 64, 0.08);
+    }
+}
+
+/* ── Sin sesión ── */
+.authLinks {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }

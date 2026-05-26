@@ -9,7 +9,7 @@ import useEventContext from '../hooks/useEventContext.js';
 const LIBRARIES = ['places'];
 const MAP_OPTIONS = { disableDefaultUI: true, zoomControl: true };
 //TUVE QUE AÑADIR EL ONLIKE
-const Event = ({ data, onBack, onLike }) => {
+const Event = ({ data, onBack, onLike, editable = false }) => {
     //EXTRAIGO EL LIKE
     const { id, title, description, location, event_date, price, cover_image, max_capacity, status, latitude, longitude, liked } = data;
     const statusName = status?.name ?? '';
@@ -82,18 +82,22 @@ const Event = ({ data, onBack, onLike }) => {
                     )}
                 </div>
 
-                <div className={styles.actions}>
-                    <Button
-                        title="Editar evento"
-                        img="/editar.png"
-                        onClick={() => setEventForEdit(data)}
-                    />
-                    {onBack && (
-                        <button className={styles.backBtn} onClick={onBack}>
-                            ← Volver
-                        </button>
-                    )}
-                </div>
+                {(editable || onBack) && (
+                    <div className={styles.actions}>
+                        {editable && (
+                            <Button
+                                title="Editar evento"
+                                img="/editar.png"
+                                onClick={() => setEventForEdit(data)}
+                            />
+                        )}
+                        {onBack && (
+                            <button className={styles.backBtn} onClick={onBack}>
+                                ← Volver
+                            </button>
+                        )}
+                    </div>
+                )}
             </div>
         </>
     );

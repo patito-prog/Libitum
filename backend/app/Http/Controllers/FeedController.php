@@ -32,12 +32,15 @@ class FeedController extends Controller
             $query->where('user_id', '!=', $userId)->inRandomOrder(); 
         }
 
+        // Filtro por estado del evento
+        $allowedStatuses = ['draft', 'published', 'live', 'finished', 'cancelled'];
+        if ($request->filled('status') && in_array($request->status, $allowedStatuses)) {
+            $query->whereHas('status', fn($q) => $q->where('name', $request->status));
+        }
+
         // Filtro de zona/ciudad (Funciona para ambos modos)
-        // Ejemplo de petición: /api/feed?mode=discover&city=Madrid
-        if ($request->has('city') && !empty($request->city)) {
-            $query->whereHas('artist', function($q) use ($request) {
-                $q->where('city', $request->city);
-            });
+        if ($request->filled('city')) {
+            $query->whereHas('artist', fn($q) => $q->where('city', $request->city));
         }
 
         //Paginamos (modo TikTok)

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import useAuthContext from "./../../hooks/useAuthContext.js";
 import useMessageContext from "../../hooks/useMessageContext.js";
 import { validateLogin } from "../../utils/validations/auth.js";
@@ -17,6 +17,8 @@ const Login = () => {
     const { logIn } = useAuthContext();
     const { showMessageWithTime } = useMessageContext();
     const nav = useNavigate();
+    const location = useLocation();
+    const from = location.state?.from ?? '/feed';
     
     const updateData = (event) => {
         const { name, value } = event.target;
@@ -39,8 +41,8 @@ const Login = () => {
         try {
             setLoading(true);
             await logIn(credentials);
-            showMessageWithTime("¡Bienvenido/a de nuevo!", "ok");   
-            nav('/feed'); 
+            showMessageWithTime("¡Bienvenido/a de nuevo!", "ok");
+            nav(from, { replace: true });
             
         } catch(error) {
             showMessageWithTime("Credenciales incorrectas o problema de conexión.", "error");
