@@ -1,7 +1,12 @@
-/**
-Clase de SCSS para los estilos más generales. (La clase App.module.scss es para estilos más personalizados de la web)
-*/
+
+/* =========================================
+    VARIABLES GLOBALES (La identidad visual)
+   ========================================= */
 :root {
+    /* 🎨 EL VERDADERO COLOR CORPORATIVO LIBITUM */
+    --color-primary: #217377; /* El tono teal/cyan oscuro de tu captura */
+    --color-primary-hover: #18585b; /* Un pelín más oscuro para cuando pasas el ratón */
+    --color-primary-light: rgba(33, 115, 119, 0.15); /* Para fondos sutiles de botones o estados */
     --fondo-oscuro:#1e1f20;
     --color-principal: #2b6870;
     --color-secundario-claro: #e5efe6;
@@ -9,17 +14,63 @@ Clase de SCSS para los estilos más generales. (La clase App.module.scss es para
     --color-rosa-contraste: #ffc9ac;
     --color-rojo-danger: #e84a40;
     --color-rojo-danger-dark: #bd3b33;
+    
+    /* Fondos (Oscuros pero elegantes, sin ser negro puro) */
+    --bg-main: #141718; /* Un gris muy profundo con un levísimo matiz frío */
+    --bg-surface: rgba(32, 36, 38, 0.85); /* Fondo para las tarjetas, más opaco y sólido */
+    
+    /* Textos */
+    --text-primary: #f0f4f5; /* Blanco roto (cansa menos la vista que el blanco puro) */
+    --text-secondary: #97a1a2; /* Gris para textos secundarios */
+    
+    /* Utilidades */
+    --border-color: rgba(255, 255, 255, 0.08); /* Bordes más sutiles */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --transition-speed: 0.3s;
 }
+
+/* =========================================
+    RESETEO BÁSICO
+   ========================================= */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
     color: var(--color-letra-claro);
 }
+
+
 body {
     font-family: sans-serif;
     min-height: 100vh;
     background-color: var(--fondo-oscuro);
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+}
+
+/* Scrollbar personalizada para que no se vea la fea de Windows/Chrome */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-main);
+}
+::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary);
+
 }
 
 h1 {

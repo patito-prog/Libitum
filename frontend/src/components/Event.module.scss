@@ -1,8 +1,11 @@
 .card {
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    margin-top: clamp(0.75rem, 2vw, 1rem);
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 500px; /* Tamaño perfecto para móvil/tablet y elegante en PC */
+    margin: 0 auto;
 }
 
 .cover {

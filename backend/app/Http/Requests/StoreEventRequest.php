@@ -36,7 +36,7 @@ class StoreEventRequest extends FormRequest
             'event_date' => 'required|date',
             'price' => 'nullable|numeric|min:0',
             // De momento validamos que status sea uno de estos, ajústalo a tu lógica
-            'status' => 'nullable|in:draft,published,cancelled',
+            'status_id' => 'nullable|integer',
             // Validamos que 'categories' sea un array y que los IDs existan en la tabla
             'categories' => 'nullable|array',
             'categories.*' => 'exists:categories,id',
@@ -74,6 +74,7 @@ class StoreEventRequest extends FormRequest
 
             // Estado
             'status.in' => 'El estado seleccionado no es válido.',
+            'status_id.integer' => 'El estado seleccionado no es válido.',
 
             // Categorías
             'categories.array'  => 'El formato de las categorías no es correcto.',

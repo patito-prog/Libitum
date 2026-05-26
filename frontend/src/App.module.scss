@@ -24,3 +24,20 @@
         box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.15);
     }
 }
+
+/* Contenedor maestro que envuelve toda la web */
+.appContainer {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Ocupa al menos toda la pantalla */
+    width: 100%;
+}
+
+/* El espacio central donde van tus vistas (Feed, Favoritos, etc.) */
+.mainContent {
+    flex: 1; /* Esto empuja el footer hacia abajo siempre */
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    position: relative;
+}

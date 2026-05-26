@@ -24,7 +24,9 @@ Route::get('/statuses', [StatusController::class, 'index']); // Recoge todos los
 
 // --- RUTAS PROTEGIDAS (Necesitan el token de Sanctum) ---
 Route::middleware('auth:sanctum')->group(function () {
-
+    
+    //RUTA FAVORITOS
+     Route::get('/user/favorites', [EventController::class, 'favorites']);
     //La ruta por defecto de Laravel
     Route::get('/user', function (Request $request) {
         //carga todo lo relacionado con el perfil de artista, para que cuando el frontend pida los datos del usuario, ya tenga toda la info del perfil de artista (si es que tiene).
@@ -42,8 +44,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/profile', [\App\Http\Controllers\ProfileController::class, 'update']);
     Route::delete('/profile', [\App\Http\Controllers\ProfileController::class, 'destroy']);
 
-
-
+    //RUTA FEED
+    Route::get('/feed', [\App\Http\Controllers\FeedController::class, 'index']);
+    //RUTA LIKE
+    Route::post('/events/{event}/like', [\App\Http\Controllers\LikeController::class, 'toggle']);
+   
     // Rutas de seguidores para la API
     Route::get('/my-favorites', [FollowerController::class, 'index']);
     Route::post('/artist/{id}/follow', [FollowerController::class, 'store']);
@@ -73,6 +78,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/users/{id}', [AdminUserController::class, 'show']);
         Route::patch('/admin/users/{id}', [AdminUserController::class, 'update']);
         Route::delete('/admin/users/{id}', [AdminUserController::class, 'destroy']);
+        Route::get('/admin/events', [EventController::class, 'allEventsForAdmin']); 
+        Route::delete('/admin/events/{id}', [EventController::class, 'destroyByAdmin']);
     }); // -----------------    TERMINA EL MIDDLEWARE `admin`   --------------------------
 
 

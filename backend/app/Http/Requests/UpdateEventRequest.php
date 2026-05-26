@@ -43,6 +43,7 @@ class UpdateEventRequest extends FormRequest
             'event_date' => 'required|date',
             'price' => 'nullable|numeric|min:0',
             'status_id' => 'required|exists:statuses,id',
+            'status_id' => 'required|in:statuses,id',
             // Validamos que llegue un array de categorías y que los IDs existan
             'categories' => 'nullable|array',
             'categories.*' => 'exists:categories,id',

@@ -30,9 +30,16 @@ const AddEvent = () => {
     const handleCancel = editMode ? changeDecisionEditMode : changeDecisionAddEvent;
     const handleSubmit = editMode ? updateEvent : saveEvent;
 
+    //CAMBIÉ EL MÉTODO CON EL PREVENT DEFAULT Y PUSE EL BOTON TIPO BUTTON PORQUE SE PETABA PERO OBVIO PON LO QUE HAYAS HECHO.
+    const handleFormSubmit = (e) => {
+        e.preventDefault();
+        handleSubmit();
+    };
+
     return (
-        <div className={styles.page}>
+        <form className={styles.page} onSubmit={handleFormSubmit}>
             <div className={styles.bottomCard}>
+                {/* ── TOP CARD: imagen + título ── */}
                 <div className={styles.topCard}>
                     <label htmlFor="cover_image" className={styles.imageUpload}>
                         {preview
@@ -51,11 +58,9 @@ const AddEvent = () => {
                         id="title"
                         name="title"
                         label="Título del Evento"
-                        defaultValue={event.title}
                         onChange={changeStatusNewEvent}
                     />
                 </div>
-
                 <FloatingTextarea
                     id="description"
                     name="description"
@@ -124,11 +129,11 @@ const AddEvent = () => {
                 <button className={styles.cancelBtn} onClick={handleCancel}>
                     Cancelar
                 </button>
-                <button type="submit" className={styles.submitBtn} onClick={handleSubmit}>
+                <button type="submit" className={styles.submitBtn}>
                     {editMode ? 'Actualizar' : 'Guardar'}
                 </button>
             </div>
-        </div>
+        </form>
     );
 };
 

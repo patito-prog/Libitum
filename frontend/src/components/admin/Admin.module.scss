@@ -1,0 +1,150 @@
+/* src/components/admin/Admin.module.scss */
+
+.adminDashboardContainer {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: calc(100vh - 70px);
+    
+    h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 2rem;
+    }
+}
+
+.tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+    
+    button {
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 0.6rem 1.2rem;
+        border-radius: var(--radius-sm);
+        transition: all var(--transition-speed);
+        
+        &:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        &.active {
+            color: var(--color-primary);
+            background: rgba(43, 217, 186, 0.1);
+        }
+    }
+}
+
+.adminTable {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--bg-surface);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    
+    thead {
+        background: rgba(0, 0, 0, 0.3);
+        
+        th {
+            text-align: left;
+            padding: 1.2rem 1.5rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--border-color);
+        }
+    }
+    
+    tbody {
+        tr {
+            transition: background var(--transition-speed);
+            
+            &:hover {
+                background: rgba(255, 255, 255, 0.03);
+            }
+            
+            td {
+                padding: 1rem 1.5rem;
+                color: var(--text-primary);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                vertical-align: middle;
+            }
+            
+            &:last-child td {
+                border-bottom: none;
+            }
+        }
+    }
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    
+    &.admin { 
+        background: rgba(255, 59, 48, 0.15); 
+        color: #ff3b30; 
+        border: 1px solid rgba(255, 59, 48, 0.3); 
+    }
+    &.artist { 
+        background: rgba(43, 217, 186, 0.15); 
+        color: var(--color-primary); 
+        border: 1px solid rgba(43, 217, 186, 0.3); 
+    }
+    &.user { 
+        background: rgba(255, 255, 255, 0.1); 
+        color: var(--text-secondary); 
+        border: 1px solid rgba(255, 255, 255, 0.2); 
+    }
+}
+
+.buttonAdmin {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 59, 48, 0.1);
+    color: #ff3b30;
+    border: 1px solid transparent;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    
+    &:hover {
+        background: #ff3b30;
+        color: white;
+        box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3);
+        transform: translateY(-2px);
+    }
+    
+    &:active {
+        transform: translateY(0);
+    }
+    
+    .icon {
+        font-size: 1rem;
+    }
+}

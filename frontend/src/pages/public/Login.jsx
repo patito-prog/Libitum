@@ -1,10 +1,11 @@
-import {useState} from "react";
-import {useNavigate, Link} from "react-router-dom";
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import useAuthContext from "./../../hooks/useAuthContext.js";
 import useMessageContext from "../../hooks/useMessageContext.js";
+import { validateLogin } from "../../utils/validations/auth.js";
+import styles from './Auth.module.scss';
 
 const Login = () => {
-
     const initialCredentials = {
         email: "",
         password: ""
@@ -13,82 +14,92 @@ const Login = () => {
     const [credentials, setCredentials] = useState(initialCredentials);
     const [loading, setLoading] = useState(false);
 
-    const {logIn} = useAuthContext();
-    const {
-        showMessageWithTime,
-    } = useMessageContext();
+    const { logIn } = useAuthContext();
+    const { showMessageWithTime } = useMessageContext();
     const nav = useNavigate();
     
     const updateData = (event) => {
-        const {name, value } = event.target;
+        const { name, value } = event.target;
         setCredentials({
             ...credentials,
-            [name]:value
+            [name]: value
         });
     }
 
     const submit = async (event) => {
-        event.preventDefault();
+        event.preventDefault(); // Esto evita que recargue, siempre y cuando esté en el form
         
-        //validar en validador, esto es provisional.
-        if(!credentials.email || !credentials.password){
-            showMessageWithTime("Por favor, rellena todos los campos.", "error");
+        const error = validateLogin(credentials);
+
+        if (error) {
+            showMessageWithTime(error, "error");
             return;
         }
-
-        try{
+        
+        try {
             setLoading(true);
             await logIn(credentials);
-            showMessageWithTime("¡Bienvenido/a de nuevo!", "ok");
-            //Navegar al para ti del usuario.
-        }catch(error){
-            showMessage("Credenciales incorrectas o problema de conexión.", "error");
-        }finally{
+            showMessageWithTime("¡Bienvenido/a de nuevo!", "ok");   
+            nav('/feed'); 
+            
+        } catch(error) {
+            showMessageWithTime("Credenciales incorrectas o problema de conexión.", "error");
+        } finally {
             setLoading(false);
         }
+    }
 
-    };
     return (
-        <div className="login-container">
-            <h2>Iniciar Sesión en Libitum</h2>
-            
-            <form onSubmit={submit}>
-                <div>
-                    <label htmlFor="email">Email:</label>
-                    <input 
-                        id="email"
-                        type="email" 
-                        name="email" 
-                        value={credentials.email} 
-                        onChange={updateData} 
-                        autoComplete="username"
-                    />
-                </div>
+        <div className={styles.authContainer}>
+            <div className={styles.authCard}>
+                <h1 className={styles.title}>Bienvenido de nuevo</h1>
+                <p className={styles.subtitle}>Inicia sesión para continuar en Libitum</p>
 
-                <div>
-                    <label htmlFor="password">Contraseña:</label>
-                    <input 
-                        id="password"
-                        type="password" 
-                        name="password"
-                        value={credentials.password} 
-                        onChange={updateData}
-                        autoComplete="current-password" 
-                    />
-                </div>
+                <form className={styles.form} onSubmit={submit}>
+                    
+                    <div className={styles.inputGroup}>
+                        <label htmlFor="email">Correo electrónico</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            className={styles.input} 
+                            placeholder="tu@email.com" 
+                            autoComplete="username"
+                            value={credentials.email} 
+                            onChange={updateData} 
+                        />
+                    </div>
 
-                {/* Ya no hace falta renderizar el error aquí, 
-                    tu componente global de Mensajes se encargará de mostrarlo flotando o donde lo tengas diseñado */}
+                    <div className={styles.inputGroup}>
+                        <label htmlFor="password">Contraseña</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            className={styles.input} 
+                            placeholder="••••••••" 
+                            autoComplete="current-password"
+                            value={credentials.password} 
+                            onChange={updateData} 
+                        />
+                    </div>
 
-                <button type="submit" disabled={loading}>
-                    {loading ? "Cargando..." : "Entrar"}
-                </button>
-            </form>
+                    <button 
+                        type="submit" 
+                        className={styles.submitBtn}
+                        disabled={loading}
+                    >
+                        {loading ? 'Entrando...' : 'Entrar'}
+                    </button>
+                </form>
 
-            <p>
-                ¿No tienes cuenta? <Link to="/register">Regístrate aquí</Link>
-            </p>
+                <p className={styles.switchAuth}>
+                    ¿No tienes cuenta? <Link to="/register">Regístrate aquí</Link>
+                </p>
+            </div>
         </div>
     );
 }
+
 export default Login;

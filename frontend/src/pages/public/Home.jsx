@@ -1,5 +1,7 @@
-
+import useAuthContext from "../../hooks/useAuthContext.js";
 const Home = () => {
+    const {user} = useAuthContext();
+    console.log(user);
     return (
         <div className="home">
             <h1>Welcome to Libitum</h1>

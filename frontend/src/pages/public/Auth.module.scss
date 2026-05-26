@@ -1,0 +1,156 @@
+/* Contenedor que centra la tarjeta en la pantalla */
+.authContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 70px); /* Restamos el header */
+    padding: 2rem;
+    /* Un pequeño resplandor turquesa de fondo para darle ambiente */
+    background: radial-gradient(circle at top center, rgba(43, 217, 186, 0.05) 0%, transparent 50%);
+}
+
+/* La tarjeta de cristal */
+.authCard {
+    background: var(--bg-surface, rgba(30, 30, 30, 0.7));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    border-radius: var(--radius-lg, 16px);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    padding: 3rem 2.5rem;
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+}
+
+.title {
+    color: var(--text-primary, #ffffff);
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: var(--text-secondary, #a0a0a0);
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+}
+
+/* El formulario */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    gap: 0.4rem;
+
+    label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        padding-left: 0.2rem;
+    }
+}
+
+.input {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.9rem 1rem;
+    border-radius: var(--radius-md, 12px);
+    font-size: 1rem;
+    transition: all var(--transition-speed, 0.3s);
+
+    &:focus {
+        outline: none;
+        border-color: var(--color-primary, #2bd9ba);
+        box-shadow: 0 0 0 3px rgba(43, 217, 186, 0.15);
+        background: rgba(0, 0, 0, 0.4);
+    }
+    
+    &::placeholder {
+        color: rgba(255, 255, 255, 0.2);
+    }
+}
+
+/* Botón principal (Turquesa) */
+.submitBtn {
+    background: var(--color-primary, #2bd9ba);
+    color: #121212;
+    border: none;
+    padding: 1rem;
+    border-radius: var(--radius-md, 12px);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: all var(--transition-speed, 0.3s);
+
+    &:hover {
+        background: var(--color-primary-hover, #1fb99e);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(43, 217, 186, 0.4);
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+}
+
+/* Enlace inferior para cambiar entre Login y Register */
+.switchAuth {
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+
+    a {
+        color: var(--color-primary);
+        font-weight: 600;
+        text-decoration: none;
+        transition: color var(--transition-speed);
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}
+
+/* --- Selector de Rol (Register) --- */
+.roleSelector {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.roleLabel {
+    flex: 1;
+    text-align: center;
+    padding: 0.8rem;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md, 12px);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-speed, 0.3s);
+    
+    /* Ocultamos el radio button real */
+    input { display: none; }
+    
+    /* Efecto hover */
+    &:hover { background: rgba(255, 255, 255, 0.05); }
+    
+    /* Cuando está seleccionado (lo controlaremos con React) */
+    &.activeRole {
+        background: rgba(43, 217, 186, 0.15);
+        border-color: var(--color-primary, #2bd9ba);
+        color: var(--color-primary, #2bd9ba);
+    }
+}

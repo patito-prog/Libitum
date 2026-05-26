@@ -1,0 +1,83 @@
+.feedWrapper {
+    position: relative;
+    width: 100%;
+    /* 100vh menos lo que mida tu Header superior */
+    height: calc(100vh - 70px); 
+    background-color: var(--bg-main);
+    overflow: hidden;
+}
+
+.topNav {
+    position: absolute;
+    top: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    /* Fondo cristalino para los botones superiores */
+    background: rgba(18, 18, 18, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 0.6rem 1.5rem;
+    border-radius: 50px;
+    border: 1px solid var(--border-color);
+}
+
+.navBtn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color var(--transition-speed);
+
+    &.active {
+        color: var(--text-primary);
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+    }
+
+    &:hover { color: var(--text-primary); }
+}
+
+.separator { color: var(--border-color); }
+
+.feedContainer {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+
+    /* Ocultar barra de scroll nativa */
+    &::-webkit-scrollbar { display: none; }
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.snapItem {
+    width: 100%;
+    height: 100%;
+    scroll-snap-align: start;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* El padding top 80px evita que el topNav tape el evento */
+    padding: 80px 1rem 2rem 1rem; 
+}
+
+.messageBox {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    text-align: center;
+    padding: 2rem;
+}

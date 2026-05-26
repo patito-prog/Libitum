@@ -2,17 +2,22 @@ import { useLoadScript, GoogleMap, Marker } from '@react-google-maps/api';
 import styles from './Event.module.scss';
 import appStyles from '../App.module.scss';
 import { formatDate } from '../utils/validations';
-import  useEventContext from '../hooks/useEventContext.js';
-
 import Button from './common/Button.jsx';
+//Importamos el contexto para gestionar los likes.
+import useEventContext from '../hooks/useEventContext.js';
 
 const LIBRARIES = ['places'];
 const MAP_OPTIONS = { disableDefaultUI: true, zoomControl: true };
-
-const Event = ({ data, onBack }) => {
-    const { id, title, description, location, event_date, price, cover_image, max_capacity, status, latitude, longitude } = data;
+//TUVE QUE AÑADIR EL ONLIKE
+const Event = ({ data, onBack, onLike }) => {
+    //EXTRAIGO EL LIKE
+    const { id, title, description, location, event_date, price, cover_image, max_capacity, status, latitude, longitude, liked } = data;
     const statusName = status?.name ?? '';
     const coords = latitude && longitude ? { lat: Number(latitude), lng: Number(longitude) } : null;
+
+    //PARA LIKES
+    //Extraemos la función para gestionar los likes.
+    const { toggleLike } = useEventContext();
 
     const { isLoaded } = useLoadScript({
         googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_KEY,
@@ -22,19 +27,19 @@ const Event = ({ data, onBack }) => {
 
     const { setEventForEdit } = useEventContext();
 
+    //PARA LIKES
+    const handleLikeClick = (e) => {
+        if (onLike) {
+            onLike(id);
+        } else {
+            toggleLike(id);
+        }
+    };
+
+    //SE HA MODIFICADO PARA EL TEMA DE LOS LIKES PERO OBVIO AL ESTAR HACIENDO TU LOS EVENTOS HAZ LO QUE QUIERAS, LO QUE NO SE DEBE TOCAR ES LA LÓGICA EN EL CONTEXTO Y BACKEND.
     return (
         <>
-            {onBack && (
-                <button className={styles.backBtn} onClick={onBack}>
-                    ← Volver
-                </button>
-            )}
             <div id={id} className={`${styles.card} ${appStyles.cristal}`}>
-                <Button
-                    title="Editar evento"
-                    img="/editar.png"
-                    onClick={() => setEventForEdit(data)}
-                />
 
                 {cover_image && (
                     <img src={cover_image} alt={title} className={styles.cover} />
@@ -42,7 +47,17 @@ const Event = ({ data, onBack }) => {
 
                 <div className={styles.body}>
                     <div className={styles.titleRow}>
-                        <h2 className={styles.title}>{title}</h2>
+                        <div className={styles.titleWrapper}>
+                            <h2 className={styles.title}>{title}</h2>
+                            {/* 3. Botón de Like junto al título */}
+                            <button
+                                className={styles.likeBtn}
+                                onClick={handleLikeClick}
+                                title={liked ? "Quitar me gusta" : "Me gusta"}
+                            >
+                                {liked ? "❤️" : "🤍"}
+                            </button>
+                        </div>
                         <span className={`${styles.badge} ${styles[statusName]}`}>{statusName}</span>
                     </div>
 
@@ -66,9 +81,21 @@ const Event = ({ data, onBack }) => {
                         </GoogleMap>
                     )}
                 </div>
+
+                <div className={styles.actions}>
+                    <Button
+                        title="Editar evento"
+                        img="/editar.png"
+                        onClick={() => setEventForEdit(data)}
+                    />
+                    {onBack && (
+                        <button className={styles.backBtn} onClick={onBack}>
+                            ← Volver
+                        </button>
+                    )}
+                </div>
             </div>
         </>
-
     );
 };
 

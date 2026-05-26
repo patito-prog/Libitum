@@ -42,6 +42,18 @@ const AuthProvider = ({children}) => {
         }
     };
 
+    //Para comprobar si el usuario tiene un rol en específico.
+    const hasRole = (roleName) => {
+        // Si no hay usuario o no tiene rol, devolvemos false
+        if (!user || !user.role) return false;
+        
+        
+        return user.role === roleName;
+    };
+
+    //Atajo directo para saber si es admin, no es necesario que sea un estado, al revés, evitamos re-renderizados coordinando dos estados, esto depende de user, cuando user cambie, esto se cambiará también.
+    const isAdmin = hasRole("admin");
+
     const logOut = async () => {
         try{
             await save(pathLogOut, {});
@@ -88,9 +100,11 @@ const AuthProvider = ({children}) => {
         token,
         isAuthenticated,
         loadingAuth,
+        isAdmin,
         logIn,
         logOut,
-        register
+        register,
+        hasRole
     };
 
     return(
