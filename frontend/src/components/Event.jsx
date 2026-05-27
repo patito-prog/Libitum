@@ -9,9 +9,10 @@ import useEventContext from '../hooks/useEventContext.js';
 const LIBRARIES = ['places'];
 const MAP_OPTIONS = { disableDefaultUI: true, zoomControl: true };
 //TUVE QUE AÑADIR EL ONLIKE
-const Event = ({ data, onBack, onLike, editable = false }) => {
-    //EXTRAIGO EL LIKE
-    const { id, title, description, location, event_date, price, cover_image, max_capacity, status, latitude, longitude, liked, artist } = data;
+const INSCRIBABLE = ['published', 'live'];
+
+const Event = ({ data, onBack, onLike, onInscribe, editable = false }) => {
+    const { id, title, description, location, event_date, price, cover_image, max_capacity, status, latitude, longitude, liked, artist, signed_up } = data;
     const statusName = status?.name ?? '';
     const coords = latitude && longitude ? { lat: Number(latitude), lng: Number(longitude) } : null;
 
@@ -87,7 +88,7 @@ const Event = ({ data, onBack, onLike, editable = false }) => {
                     )}
                 </div>
 
-                {(editable || onBack) && (
+                {(editable || onBack || onInscribe) && (
                     <div className={styles.actions}>
                         {editable && (
                             <Button
@@ -95,6 +96,14 @@ const Event = ({ data, onBack, onLike, editable = false }) => {
                                 img="/editar.png"
                                 onClick={() => setEventForEdit(data)}
                             />
+                        )}
+                        {onInscribe && INSCRIBABLE.includes(statusName) && (
+                            <button
+                                className={`${styles.inscribeBtn} ${signed_up ? styles.inscribedActive : ''}`}
+                                onClick={() => onInscribe(id, signed_up)}
+                            >
+                                {signed_up ? '✓ Apuntado' : '+ Me apunto'}
+                            </button>
                         )}
                         {onBack && (
                             <button className={styles.backBtn} onClick={onBack}>

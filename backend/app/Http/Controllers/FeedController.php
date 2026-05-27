@@ -17,6 +17,9 @@ class FeedController extends Controller
         $query = Event::with(['artist', 'categories', 'status'])
             ->withExists(['likedBy as liked' => function ($q) use ($userId) {
                 $q->where('user_id', $userId);
+            }])
+            ->withExists(['attendees as signed_up' => function ($q) use ($userId) {
+                $q->where('user_id', $userId);
             }]);
 
         //Comprobamos el "modo" (Por defecto será 'discover' si no envían nada)

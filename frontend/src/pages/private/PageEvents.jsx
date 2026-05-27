@@ -12,7 +12,7 @@ const TITLES = {
 };
 
 const PageEvents = () => {
-    const { getEvents, addMode, editMode, changeDecisionAddEvent, resetModes } = useEventContext();
+    const { getEvents, addMode, editMode, event, changeDecisionAddEvent, resetModes } = useEventContext();
 
     useEffect(() => {
         getEvents();
@@ -26,7 +26,7 @@ const PageEvents = () => {
         <div className={styles.pageEvents}>
             <h1>{title}</h1>
 
-            {showForm ? <AddEvent /> : <Events />}
+            {showForm ? <AddEvent key={editMode ? event.id : 'new'} /> : <Events />}
 
             {!showForm && (
                 <ButtonAdd
