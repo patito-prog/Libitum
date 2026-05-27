@@ -4,6 +4,7 @@ import useEventContext from "../../hooks/useEventContext.js";
 import Event from "../../components/Event.jsx";
 import styles from "./Feed.module.scss";
 import EventSkeleton from "../../components/common/EventSkeleton.jsx";
+import API_BASE from "../../config/api.js";
 
 const STATUS_FILTERS = [
     { value: null,          label: 'Todos' },
@@ -16,7 +17,7 @@ const STATUS_FILTERS = [
 const Feed = () => {
     const { getData, save, deleteData } = useAPI();
     const { toggleLike } = useEventContext();
-    const API = 'http://localhost:8000/api';
+    const API = '${API_BASE}/api';
     const [feedEvents, setFeedEvents] = useState([]);
     const [mode, setMode] = useState("discover");
     const [statusFilter, setStatusFilter] = useState(null);
@@ -39,7 +40,7 @@ const Feed = () => {
         try {
             const statusParam = currentStatus ? `&status=${currentStatus}` : '';
             const response = await getData(
-                `http://localhost:8000/api/feed?mode=${currentMode}&page=${pageNum}${statusParam}`
+                `${API_BASE}/api/feed?mode=${currentMode}&page=${pageNum}${statusParam}`
             );
             const paginator = response?.data;
             const newEvents = paginator?.data ?? [];

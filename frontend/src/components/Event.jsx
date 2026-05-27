@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useLoadScript, GoogleMap, Marker } from '@react-google-maps/api';
 import styles from './Event.module.scss';
 import appStyles from '../App.module.scss';
-import { formatDate } from '../utils/validations';
+import { formatDate, STATUS_LABELS } from '../utils/validations';
 import Button from './common/Button.jsx';
 import useEventContext from '../hooks/useEventContext.js';
 
@@ -64,7 +64,7 @@ const Event = ({ data, onBack, onLike, onInscribe, editable = false }) => {
                                 {liked ? "❤️" : "🤍"}
                             </button>
                         </div>
-                        <span className={`${styles.badge} ${styles[statusName]}`}>{statusName}</span>
+                        <span className={`${styles.badge} ${styles[statusName]}`}>{STATUS_LABELS[statusName] ?? statusName}</span>
                     </div>
 
                     {description && <p className={styles.description}>{description}</p>}

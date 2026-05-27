@@ -79,6 +79,26 @@ class ProfileController extends Controller
         ]);
     }
 
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password'      => ['required', 'current_password'],
+            'password'              => ['required', 'string', 'min:8', 'confirmed'],
+            'password_confirmation' => ['required'],
+        ], [
+            'current_password.current_password' => 'La contraseña actual no es correcta.',
+            'password.min'                      => 'La nueva contraseña debe tener al menos 8 caracteres.',
+            'password.confirmed'                => 'Las contraseñas no coinciden.',
+        ]);
+
+        $request->user()->update(['password' => $request->password]);
+
+        return response()->json([
+            'error'   => false,
+            'message' => 'Contraseña actualizada correctamente',
+        ]);
+    }
+
     /**
      * Delete the user's account.
      */

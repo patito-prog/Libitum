@@ -1,6 +1,6 @@
 import styles from './MiniEvent.module.scss';
 import appStyles from '../App.module.scss';
-import { formatDate } from '../utils/validations';
+import { formatDate, STATUS_LABELS } from '../utils/validations';
 import useEventContext from "../hooks/useEventContext.js";
 import MiniEventSkeleton from './common/MiniEvenSkeleton.jsx';
 //LO MISMO QUE EN EL COMPONENTE EVENT, HE MODIFICADO COSAS PARA AÑADIR EL SISTEMA DE LIKES, OBVIAMENTE PUEDES CAMBIARLO COMO QUIERAS, LO QUE IMPORTA ES LA LÓGICA QUE ESTÁ LISTA.
@@ -37,7 +37,7 @@ const MiniEvent = ({ data, onClick, onLike }) => {
             <p className={styles.location}>📍 {location}</p>
             <div className={styles.footer}>
                 <span className={styles.date}>🗓 {formatDate(event_date)}</span>
-                <span className={`${styles.badge} ${styles[statusName]}`}>{statusName}</span>
+                <span className={`${styles.badge} ${styles[statusName]}`}>{STATUS_LABELS[statusName] ?? statusName}</span>
             </div>
         </div>
     );

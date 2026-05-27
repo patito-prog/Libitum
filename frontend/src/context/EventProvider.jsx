@@ -1,14 +1,15 @@
 import { createContext, useEffect, useState } from 'react';
 import useAPI from '../hooks/useAPI';
 import useMessageContext from '../hooks/useMessageContext.js';
+import API_BASE from '../config/api.js';
 
 const EventContext = createContext();
 
 const EventProvider = ({ children }) => {
-    const URL_API = "http://localhost:8000/api";
+    const URL_API = `${API_BASE}/api`;
     const URL_EVENTS = `${URL_API}/events`;
 
-    const { save, getData, edit } = useAPI();
+    const { save, getData, edit, uploadFile } = useAPI();
     const { showMessageWithTime } = useMessageContext();
 
     const initialEvent = {
@@ -54,13 +55,27 @@ const EventProvider = ({ children }) => {
 
     const saveEvent = async () => {
         try {
-            const data = await save(URL_EVENTS, event);
+            const coverFile = event.cover_image instanceof File ? event.cover_image : null;
+            const payload = { ...event, cover_image: undefined };
+
+            const data = await save(URL_EVENTS, payload);
             if (data?.event) {
-                setEvents(prev => [...prev, data.event]);
+                let savedEvent = data.event;
+
+                if (coverFile) {
+                    const fd = new FormData();
+                    fd.append('cover', coverFile);
+                    const coverRes = await uploadFile(`${URL_EVENTS}/${savedEvent.id}/cover`, fd);
+                    if (coverRes?.data?.cover_image) {
+                        savedEvent = { ...savedEvent, cover_image: coverRes.data.cover_image };
+                    }
+                }
+
+                setEvents(prev => [...prev, savedEvent]);
                 setAddMode(false);
                 setEvent(initialEvent);
                 showMessageWithTime('Evento creado correctamente', 'ok');
-                return data.event;
+                return savedEvent;
             }
         } catch (error) {
             showMessageWithTime(`Error al crear el evento: ${error}`, 'error');
@@ -69,9 +84,23 @@ const EventProvider = ({ children }) => {
 
     const updateEvent = async () => {
         try {
-            const data = await edit(`${URL_EVENTS}/${event.id}`, event);
+            const coverFile = event.cover_image instanceof File ? event.cover_image : null;
+            const payload = { ...event, cover_image: undefined };
+
+            const data = await edit(`${URL_EVENTS}/${event.id}`, payload);
             if (data) {
-                setEvents(prev => prev.map(e => e.id === event.id ? { ...e, ...data.event } : e));
+                let updatedEvent = data.event;
+
+                if (coverFile) {
+                    const fd = new FormData();
+                    fd.append('cover', coverFile);
+                    const coverRes = await uploadFile(`${URL_EVENTS}/${event.id}/cover`, fd);
+                    if (coverRes?.data?.cover_image) {
+                        updatedEvent = { ...updatedEvent, cover_image: coverRes.data.cover_image };
+                    }
+                }
+
+                setEvents(prev => prev.map(e => e.id === event.id ? { ...e, ...updatedEvent } : e));
                 setEditMode(false);
                 setEvent(initialEvent);
                 showMessageWithTime('Evento actualizado correctamente', 'ok');

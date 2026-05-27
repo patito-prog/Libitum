@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import useAPI from '../../hooks/useAPI.js';
 import useEventContext from '../../hooks/useEventContext.js';
 import MiniEvent from '../../components/MiniEvent.jsx';
-import Event from '../../components/Event.jsx';
 import MiniEventSkeleton from '../../components/common/MiniEvenSkeleton.jsx';
 import styles from './SearchEvents.module.scss';
+import API_BASE from '../../config/api.js';
 
 const STATUS_FILTERS = [
     { value: 'published', label: 'Publicado' },
@@ -13,28 +14,27 @@ const STATUS_FILTERS = [
     { value: 'cancelled', label: 'Cancelado' },
 ];
 
-const API_URL = 'http://localhost:8000/api/events/search';
+const API_URL = `${API_BASE}/api/events/search`;
 
 const SearchEvents = () => {
     const { getData } = useAPI();
     const { categories, toggleLike } = useEventContext();
+    const navigate = useNavigate();
 
-    const [query, setQuery]               = useState('');
-    const [debouncedQuery, setDebounced]  = useState('');
-    const [categoryFilter, setCategory]   = useState(null);
-    const [statusFilter, setStatus]       = useState(null);
-    const [results, setResults]           = useState([]);
-    const [page, setPage]                 = useState(1);
-    const [hasMore, setHasMore]           = useState(false);
-    const [loading, setLoading]           = useState(false);
-    const [loadingMore, setLoadingMore]   = useState(false);
-    const [searched, setSearched]         = useState(false);
-    const [selectedEvent, setSelected]    = useState(null);
+    const [query, setQuery]             = useState('');
+    const [debouncedQuery, setDebounced] = useState('');
+    const [categoryFilter, setCategory] = useState(null);
+    const [statusFilter, setStatus]     = useState(null);
+    const [results, setResults]         = useState([]);
+    const [page, setPage]               = useState(1);
+    const [hasMore, setHasMore]         = useState(false);
+    const [loading, setLoading]         = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [searched, setSearched]       = useState(false);
 
-    const sentinelRef  = useRef(null);
-    const isFetching   = useRef(false);
+    const sentinelRef = useRef(null);
+    const isFetching  = useRef(false);
 
-    // Debounce del input
     useEffect(() => {
         const t = setTimeout(() => setDebounced(query), 350);
         return () => clearTimeout(t);
@@ -47,8 +47,8 @@ const SearchEvents = () => {
 
         try {
             const params = new URLSearchParams({ page: pageNum });
-            if (q)     params.set('q', q);
-            if (catId) params.set('category_id', catId);
+            if (q)      params.set('q', q);
+            if (catId)  params.set('category_id', catId);
             if (status) params.set('status', status);
 
             const res       = await getData(`${API_URL}?${params}`);
@@ -66,7 +66,6 @@ const SearchEvents = () => {
         }
     }, [getData]);
 
-    // Reset cuando cambian los filtros
     useEffect(() => {
         if (!debouncedQuery && !categoryFilter && !statusFilter) {
             setResults([]);
@@ -77,7 +76,6 @@ const SearchEvents = () => {
         fetchResults(1, debouncedQuery, categoryFilter, statusFilter, true);
     }, [debouncedQuery, categoryFilter, statusFilter]);
 
-    // Infinite scroll
     useEffect(() => {
         if (!sentinelRef.current || !hasMore) return;
         const observer = new IntersectionObserver(([entry]) => {
@@ -98,26 +96,11 @@ const SearchEvents = () => {
         const backendLiked = await toggleLike(id);
         if (backendLiked !== undefined) {
             setResults(prev => prev.map(e => e.id === id ? { ...e, liked: backendLiked } : e));
-            if (selectedEvent?.id === id) {
-                setSelected(prev => ({ ...prev, liked: backendLiked }));
-            }
         }
     };
 
     const toggleStatus = (value) => setStatus(prev => prev === value ? null : value);
     const toggleCategory = (id) => setCategory(prev => prev === id ? null : id);
-
-    if (selectedEvent) {
-        return (
-            <div className={styles.page}>
-                <Event
-                    data={selectedEvent}
-                    onBack={() => setSelected(null)}
-                    onLike={handleLike}
-                />
-            </div>
-        );
-    }
 
     return (
         <div className={styles.page}>
@@ -184,7 +167,7 @@ const SearchEvents = () => {
                             <MiniEvent
                                 key={event.id}
                                 data={event}
-                                onClick={() => setSelected(event)}
+                                onClick={() => navigate(`/event/${event.id}`)}
                                 onLike={handleLike}
                             />
                         ))}

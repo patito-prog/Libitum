@@ -22,6 +22,8 @@ Route::get('/events/{event}', [EventController::class, 'show']); //  ARTISTA/USU
 Route::get('/artists/{id}', [ArtistProfileController::class, 'show']);
 // Perfil social público de cualquier usuario (artista o espectador).
 Route::get('/users/{id}', [UserProfileController::class, 'show']);
+Route::get('/users/{id}/followers', [UserProfileController::class, 'followers']);
+Route::get('/users/{id}/following', [UserProfileController::class, 'following']);
 
 Route::get('/categories',[CategoryController::class, 'index']); // Recoger todas las categorías que existen (básicamente para rellenar dinámicamente el select de categorías)
 Route::get('/statuses', [StatusController::class, 'index']); // Recoge todos los estados que existen en la base de datos.
@@ -46,6 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::patch('/profile', [\App\Http\Controllers\ProfileController::class, 'update']);
+    Route::patch('/profile/password', [\App\Http\Controllers\ProfileController::class, 'changePassword']);
     Route::post('/profile/avatar', [\App\Http\Controllers\ProfileController::class, 'uploadAvatar']);
     Route::delete('/profile', [\App\Http\Controllers\ProfileController::class, 'destroy']);
 
@@ -70,6 +73,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/events', [EventController::class, 'index']); //  Artista puede ver sus eventos.
         Route::post('/events', [EventController::class, 'store']); //  Artista crea un evento.
         Route::put('/events/{event}',[EventController::class, 'update']); //  Artista edita un evento.
+        Route::post('/events/{event}/cover', [EventController::class, 'uploadCover']); // Artista sube portada de un evento.
         Route::delete('/events/{event}',[EventController::class, 'destroy']); //  Artista elimina un evento.
 
         //Acciones específicas de eventos.

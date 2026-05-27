@@ -74,4 +74,40 @@ class UserProfileController extends Controller
             'data'    => $data,
         ]);
     }
+
+    public function followers($id)
+    {
+        $user = User::findOrFail($id);
+
+        $list = $user->followers()
+            ->select('users.id', 'users.name', 'users.avatar_url', 'users.city')
+            ->get()
+            ->map(fn($u) => [
+                'id'         => $u->id,
+                'name'       => $u->name,
+                'avatar_url' => $u->avatar_url,
+                'city'       => $u->city,
+                'role'       => $u->getRoleNames()->first() ?? 'spectator',
+            ]);
+
+        return response()->json(['error' => false, 'data' => $list]);
+    }
+
+    public function following($id)
+    {
+        $user = User::findOrFail($id);
+
+        $list = $user->following()
+            ->select('users.id', 'users.name', 'users.avatar_url', 'users.city')
+            ->get()
+            ->map(fn($u) => [
+                'id'         => $u->id,
+                'name'       => $u->name,
+                'avatar_url' => $u->avatar_url,
+                'city'       => $u->city,
+                'role'       => $u->getRoleNames()->first() ?? 'spectator',
+            ]);
+
+        return response()->json(['error' => false, 'data' => $list]);
+    }
 }

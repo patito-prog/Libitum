@@ -1,5 +1,20 @@
 "use strict";
 
+export const STATUS_LABELS = {
+    draft:     'Borrador',
+    published: 'Publicado',
+    live:      'En directo',
+    finished:  'Terminado',
+    cancelled: 'Cancelado',
+};
+
+export const ROLE_LABELS = {
+    artist:    'Artista',
+    spectator: 'Espectador',
+    user:      'Espectador',
+    admin:     'Admin',
+};
+
 export const isNumber = (num) => {
     //isNotaNumber? = true;
     return !isNaN(num);

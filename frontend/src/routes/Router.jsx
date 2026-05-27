@@ -11,6 +11,7 @@ import PageEvents from '../pages/private/PageEvents.jsx';
 import ArtistProfile from "../pages/public/ArtistProfile.jsx";
 import UserProfile from "../pages/public/UserProfile.jsx";
 import ArtistQR from "../pages/private/artist/ArtistQR.jsx";
+import ArtistStats from "../pages/private/artist/ArtistStats.jsx";
 import EventDetail from "../pages/public/EventDetail.jsx";
 import AdminRoute from './guards/AdminRoute.jsx';
 import AdminDashboard from "../pages/private/admin/AdminDashboard.jsx";
@@ -31,7 +32,7 @@ const Router = () => {
                 <Route path="/register" element={<Register />} />
             </Route>
 
-            {/* Página QR/donación del artista — acceso libre */}
+            {/* Landing QR/donación del artista — acceso libre */}
             <Route path="/artist/:id" element={<ArtistProfile />} />
             {/* Perfil social de cualquier usuario — acceso libre */}
             <Route path="/user/:id" element={<UserProfile />} />
@@ -44,6 +45,7 @@ const Router = () => {
                 <Route path="/" element={<Home />} />
                 <Route path="/events" element={<PageEvents />} />
                 <Route path="/my-qr" element={<ArtistQR />} />
+                <Route path="/estadisticas" element={<ArtistStats />} />
                 <Route path="/feed" element={<Feed />} />
                 <Route path="/favorites" element={<Favorites />} />
                 <Route path="/asistencias" element={<MyAttendance />} />

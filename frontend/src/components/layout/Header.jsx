@@ -1,6 +1,7 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 import useAuthContext from '../../hooks/useAuthContext.js';
+import { ROLE_LABELS } from '../../utils/validations';
 import styles from './Header.module.scss';
 
 const Header = () => {
@@ -84,11 +85,14 @@ const Header = () => {
                         </button>
                         {dropdownOpen && (
                             <div className={styles.dropdownMenu} role="menu">
-                                <Link to={`/artist/${user?.id}`} className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
+                                <Link to={`/user/${user?.id}`} className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
                                     Mi perfil público
                                 </Link>
                                 <Link to="/my-qr" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
                                     Mi QR
+                                </Link>
+                                <Link to="/estadisticas" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
+                                    Estadísticas
                                 </Link>
                                 <Link to="/asistencias" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
                                     Mis asistencias
@@ -106,7 +110,7 @@ const Header = () => {
                         <Link to={`/user/${user.id}`} className={styles.profileLink}>
                             <div className={styles.profileInfo}>
                                 <p className={styles.name}>{user.name}</p>
-                                <span className={styles.role}>{user.role}</span>
+                                <span className={styles.role}>{ROLE_LABELS[user.role] ?? user.role}</span>
                             </div>
                         </Link>
                         <button onClick={handleLogout} className={styles.logoutBtn}>
@@ -150,8 +154,9 @@ const Header = () => {
                     )}
                     {isArtist && (
                         <>
-                            <Link to={`/artist/${user?.id}`} className={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Mi perfil público</Link>
+                            <Link to={`/user/${user?.id}`} className={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Mi perfil público</Link>
                             <Link to="/my-qr" className={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Mi QR</Link>
+                            <Link to="/estadisticas" className={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Estadísticas</Link>
                         </>
                     )}
                     {isAdmin && (

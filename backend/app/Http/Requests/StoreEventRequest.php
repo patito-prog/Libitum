@@ -40,6 +40,7 @@ class StoreEventRequest extends FormRequest
             // Validamos que 'categories' sea un array y que los IDs existan en la tabla
             'categories' => 'nullable|array',
             'categories.*' => 'exists:categories,id',
+            'max_capacity' => 'nullable|integer|min:1',
         ];
     }
 

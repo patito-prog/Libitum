@@ -4,7 +4,9 @@ import useAPI from "../../hooks/useAPI.js";
 import useAuthContext from "../../hooks/useAuthContext.js";
 import useMessageContext from "../../hooks/useMessageContext.js";
 import Loader from "../../components/common/Loader.jsx";
-import { formatDate } from "../../utils/validations";
+import UserListModal from "../../components/common/UserListModal.jsx";
+import { formatDate, STATUS_LABELS } from "../../utils/validations";
+import API_BASE from "../../config/api.js";
 import styles from "./UserProfile.module.scss";
 
 const SOCIAL_LINKS = [
@@ -34,11 +36,16 @@ const UserProfile = () => {
     const [saveLoading, setSaveLoading]     = useState(false);
     const [avatarPreview, setAvatarPreview] = useState(null);
     const [avatarUploading, setAvatarUploading] = useState(false);
+    const [pwForm, setPwForm] = useState({ current_password: '', password: '', password_confirmation: '' });
+    const [pwLoading, setPwLoading] = useState(false);
+    const [modal, setModal]           = useState(null);   // null | 'followers' | 'following'
+    const [modalUsers, setModalUsers] = useState([]);
+    const [modalLoading, setModalLoading] = useState(false);
 
     useEffect(() => {
         const fetch = async () => {
             try {
-                const res = await getData(`http://localhost:8000/api/users/${id}`);
+                const res = await getData(`${API_BASE}/api/users/${id}`);
                 setProfile(res.data);
                 setIsFollowing(res.data.is_following ?? false);
             } catch {
@@ -56,11 +63,11 @@ const UserProfile = () => {
         setFollowLoading(true);
         try {
             if (isFollowing) {
-                await deleteData(`http://localhost:8000/api/artist/${id}/unfollow`);
+                await deleteData(`${API_BASE}/api/artist/${id}/unfollow`);
                 setIsFollowing(false);
                 setProfile(prev => ({ ...prev, followers_count: prev.followers_count - 1 }));
             } else {
-                await save(`http://localhost:8000/api/artist/${id}/follow`, {});
+                await save(`${API_BASE}/api/artist/${id}/follow`, {});
                 setIsFollowing(true);
                 setProfile(prev => ({ ...prev, followers_count: prev.followers_count + 1 }));
             }
@@ -68,6 +75,44 @@ const UserProfile = () => {
             showMessageWithTime("No se pudo completar la acción.", "error");
         } finally {
             setFollowLoading(false);
+        }
+    };
+
+    const openModal = async (type) => {
+        setModal(type);
+        setModalLoading(true);
+        setModalUsers([]);
+        try {
+            const res = await getData(`${API_BASE}/api/users/${id}/${type}`);
+            setModalUsers(res.data ?? []);
+        } catch {
+            showMessageWithTime('No se pudo cargar la lista.', 'error');
+            setModal(null);
+        } finally {
+            setModalLoading(false);
+        }
+    };
+
+    const handlePwChange = (e) => {
+        const { name, value } = e.target;
+        setPwForm(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handlePwSave = async (e) => {
+        e.preventDefault();
+        if (pwForm.password !== pwForm.password_confirmation) {
+            showMessageWithTime('Las contraseñas no coinciden.', 'error');
+            return;
+        }
+        setPwLoading(true);
+        try {
+            await patch(`${API_BASE}/api/profile/password`, pwForm);
+            showMessageWithTime('Contraseña actualizada correctamente.', 'success');
+            setPwForm({ current_password: '', password: '', password_confirmation: '' });
+        } catch (err) {
+            showMessageWithTime(err.message || 'Error al cambiar la contraseña.', 'error');
+        } finally {
+            setPwLoading(false);
         }
     };
 
@@ -96,7 +141,7 @@ const UserProfile = () => {
         try {
             const fd = new FormData();
             fd.append('avatar', file);
-            const res = await uploadFile('http://localhost:8000/api/profile/avatar', fd);
+            const res = await uploadFile('${API_BASE}/api/profile/avatar', fd);
             setFormData(prev => ({ ...prev, avatar_url: res.data.avatar_url }));
             setProfile(prev => ({ ...prev, avatar_url: res.data.avatar_url }));
         } catch {
@@ -116,7 +161,7 @@ const UserProfile = () => {
         e.preventDefault();
         setSaveLoading(true);
         try {
-            await patch('http://localhost:8000/api/profile', {
+            await patch('${API_BASE}/api/profile', {
                 name:       formData.name,
                 email:      formData.email,
                 city:       formData.city       || null,
@@ -124,7 +169,7 @@ const UserProfile = () => {
             });
 
             if (profile.role === 'artist') {
-                await patch('http://localhost:8000/api/artist-profile', {
+                await patch('${API_BASE}/api/artist-profile', {
                     bio:           formData.bio           || null,
                     spotify_url:   formData.spotify_url   || null,
                     instagram_url: formData.instagram_url || null,
@@ -200,14 +245,14 @@ const UserProfile = () => {
                                 <strong>{profile.events_count ?? 0}</strong>
                                 <span>eventos</span>
                             </div>
-                            <div className={styles.stat}>
+                            <button className={styles.statBtn} onClick={() => openModal('followers')}>
                                 <strong>{profile.followers_count ?? 0}</strong>
                                 <span>seguidores</span>
-                            </div>
-                            <div className={styles.stat}>
+                            </button>
+                            <button className={styles.statBtn} onClick={() => openModal('following')}>
                                 <strong>{profile.following_count ?? 0}</strong>
                                 <span>siguiendo</span>
-                            </div>
+                            </button>
                         </div>
                     ) : (
                         <div className={styles.stats}>
@@ -215,10 +260,10 @@ const UserProfile = () => {
                                 <strong>{profile.events_count ?? 0}</strong>
                                 <span>eventos</span>
                             </div>
-                            <div className={styles.stat}>
+                            <button className={styles.statBtn} onClick={() => openModal('following')}>
                                 <strong>{profile.following_count ?? 0}</strong>
                                 <span>artistas siguiendo</span>
-                            </div>
+                            </button>
                         </div>
                     )}
 
@@ -254,6 +299,7 @@ const UserProfile = () => {
 
             {/* ── FORMULARIO DE EDICIÓN ── */}
             {editMode && (
+                <>
                 <form className={styles.editForm} onSubmit={handleSave}>
                     <div className={styles.editSection}>
                         <h3 className={styles.editSectionTitle}>Información básica</h3>
@@ -334,11 +380,51 @@ const UserProfile = () => {
                         </button>
                     </div>
                 </form>
+
+                <form className={styles.editForm} onSubmit={handlePwSave}>
+                    <div className={styles.editSection}>
+                        <h3 className={styles.editSectionTitle}>Cambiar contraseña</h3>
+                        <div className={styles.formGrid}>
+                            <div className={`${styles.formGroup} ${styles.formGroupFull}`}>
+                                <label className={styles.formLabel}>Contraseña actual</label>
+                                <input className={styles.formInput} type="password" name="current_password" value={pwForm.current_password} onChange={handlePwChange} required />
+                            </div>
+                            <div className={styles.formGroup}>
+                                <label className={styles.formLabel}>Nueva contraseña</label>
+                                <input className={styles.formInput} type="password" name="password" value={pwForm.password} onChange={handlePwChange} minLength={8} required />
+                            </div>
+                            <div className={styles.formGroup}>
+                                <label className={styles.formLabel}>Confirmar nueva contraseña</label>
+                                <input className={styles.formInput} type="password" name="password_confirmation" value={pwForm.password_confirmation} onChange={handlePwChange} required />
+                            </div>
+                        </div>
+                    </div>
+                    <div className={styles.formActions}>
+                        <button type="submit" className={styles.saveBtn} disabled={pwLoading}>
+                            {pwLoading ? 'Guardando...' : 'Cambiar contraseña'}
+                        </button>
+                    </div>
+                </form>
+                </>
             )}
 
             {/* ── CONTENIDO ARTISTA ── */}
             {isArtist && (
                 <>
+                    {artistProfile?.donation_url && !isOwnProfile && !editMode && (
+                        <div className={styles.donateBar}>
+                            <p className={styles.donateBarText}>¿Te gusta su música?</p>
+                            <a
+                                href={artistProfile.donation_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={styles.donateBarBtn}
+                            >
+                                💛 Apoyar a {profile.name?.split(' ')[0]}
+                            </a>
+                        </div>
+                    )}
+
                     {artistProfile?.bio && (
                         <p className={styles.bio}>{artistProfile.bio}</p>
                     )}
@@ -372,7 +458,7 @@ const UserProfile = () => {
                                                 <p className={styles.eventTitle}>{event.title}</p>
                                                 {event.status && (
                                                     <span className={`${styles.badge} ${styles[event.status.name]}`}>
-                                                        {event.status.name}
+                                                        {STATUS_LABELS[event.status.name] ?? event.status.name}
                                                     </span>
                                                 )}
                                             </div>
@@ -407,7 +493,7 @@ const UserProfile = () => {
                                                 <p className={styles.eventTitle}>{event.title}</p>
                                                 {event.status && (
                                                     <span className={`${styles.badge} ${styles[event.status.name]}`}>
-                                                        {event.status.name}
+                                                        {STATUS_LABELS[event.status.name] ?? event.status.name}
                                                     </span>
                                                 )}
                                             </div>
@@ -423,6 +509,15 @@ const UserProfile = () => {
                         <p className={styles.empty}>Este usuario no está apuntado a ningún evento todavía.</p>
                     )}
                 </>
+            )}
+
+            {modal && (
+                <UserListModal
+                    title={modal === 'followers' ? 'Seguidores' : 'Siguiendo'}
+                    users={modalUsers}
+                    loading={modalLoading}
+                    onClose={() => setModal(null)}
+                />
             )}
         </div>
     );

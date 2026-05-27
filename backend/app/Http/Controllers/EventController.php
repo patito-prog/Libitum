@@ -80,9 +80,7 @@ class EventController extends Controller
             'event_date' => $data['event_date'],
             'price' => $data['price'] ?? 0.00,
             'status_id' => $data['status_id'] ?? 2,
-            //toDo: 'cover_image' => ... (La subida de imágenes la haremos en un paso aparte)
-            //toDo: 'max_capacity'
-            //toDo: Actualizar el evento como evento y hacer ACTOS.
+            'max_capacity' => $data['max_capacity'] ?? null,
         ]);
 
         // 4. Si vienen categorías en la $request, las asociamos.
@@ -110,7 +108,6 @@ class EventController extends Controller
         // 4. Actualizamos el evento.
         $event->update([
             'title' => $data['title'],
-            // Si cambia el título, actualizamos el slug.
             'slug' => Str::slug($data['title'] . '-' . uniqid()),
             'description' => $data['description'],
             'location' => $data['location'],
@@ -119,6 +116,7 @@ class EventController extends Controller
             'event_date' => $data['event_date'],
             'price' => $data['price'] ?? 0.00,
             'status_id' => $data['status_id'],
+            'max_capacity' => $data['max_capacity'] ?? null,
         ]);
 
         $event->categories()->sync($data['categories'] ?? []);
@@ -316,6 +314,24 @@ class EventController extends Controller
             'error' => false,
             'data'  => $events,
         ]);
+    }
+
+    public function uploadCover(Request $request, Event $event)
+    {
+        if (Auth::id() !== $event->user_id) {
+            return response()->json(['error' => true, 'message' => 'No tienes permiso para editar este evento.'], 403);
+        }
+
+        $request->validate([
+            'cover' => 'required|image|mimes:jpg,jpeg,png,webp|max:4096',
+        ]);
+
+        $path = $request->file('cover')->store('events', 'public');
+        $url  = $request->getSchemeAndHttpHost() . '/storage/' . $path;
+
+        $event->update(['cover_image' => $url]);
+
+        return response()->json(['error' => false, 'data' => ['cover_image' => $url]]);
     }
 
     //METODO PARA FAVORITOS

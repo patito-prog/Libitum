@@ -46,6 +46,7 @@ class UpdateEventRequest extends FormRequest
             // Validamos que llegue un array de categorías y que los IDs existan
             'categories' => 'nullable|array',
             'categories.*' => 'exists:categories,id',
+            'max_capacity' => 'nullable|integer|min:1',
         ];
     }
 

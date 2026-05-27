@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import useAPI from "../../hooks/useAPI.js";
 import useAuthContext from "../../hooks/useAuthContext.js";
 import useMessageContext from "../../hooks/useMessageContext.js";
+import API_BASE from "../../config/api.js";
 import Loader from "../../components/common/Loader.jsx";
 import { formatDate } from "../../utils/validations";
 import styles from "./ArtistProfile.module.scss";
@@ -37,7 +38,7 @@ const ArtistProfile = () => {
     useEffect(() => {
         const fetchArtist = async () => {
             try {
-                const res = await getData(`http://localhost:8000/api/artists/${id}`);
+                const res = await getData(`${API_BASE}/api/artists/${id}`);
                 setArtist(res.data);
                 setIsFollowing(res.data.is_following);
             } catch {
@@ -69,11 +70,11 @@ const ArtistProfile = () => {
         setFollowLoading(true);
         try {
             if (isFollowing) {
-                await deleteData(`http://localhost:8000/api/artist/${id}/unfollow`);
+                await deleteData(`${API_BASE}/api/artist/${id}/unfollow`);
                 setIsFollowing(false);
                 setArtist(prev => ({ ...prev, total_followers: prev.total_followers - 1 }));
             } else {
-                await save(`http://localhost:8000/api/artist/${id}/follow`, {});
+                await save(`${API_BASE}/api/artist/${id}/follow`, {});
                 setIsFollowing(true);
                 setArtist(prev => ({ ...prev, total_followers: prev.total_followers + 1 }));
             }
@@ -93,7 +94,7 @@ const ArtistProfile = () => {
         e.preventDefault();
         setSaveLoading(true);
         try {
-            await patch("http://localhost:8000/api/artist-profile", profileForm);
+            await patch("${API_BASE}/api/artist-profile", profileForm);
             setArtist(prev => ({
                 ...prev,
                 artist_profile: { ...prev.artist_profile, ...profileForm },

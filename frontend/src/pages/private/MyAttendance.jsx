@@ -5,9 +5,10 @@ import Event from '../../components/Event.jsx';
 import MiniEventSkeleton from '../../components/common/MiniEvenSkeleton.jsx';
 import styles from './MyAttendance.module.scss';
 import appStyles from '../../App.module.scss';
-import { formatDate } from '../../utils/validations';
+import { formatDate, STATUS_LABELS } from '../../utils/validations';
+import API_BASE from '../../config/api.js';
 
-const API = 'http://localhost:8000/api';
+const API = `${API_BASE}/api`;
 
 const AttendanceCard = ({ event, onRemindToggle, onLeave, onExpand }) => {
     const { id, title, location, event_date, status, liked, pivot } = event;
@@ -19,7 +20,7 @@ const AttendanceCard = ({ event, onRemindToggle, onLeave, onExpand }) => {
             <div className={styles.main} onClick={onExpand}>
                 <div className={styles.headerRow}>
                     <p className={styles.title}>{title}</p>
-                    <span className={`${styles.badge} ${styles[statusName]}`}>{statusName}</span>
+                    <span className={`${styles.badge} ${styles[statusName]}`}>{STATUS_LABELS[statusName] ?? statusName}</span>
                 </div>
                 {location && <p className={styles.location}>📍 {location}</p>}
                 {event_date && <p className={styles.date}>🗓 {formatDate(event_date)}</p>}

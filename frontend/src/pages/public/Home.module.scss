@@ -1,0 +1,117 @@
+.page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 3rem 1.25rem 5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+}
+
+/* ── HERO ── */
+.hero {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.greeting {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin: 0;
+    font-weight: 500;
+}
+
+.name {
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
+.headline {
+    font-size: clamp(2rem, 5vw, 2.8rem);
+    font-weight: 900;
+    color: var(--text-primary);
+    margin: 0;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+}
+
+.sub {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin: 0.25rem 0 0;
+    max-width: 520px;
+    line-height: 1.6;
+}
+
+/* ── GRID DE CARDS ── */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+
+    @media (max-width: 480px) {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1.4rem 1.25rem;
+    background: var(--bg-card, rgba(255, 255, 255, 0.04));
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg, 16px);
+    text-decoration: none;
+    transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    position: relative;
+    overflow: hidden;
+
+    &::after { display: none; }
+
+    &:hover {
+        transform: translateY(-3px);
+        border-color: var(--color-primary);
+        background: rgba(33, 115, 119, 0.07);
+
+        .arrow { opacity: 1; transform: translateX(0); }
+        .cardIcon { transform: scale(1.1); }
+    }
+
+    @media (max-width: 480px) {
+        padding: 1.1rem 1rem;
+    }
+}
+
+.cardIcon {
+    font-size: 1.6rem;
+    line-height: 1;
+    transition: transform 0.18s ease;
+    display: block;
+    margin-bottom: 0.2rem;
+}
+
+.cardTitle {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.cardDesc {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.45;
+    flex: 1;
+}
+
+.arrow {
+    font-size: 1rem;
+    color: var(--color-primary);
+    margin-top: 0.5rem;
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}

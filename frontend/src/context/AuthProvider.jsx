@@ -1,6 +1,7 @@
 import React, {createContext, useState, useEffect, useContext} from "react";
 import { useNavigate } from "react-router-dom";
 import useAPI from "../hooks/useAPI.js";
+import API_BASE from "../config/api.js";
 
 const authContext = createContext();
 
@@ -14,10 +15,10 @@ const AuthProvider = ({children}) => {
     const [isAuthenticated, setIsAutheticated] = useState(false);
     const [loadingAuth, setLoadingAuth] = useState(true);
 
-    const pathGetUser = "http://localhost:8000/api/user";
-    const pathLogin = "http://localhost:8000/api/login";
-    const pathRegister = "http://localhost:8000/api/register";
-    const pathLogOut = "http://localhost:8000/api/logout";
+    const pathGetUser = `${API_BASE}/api/user`;
+    const pathLogin = `${API_BASE}/api/login`;
+    const pathRegister = `${API_BASE}/api/register`;
+    const pathLogOut = `${API_BASE}/api/logout`;
 
     const logIn = async (credentials) => {
         //Validaciones realizadas en Login.jsx.
