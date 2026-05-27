@@ -58,6 +58,7 @@ const AddEvent = () => {
                         id="title"
                         name="title"
                         label="Título del Evento"
+                        defaultValue={event.title}
                         onChange={changeStatusNewEvent}
                     />
                 </div>
@@ -108,6 +109,7 @@ const AddEvent = () => {
                         name="categories"
                         label="Categorías"
                         options={categories}
+                        initialValue={event.categories ?? []}
                         onChange={changeStatusNewEvent}
                     />
                 </div>

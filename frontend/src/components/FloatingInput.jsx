@@ -5,7 +5,7 @@ const ALWAYS_FLOAT_TYPES = ['datetime-local', 'date', 'time', 'month', 'week'];
 
 const FloatingInput = ({ id, name, label, placeholder = '', type = 'text', onChange, ...props }) => {
     const [focused, setFocused] = useState(false);
-    const [hasValue, setHasValue] = useState(false);
+    const [hasValue, setHasValue] = useState(!!props.defaultValue);
     const floating = focused || hasValue || ALWAYS_FLOAT_TYPES.includes(type);
 
     return (
@@ -36,7 +36,7 @@ const FloatingInput = ({ id, name, label, placeholder = '', type = 'text', onCha
 
 const FloatingTextarea = ({ id, name, label, placeholder = '', rows = 4, onChange, ...props }) => {
     const [focused, setFocused] = useState(false);
-    const [hasValue, setHasValue] = useState(false);
+    const [hasValue, setHasValue] = useState(!!props.defaultValue);
     const floating = focused || hasValue;
 
     return (
@@ -76,9 +76,9 @@ const FloatingSelect = ({ id, name, label, onChange, children, ...props }) => (
     </div>
 );
 
-const FloatingMultiSelect = ({ id, name, label, onChange, options = [] }) => {
+const FloatingMultiSelect = ({ id, name, label, onChange, options = [], initialValue = [] }) => {
     const [open, setOpen] = useState(false);
-    const [selected, setSelected] = useState([]);
+    const [selected, setSelected] = useState(initialValue);
     const ref = useRef(null);
 
     useEffect(() => {
