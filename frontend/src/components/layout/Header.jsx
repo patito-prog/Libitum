@@ -58,6 +58,9 @@ const Header = () => {
                 {(isSpectator || isArtist) && (
                     <NavLink to="/favorites" className={navLinkClass}>Favoritos</NavLink>
                 )}
+                {isSpectator && (
+                    <NavLink to="/asistencias" className={navLinkClass}>Asistencias</NavLink>
+                )}
                 {isArtist && (
                     <NavLink to="/events" className={navLinkClass}>Mis Eventos</NavLink>
                 )}
@@ -86,6 +89,9 @@ const Header = () => {
                                 </Link>
                                 <Link to="/my-qr" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
                                     Mi QR
+                                </Link>
+                                <Link to="/asistencias" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
+                                    Mis asistencias
                                 </Link>
                             </div>
                         )}
@@ -133,6 +139,9 @@ const Header = () => {
                     <NavLink to="/events/buscar" className={mobileLinkClass} onClick={() => setMobileMenuOpen(false)}>Buscar</NavLink>
                     {(isSpectator || isArtist) && (
                         <NavLink to="/favorites" className={mobileLinkClass} onClick={() => setMobileMenuOpen(false)}>Favoritos</NavLink>
+                    )}
+                    {(isSpectator || isArtist) && (
+                        <NavLink to="/asistencias" className={mobileLinkClass} onClick={() => setMobileMenuOpen(false)}>Mis asistencias</NavLink>
                     )}
                     {isArtist && (
                         <NavLink to="/events" className={mobileLinkClass} onClick={() => setMobileMenuOpen(false)}>Mis Eventos</NavLink>

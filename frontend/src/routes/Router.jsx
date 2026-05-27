@@ -14,6 +14,8 @@ import AdminRoute from './guards/AdminRoute.jsx';
 import AdminDashboard from "../pages/private/admin/AdminDashboard.jsx";
 import Favorites from "../pages/private/Favorites.jsx";
 import Feed from "../pages/private/Feed.jsx";
+import SearchEvents from "../pages/private/SearchEvents.jsx";
+import MyAttendance from "../pages/private/MyAttendance.jsx";
 
 const Router = () => {
     return (
@@ -30,13 +32,15 @@ const Router = () => {
             {/**Esta ruta es a la que acceden los espectadores con el QR para donar, debe ser una ruta libre ya que puede acceder todo el mundo.*/}
             <Route path="/artist/:id" element={<ArtistProfile />} />
             
+            <Route path="/events/buscar" element={<SearchEvents />} />
+
             <Route element={<PrivateRoute/>}>
-                
                 <Route path="/" element={<Home />} />
                 <Route path="/events" element={<PageEvents />} />
                 <Route path="/my-qr" element={<ArtistQR />} />
-                <Route path="/feed" element={<Feed />} /> {/* El "Para ti" */}
-                <Route path="/favorites" element={<Favorites />} /> {/* Mis Me Gusta */}
+                <Route path="/feed" element={<Feed />} />
+                <Route path="/favorites" element={<Favorites />} />
+                <Route path="/asistencias" element={<MyAttendance />} />
                 <Route path="*" element={<Error />} />
             </Route>
 

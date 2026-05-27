@@ -273,6 +273,52 @@ class EventController extends Controller
         return ReturnHelper::ok("El evento '$titulo' ha sido eliminado por moderación.");
     }
 
+    //METODO DE BÚSQUEDA PÚBLICA
+    public function search(Request $request)
+    {
+        $userId = Auth::id();
+
+        $query = Event::with(['artist', 'categories', 'status']);
+
+        if ($userId) {
+            $query->withExists(['likedBy as liked' => function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            }])
+            ->withExists(['attendees as signed_up' => function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            }]);
+        }
+
+        // Búsqueda por texto en título, descripción, lugar y nombre del artista
+        if ($request->filled('q')) {
+            $term = $request->q;
+            $query->where(function ($q) use ($term) {
+                $q->where('title', 'ilike', "%{$term}%")
+                  ->orWhere('description', 'ilike', "%{$term}%")
+                  ->orWhere('location', 'ilike', "%{$term}%")
+                  ->orWhereHas('artist', fn($q) => $q->where('name', 'ilike', "%{$term}%"));
+            });
+        }
+
+        // Filtro por categoría
+        if ($request->filled('category_id')) {
+            $query->whereHas('categories', fn($q) => $q->where('categories.id', $request->category_id));
+        }
+
+        // Filtro por estado
+        $allowedStatuses = ['draft', 'published', 'live', 'finished', 'cancelled'];
+        if ($request->filled('status') && in_array($request->status, $allowedStatuses)) {
+            $query->whereHas('status', fn($q) => $q->where('name', $request->status));
+        }
+
+        $events = $query->latest()->paginate(12);
+
+        return response()->json([
+            'error' => false,
+            'data'  => $events,
+        ]);
+    }
+
     //METODO PARA FAVORITOS
     public function favorites(Request $request)
     {

@@ -15,6 +15,7 @@ use App\Http\Controllers\CategoryController;
 Route::post('/login', [AuthController::class, 'verify']);
 Route::post('/register', [AuthController::class, 'register']);
 
+Route::get('/events/search', [EventController::class, 'search']); // Búsqueda pública de eventos.
 Route::get('/events/{event}', [EventController::class, 'show']); //  ARTISTA/USUARIO puede ver un evento.
 // Cualquiera puede ver el perfil de un artista.
 Route::get('/artists/{id}', [ArtistProfileController::class, 'show']);
@@ -26,7 +27,7 @@ Route::get('/statuses', [StatusController::class, 'index']); // Recoge todos los
 Route::middleware('auth:sanctum')->group(function () {
     
     //RUTA FAVORITOS
-     Route::get('/user/favorites', [EventController::class, 'favorites']);
+    Route::get('/user/favorites', [EventController::class, 'favorites']);
     //La ruta por defecto de Laravel
     Route::get('/user', function (Request $request) {
         //carga todo lo relacionado con el perfil de artista, para que cuando el frontend pida los datos del usuario, ya tenga toda la info del perfil de artista (si es que tiene).
@@ -48,7 +49,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/feed', [\App\Http\Controllers\FeedController::class, 'index']);
     //RUTA LIKE
     Route::post('/events/{event}/like', [\App\Http\Controllers\LikeController::class, 'toggle']);
-   
+    
     // Rutas de seguidores para la API
     Route::get('/my-favorites', [FollowerController::class, 'index']);
     Route::post('/artist/{id}/follow', [FollowerController::class, 'store']);

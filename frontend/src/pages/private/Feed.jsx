@@ -14,8 +14,9 @@ const STATUS_FILTERS = [
 ];
 
 const Feed = () => {
-    const { getData } = useAPI();
+    const { getData, save, deleteData } = useAPI();
     const { toggleLike } = useEventContext();
+    const API = 'http://localhost:8000/api';
     const [feedEvents, setFeedEvents] = useState([]);
     const [mode, setMode] = useState("discover");
     const [statusFilter, setStatusFilter] = useState(null);
@@ -83,6 +84,23 @@ const Feed = () => {
         observer.observe(sentinelRef.current);
         return () => observer.disconnect();
     }, [hasMore, mode, statusFilter, feedEvents.length, fetchEvents]);
+
+    const handleInscribe = async (id, isSignedUp) => {
+        setFeedEvents(prev => prev.map(evt =>
+            evt.id === id ? { ...evt, signed_up: !isSignedUp } : evt
+        ));
+        try {
+            if (isSignedUp) {
+                await deleteData(`${API}/user/${id}`);
+            } else {
+                await save(`${API}/user/event`, { event_id: id });
+            }
+        } catch {
+            setFeedEvents(prev => prev.map(evt =>
+                evt.id === id ? { ...evt, signed_up: isSignedUp } : evt
+            ));
+        }
+    };
 
     const handleFeedLike = async (id) => {
         setFeedEvents(prev => prev.map(evt =>
@@ -155,7 +173,7 @@ const Feed = () => {
                     <>
                         {feedEvents.map(event => (
                             <div key={event.id} className={styles.snapItem}>
-                                <Event data={event} onLike={handleFeedLike} />
+                                <Event data={event} onLike={handleFeedLike} onInscribe={handleInscribe} />
                             </div>
                         ))}
 
