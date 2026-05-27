@@ -10,14 +10,17 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\ArtistProfileController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\UserProfileController;
 
 // --- RUTA PÚBLICA (No necesita token, porque venimos a pedirlo) ---
 Route::post('/login', [AuthController::class, 'verify']);
 Route::post('/register', [AuthController::class, 'register']);
 
 Route::get('/events/{event}', [EventController::class, 'show']); //  ARTISTA/USUARIO puede ver un evento.
-// Cualquiera puede ver el perfil de un artista.
+// Cualquiera puede ver el perfil de un artista (página QR/donación).
 Route::get('/artists/{id}', [ArtistProfileController::class, 'show']);
+// Perfil social público de cualquier usuario (artista o espectador).
+Route::get('/users/{id}', [UserProfileController::class, 'show']);
 
 Route::get('/categories',[CategoryController::class, 'index']); // Recoger todas las categorías que existen (básicamente para rellenar dinámicamente el select de categorías)
 Route::get('/statuses', [StatusController::class, 'index']); // Recoge todos los estados que existen en la base de datos.

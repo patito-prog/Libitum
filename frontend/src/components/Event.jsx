@@ -1,9 +1,9 @@
+import { Link } from 'react-router-dom';
 import { useLoadScript, GoogleMap, Marker } from '@react-google-maps/api';
 import styles from './Event.module.scss';
 import appStyles from '../App.module.scss';
 import { formatDate } from '../utils/validations';
 import Button from './common/Button.jsx';
-//Importamos el contexto para gestionar los likes.
 import useEventContext from '../hooks/useEventContext.js';
 
 const LIBRARIES = ['places'];
@@ -11,7 +11,7 @@ const MAP_OPTIONS = { disableDefaultUI: true, zoomControl: true };
 //TUVE QUE AÑADIR EL ONLIKE
 const Event = ({ data, onBack, onLike, editable = false }) => {
     //EXTRAIGO EL LIKE
-    const { id, title, description, location, event_date, price, cover_image, max_capacity, status, latitude, longitude, liked } = data;
+    const { id, title, description, location, event_date, price, cover_image, max_capacity, status, latitude, longitude, liked, artist } = data;
     const statusName = status?.name ?? '';
     const coords = latitude && longitude ? { lat: Number(latitude), lng: Number(longitude) } : null;
 
@@ -46,6 +46,11 @@ const Event = ({ data, onBack, onLike, editable = false }) => {
                 )}
 
                 <div className={styles.body}>
+                    {artist && (
+                        <Link to={`/user/${artist.id}`} className={styles.artistLink}>
+                            🎸 {artist.name}
+                        </Link>
+                    )}
                     <div className={styles.titleRow}>
                         <div className={styles.titleWrapper}>
                             <h2 className={styles.title}>{title}</h2>

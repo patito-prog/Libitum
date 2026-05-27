@@ -9,6 +9,7 @@ import PublicRoute from './guards/PublicRoute.jsx';
 import PrivateRoute from './guards/ProtectedRoute.jsx'
 import PageEvents from '../pages/private/PageEvents.jsx';
 import ArtistProfile from "../pages/public/ArtistProfile.jsx";
+import UserProfile from "../pages/public/UserProfile.jsx";
 import ArtistQR from "../pages/private/artist/ArtistQR.jsx";
 import AdminRoute from './guards/AdminRoute.jsx';
 import AdminDashboard from "../pages/private/admin/AdminDashboard.jsx";
@@ -27,8 +28,10 @@ const Router = () => {
                 <Route path="/register" element={<Register />} />
             </Route>
 
-            {/**Esta ruta es a la que acceden los espectadores con el QR para donar, debe ser una ruta libre ya que puede acceder todo el mundo.*/}
+            {/* Página QR/donación del artista — acceso libre */}
             <Route path="/artist/:id" element={<ArtistProfile />} />
+            {/* Perfil social de cualquier usuario — acceso libre */}
+            <Route path="/user/:id" element={<UserProfile />} />
             
             <Route element={<PrivateRoute/>}>
                 
