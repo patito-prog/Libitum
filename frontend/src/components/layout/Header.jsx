@@ -7,11 +7,15 @@ const Header = () => {
     const { user, logOut } = useAuthContext();
     const navigate = useNavigate();
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const dropdownRef = useRef(null);
+    const hamburgerRef = useRef(null);
+    const mobileMenuRef = useRef(null);
 
     const handleLogout = () => {
         logOut();
         navigate('/login');
+        setMobileMenuOpen(false);
     };
 
     const isSpectator = user?.role === 'user' || user?.role === 'spectator';
@@ -21,10 +25,19 @@ const Header = () => {
     const navLinkClass = ({ isActive }) =>
         isActive ? `${styles.link} ${styles.active}` : styles.link;
 
+    const mobileLinkClass = ({ isActive }) =>
+        isActive ? `${styles.mobileLink} ${styles.active}` : styles.mobileLink;
+
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
                 setDropdownOpen(false);
+            }
+            if (
+                mobileMenuRef.current && !mobileMenuRef.current.contains(e.target) &&
+                hamburgerRef.current && !hamburgerRef.current.contains(e.target)
+            ) {
+                setMobileMenuOpen(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -37,19 +50,17 @@ const Header = () => {
                 Libitum<span>.</span>
             </Link>
 
+            {/* Nav escritorio */}
             <nav className={styles.nav}>
                 {user && (
                     <NavLink to="/feed" className={navLinkClass}>Para Ti</NavLink>
                 )}
-
                 {(isSpectator || isArtist) && (
                     <NavLink to="/favorites" className={navLinkClass}>Favoritos</NavLink>
                 )}
-
                 {isArtist && (
                     <NavLink to="/events" className={navLinkClass}>Mis Eventos</NavLink>
                 )}
-
                 {isAdmin && (
                     <NavLink to="/admin" className={({ isActive }) =>
                         isActive ? `${styles.adminBadge} ${styles.active}` : styles.adminBadge
@@ -57,7 +68,7 @@ const Header = () => {
                         Panel Admin
                     </NavLink>
                 )}
-
+                <NavLink to="/events/buscar" className={navLinkClass} ><img src="/icon-lupa.png" alt="Buscar" /></NavLink>
                 {isArtist && (
                     <div className={styles.dropdown} ref={dropdownRef}>
                         <button
@@ -68,21 +79,12 @@ const Header = () => {
                         >
                             Más <span className={dropdownOpen ? `${styles.chevron} ${styles.chevronUp}` : styles.chevron}>▾</span>
                         </button>
-
                         {dropdownOpen && (
                             <div className={styles.dropdownMenu} role="menu">
-                                <Link
-                                    to={`/artist/${user?.id}`}
-                                    className={styles.dropdownItem}
-                                    onClick={() => setDropdownOpen(false)}
-                                >
+                                <Link to={`/artist/${user?.id}`} className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
                                     Mi perfil público
                                 </Link>
-                                <Link
-                                    to="/my-qr"
-                                    className={styles.dropdownItem}
-                                    onClick={() => setDropdownOpen(false)}
-                                >
+                                <Link to="/my-qr" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
                                     Mi QR
                                 </Link>
                             </div>
@@ -91,6 +93,7 @@ const Header = () => {
                 )}
             </nav>
 
+            {/* Sección derecha escritorio */}
             <div className={styles.userSection}>
                 {user ? (
                     <>
@@ -109,6 +112,47 @@ const Header = () => {
                     </div>
                 )}
             </div>
+
+            {/* Botón hamburguesa (solo móvil) */}
+            <button
+                ref={hamburgerRef}
+                className={styles.hamburger}
+                onClick={() => setMobileMenuOpen(o => !o)}
+                aria-label="Abrir menú"
+                aria-expanded={mobileMenuOpen}
+            >
+                {mobileMenuOpen ? '✕' : '☰'}
+            </button>
+
+            {/* Menú móvil desplegable */}
+            {mobileMenuOpen && (
+                <div className={styles.mobileMenu} ref={mobileMenuRef}>
+                    {user && (
+                        <NavLink to="/feed" className={mobileLinkClass} onClick={() => setMobileMenuOpen(false)}>Para Ti</NavLink>
+                    )}
+                    <NavLink to="/events/buscar" className={mobileLinkClass} onClick={() => setMobileMenuOpen(false)}>Buscar</NavLink>
+                    {(isSpectator || isArtist) && (
+                        <NavLink to="/favorites" className={mobileLinkClass} onClick={() => setMobileMenuOpen(false)}>Favoritos</NavLink>
+                    )}
+                    {isArtist && (
+                        <NavLink to="/events" className={mobileLinkClass} onClick={() => setMobileMenuOpen(false)}>Mis Eventos</NavLink>
+                    )}
+                    {isArtist && (
+                        <>
+                            <Link to={`/artist/${user?.id}`} className={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Mi perfil público</Link>
+                            <Link to="/my-qr" className={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Mi QR</Link>
+                        </>
+                    )}
+                    {isAdmin && (
+                        <NavLink to="/admin" className={mobileLinkClass} onClick={() => setMobileMenuOpen(false)}>Panel Admin</NavLink>
+                    )}
+                    {user && (
+                        <button onClick={handleLogout} className={styles.mobileLogoutBtn}>
+                            Cerrar sesión
+                        </button>
+                    )}
+                </div>
+            )}
         </header>
     );
 };
