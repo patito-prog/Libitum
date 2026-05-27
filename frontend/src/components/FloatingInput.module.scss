@@ -119,7 +119,7 @@
     top: 100%;
     left: 0;
     right: 0;
-    background: #1e2224;
+    background: var(--bg-surface);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-top: none;
     border-radius: 0 0 var(--radius-sm) var(--radius-sm);

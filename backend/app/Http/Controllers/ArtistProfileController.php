@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use \App\Models\Event;
-use Inertia\Inertia;
 
 class ArtistProfileController extends Controller
 {
@@ -92,43 +91,63 @@ class ArtistProfileController extends Controller
         ]);
     }
 
-    //Esta función hay que ir ampliándola poco a poco, porque es la más compleja de todas. Aquí se irán añadiendo estadísticas y gráficos para que el artista pueda ver el impacto que tiene su perfil y sus eventos en la plataforma.
-    public function statistics(Request $request){
+    public function statistics(Request $request)
+    {
         $artist = $request->user();
         if (!$artist->hasRole('artist')) {
-            if ($request->is('api/*') || $request->expectsJson()) {
-                return response()->json(['error' => true, 'message' => 'Solo los artistas tienen estadísticas.', 'code' => 403], 403);
-            }
-            abort(403, 'Solo los artistas tienen estadísticas.');
+            return response()->json(['error' => true, 'message' => 'Solo los artistas tienen estadísticas.'], 403);
         }
 
-        $totalFollowers = $artist->followers()->count();
-
+        // Audiencia
+        $totalFollowers        = $artist->followers()->count();
         $newFollowersThisMonth = $artist->followers()
             ->wherePivot('created_at', '>=', now()->subDays(30))
             ->count();
 
-        $totalEvents = Event::where('user_id', $artist->id)->count();
+        // Todos los eventos del artista en una sola query
+        $artistEvents = Event::where('user_id', $artist->id)
+            ->with('status')
+            ->withCount(['attendees', 'likedBy'])
+            ->get();
+
+        $totalInscriptions = $artistEvents->sum('attendees_count');
+        $totalLikes        = $artistEvents->sum('liked_by_count');
+        $upcomingEvents    = $artistEvents->filter(fn($e) => $e->event_date > now())->count();
+
+        // Evento más popular por número de inscripciones
+        $topEvent         = $artistEvents->sortByDesc('attendees_count')->first();
+        $mostPopularEvent = $topEvent ? [
+            'id'           => $topEvent->id,
+            'title'        => $topEvent->title,
+            'inscriptions' => $topEvent->attendees_count,
+            'likes'        => $topEvent->liked_by_count,
+        ] : null;
+
+        // Desglose por estado
+        $eventsByStatus = $artistEvents
+            ->groupBy(fn($e) => $e->status->name ?? 'unknown')
+            ->map->count()
+            ->toArray();
 
         $stats = [
             'audience' => [
-                'total_followers' => $totalFollowers,
+                'total_followers'            => $totalFollowers,
                 'new_followers_last_30_days' => $newFollowersThisMonth,
             ],
             'events_impact' => [
-                'total_events_created' => $totalEvents,
-            ]
+                'total_events_created' => $artistEvents->count(),
+                'upcoming_events'      => $upcomingEvents,
+                'total_inscriptions'   => $totalInscriptions,
+                'total_likes'          => $totalLikes,
+                'events_by_status'     => $eventsByStatus,
+                'most_popular_event'   => $mostPopularEvent,
+            ],
         ];
 
-        if ($request->is('api/*') || $request->expectsJson()) {
-            return response()->json([
-                'error' => false,
-                'message' => 'Estadísticas generadas con éxito',
-                'data' => $stats,
-                'code' => 200
-            ], 200);
-        }
-
-        return Inertia::render('Artist/Statistics', ['stats' => $stats]);
+        return response()->json([
+            'error'   => false,
+            'message' => 'Estadísticas generadas con éxito',
+            'data'    => $stats,
+        ], 200);
     }
 }

@@ -7,19 +7,20 @@
     --color-primary:       #217377;
     --color-primary-hover: #18585b;
     --color-primary-light: rgba(33, 115, 119, 0.15);
-    --color-primary-glow:  rgba(33, 115, 119, 0.25);
+    --color-primary-glow:  rgba(33, 115, 119, 0.35);
 
-    --color-accent:        #ffc9ac;   /* Salmón */
+    --color-accent:        #ffc9ac;
     --color-accent-hover:  #ffb897;
+    --color-accent-glow:   rgba(255, 201, 172, 0.3);
 
     --color-danger:        #e84a40;
     --color-danger-hover:  #bd3b33;
 
     /* Fondos */
-    --bg-main:    #131516;
-    --bg-surface: rgba(28, 32, 34, 0.9);
-    --bg-card:    rgba(24, 28, 30, 0.95);
-    --bg-overlay: rgba(0, 0, 0, 0.6);
+    --bg-main:    #0f1214;
+    --bg-surface: rgba(22, 26, 28, 0.92);
+    --bg-card:    rgba(18, 22, 24, 0.97);
+    --bg-overlay: rgba(0, 0, 0, 0.65);
 
     /* Textos */
     --text-primary:   #eef2f3;
@@ -27,26 +28,31 @@
     --text-muted:     rgba(138, 148, 150, 0.5);
 
     /* Bordes */
-    --border-color:        rgba(255, 255, 255, 0.07);
-    --border-color-focus:  var(--color-primary);
+    --border-color:       rgba(255, 255, 255, 0.07);
+    --border-color-focus: var(--color-primary);
 
     /* Radios */
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 18px;
-    --radius-xl: 24px;
+    --radius-sm:   8px;
+    --radius-md:   12px;
+    --radius-lg:   18px;
+    --radius-xl:   24px;
     --radius-pill: 999px;
 
     /* Sombras */
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 6px 24px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.5);
+    --shadow-sm:   0 2px 8px rgba(0, 0, 0, 0.35);
+    --shadow-md:   0 6px 24px rgba(0, 0, 0, 0.45);
+    --shadow-lg:   0 16px 48px rgba(0, 0, 0, 0.55);
+    --shadow-glow: 0 0 20px var(--color-primary-glow);
+
+    /* Tipografía */
+    --font-display: 'Syne', 'Inter', system-ui, sans-serif;
+    --font-body:    'Inter', system-ui, -apple-system, sans-serif;
 
     /* Transición */
-    --transition-speed: 0.25s;
+    --transition-speed: 0.22s;
 
-    /* Legacy aliases (para no romper código antiguo) */
-    --fondo-oscuro:           #131516;
+    /* Legacy aliases */
+    --fondo-oscuro:           #0f1214;
     --color-principal:        #217377;
     --color-secundario-claro: #eef2f3;
     --color-letra-claro:      #eef2f3;
@@ -62,10 +68,19 @@
     padding: 0;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     background-color: var(--bg-main);
+    /* Gradiente atmosférico: el teal aparece arriba-izquierda, el salmón abajo-derecha */
+    background-image:
+        radial-gradient(ellipse 80% 60% at 10% 0%,   rgba(33, 115, 119, 0.14) 0%, transparent 60%),
+        radial-gradient(ellipse 70% 50% at 90% 100%,  rgba(255, 201, 172, 0.09) 0%, transparent 55%);
+    background-attachment: fixed;
     color: var(--text-primary);
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     min-height: 100vh;
@@ -73,50 +88,65 @@ body {
     overflow-x: hidden;
 }
 
+/* Grain — capa de textura de película fotográfica sobre toda la app.
+   Hace que el fondo oscuro se sienta cálido en lugar de vacío. */
+body::after {
+    content: '';
+    position: fixed;
+    inset: -50%;
+    width: 200%;
+    height: 200%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='0.4'/%3E%3C/svg%3E");
+    opacity: 0.032;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+/* Headings: Syne da un carácter editorial y artístico sin perder legibilidad */
 h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
     color: var(--text-primary);
-    line-height: 1.2;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
 }
 
 /* ── Scrollbar ── */
-::-webkit-scrollbar       { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--bg-main); }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 999px; }
+::-webkit-scrollbar       { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 999px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-primary); }
 
-/* ── Links ── */
+/* ── Links base ── */
 a {
     color: var(--color-primary);
     text-decoration: none;
-    position: relative;
-    display: inline-block;
 
-    &::after {
-        content: '';
-        position: absolute;
-        width: 0; height: 1.5px;
-        bottom: -2px; left: 0;
-        background: var(--color-primary);
-        transition: width var(--transition-speed) ease;
-    }
-
-    &:hover::after { width: 100%; }
+    &:hover { color: var(--text-primary); }
 }
 
 ul { list-style: none; }
 
 /* ── Clase cristal compartida ── */
 .cristal {
-    background: rgba(255, 255, 255, 0.055);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: var(--radius-lg);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
     background-image:
-        radial-gradient(ellipse at 20% 30%, rgba(33, 115, 119, 0.20) 0%, transparent 55%),
-        radial-gradient(ellipse at 80% 70%, rgba(255, 201, 172, 0.10) 0%, transparent 50%);
+        radial-gradient(ellipse at 15% 20%, rgba(33, 115, 119, 0.16) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 80%, rgba(255, 201, 172, 0.08) 0%, transparent 50%);
     color: var(--text-primary);
-    transition: background var(--transition-speed), box-shadow var(--transition-speed);
+    transition: box-shadow var(--transition-speed);
+
+    &:hover {
+        box-shadow:
+            0 12px 40px rgba(0, 0, 0, 0.45),
+            0 0 0 1px rgba(33, 115, 119, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
 }

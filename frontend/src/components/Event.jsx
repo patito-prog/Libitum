@@ -42,6 +42,12 @@ const Event = ({ data, onBack, onLike, onInscribe, editable = false }) => {
         <>
             <div id={id} className={`${styles.card} ${appStyles.cristal}`}>
 
+                {onBack && (
+                    <button className={styles.backBtn} onClick={onBack}>
+                        ← Volver
+                    </button>
+                )}
+
                 {cover_image && (
                     <img src={cover_image} alt={title} className={styles.cover} />
                 )}
@@ -88,7 +94,7 @@ const Event = ({ data, onBack, onLike, onInscribe, editable = false }) => {
                     )}
                 </div>
 
-                {(editable || onBack || onInscribe) && (
+                {(editable || onInscribe) && (
                     <div className={styles.actions}>
                         {editable && (
                             <Button
@@ -103,11 +109,6 @@ const Event = ({ data, onBack, onLike, onInscribe, editable = false }) => {
                                 onClick={() => onInscribe(id, signed_up)}
                             >
                                 {signed_up ? '✓ Apuntado' : '+ Me apunto'}
-                            </button>
-                        )}
-                        {onBack && (
-                            <button className={styles.backBtn} onClick={onBack}>
-                                ← Volver
                             </button>
                         )}
                     </div>

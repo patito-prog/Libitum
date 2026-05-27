@@ -2,7 +2,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: calc(100vh - 64px);
+    min-height: calc(100dvh - 64px);
     padding: 2rem 1rem;
     background:
         radial-gradient(ellipse at 30% 20%, rgba(33, 115, 119, 0.10) 0%, transparent 50%),

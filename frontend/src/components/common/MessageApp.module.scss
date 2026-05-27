@@ -36,9 +36,9 @@
     }
 
     &.info {
-        border-left-color: var(--color-principal);
-        .icon { color: var(--color-principal); }
-        p { color: var(--color-secundario-claro); }
+        border-left-color: var(--color-primary);
+        .icon { color: var(--color-primary); }
+        p { color: var(--text-primary); }
     }
 }
 

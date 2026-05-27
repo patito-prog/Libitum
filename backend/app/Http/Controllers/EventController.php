@@ -49,7 +49,8 @@ class EventController extends Controller
         //  Hay que hacer una lógica de que si eres el creador puedes verlos y si no lo eres pues solo puedes ver el el evento en si.
         $event->load('categories', 'status', 'artist');
 
-        $event->liked = $userId ? $event->likedBy()->where('user_id', $userId)->exists() : false;
+        $event->liked     = $userId ? $event->likedBy()->where('user_id', $userId)->exists()  : false;
+        $event->signed_up = $userId ? $event->attendees()->where('user_id', $userId)->exists() : false;
 
         return ReturnHelper::return([
             'event' => $event,
@@ -174,13 +175,24 @@ class EventController extends Controller
     public function inscription(Request $request)
     {
         $request->validate(['event_id' => 'required|exists:events,id']);
-        $user = Auth::user();
+        $user  = Auth::user();
+        $event = Event::findOrFail($request->event_id);
+
+        if ($event->max_capacity !== null) {
+            $current = $event->attendees()->count();
+            if ($current >= $event->max_capacity) {
+                return response()->json([
+                    'error'   => true,
+                    'message' => 'Este evento ha alcanzado su aforo máximo.',
+                ], 409);
+            }
+        }
 
         $result = $user->events()->syncWithoutDetaching([$request->event_id]);
 
         if (empty($result['attached'])) {
             return response()->json([
-                'error' => true,
+                'error'   => true,
                 'message' => 'Ya estás inscrito en este evento',
             ], 409);
         }
@@ -189,7 +201,7 @@ class EventController extends Controller
 
         return response()->json([
             'message' => 'Inscripción realizada con éxito.',
-            'events' => $user->events,
+            'events'  => $user->events,
         ]);
     }
 
@@ -236,9 +248,10 @@ class EventController extends Controller
     {
         $userId = Auth::id();
         // Usamos with('user') para que nos traiga también los datos del creador.
-        $events = Event::with(['artist', 'categories', 'status'])->withExists(['likedBy as liked' => function ($query) use ($userId) {
-            $query->where('user_id', $userId);
-        }])->latest()->get();
+        $events = Event::with(['artist', 'status'])
+            ->withCount('attendees')
+            ->latest()
+            ->get();
 
         // Lo devolvemos de la misma forma que AdminUserController
         // para que tu response.data de React lo lea perfectamente.

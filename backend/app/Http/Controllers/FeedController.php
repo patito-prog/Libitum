@@ -15,6 +15,7 @@ class FeedController extends Controller
 
         //Cargamos relaciones y verificamos si el usuario le dio LIKE
         $query = Event::with(['artist', 'categories', 'status'])
+            ->whereHas('status', fn($q) => $q->where('name', '!=', 'draft'))
             ->withExists(['likedBy as liked' => function ($q) use ($userId) {
                 $q->where('user_id', $userId);
             }])

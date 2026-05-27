@@ -2,7 +2,7 @@
     padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 3vw, 2rem);
     max-width: 1200px;
     margin: 0 auto;
-    min-height: calc(100vh - 64px);
+    min-height: calc(100dvh - 64px);
 
     h1 {
         font-size: clamp(1.5rem, 4vw, 2.4rem);
@@ -114,6 +114,106 @@
     &.user,
     &.spectator { background: rgba(255,255,255,0.07); color: var(--text-secondary); border: 1px solid var(--border-color); }
 }
+
+.toolBar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.searchInput {
+    flex: 1;
+    max-width: 360px;
+    background: var(--bg-card, rgba(255,255,255,0.04));
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.55rem 1rem;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color var(--transition-speed);
+
+    &:focus { border-color: var(--color-primary); }
+    &::placeholder { color: var(--text-secondary); }
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.pageBtn {
+    background: var(--bg-card, rgba(255,255,255,0.04));
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.45rem 1rem;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+
+    &:hover:not(:disabled) {
+        border-color: var(--color-primary);
+        color: var(--color-primary);
+    }
+
+    &:disabled {
+        opacity: 0.35;
+        cursor: default;
+    }
+}
+
+.pageInfo {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    min-width: 60px;
+    text-align: center;
+}
+
+.loadingText {
+    color: var(--text-secondary);
+    padding: 2rem 0;
+    text-align: center;
+}
+
+.emailCell {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.roleSelect {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-pill);
+    padding: 0.2rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    outline: none;
+    transition: all var(--transition-speed);
+
+    &.admin    { color: #f87171; border-color: rgba(232,74,64,0.4);  background: rgba(232,74,64,0.08); }
+    &.artist   { color: #5ab8bc; border-color: rgba(33,115,119,0.4); background: var(--color-primary-light); }
+    &.spectator,
+    &.user     { color: var(--text-secondary); border-color: var(--border-color); background: rgba(255,255,255,0.04); }
+
+    option { background: var(--bg-surface); color: var(--text-primary); }
+
+    &:disabled { opacity: 0.5; cursor: wait; }
+}
+
+// status badges in event table
+.published { background: rgba(34,197,94,0.1);  color: #4ade80; border: 1px solid rgba(34,197,94,0.25); }
+.live      { background: rgba(239,68,68,0.1);  color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+.finished  { background: rgba(148,163,184,0.1); color: #94a3b8; border: 1px solid rgba(148,163,184,0.25); }
+.cancelled { background: rgba(239,68,68,0.06); color: #f87171; border: 1px solid rgba(239,68,68,0.15); text-decoration: line-through; }
+.draft     { background: rgba(251,191,36,0.08); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
 
 .buttonAdmin {
     display: inline-flex;

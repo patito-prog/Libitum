@@ -17,7 +17,7 @@ const STATUS_FILTERS = [
 const Feed = () => {
     const { getData, save, deleteData } = useAPI();
     const { toggleLike } = useEventContext();
-    const API = '${API_BASE}/api';
+    const API = `${API_BASE}/api`;
     const [feedEvents, setFeedEvents] = useState([]);
     const [mode, setMode] = useState("discover");
     const [statusFilter, setStatusFilter] = useState(null);

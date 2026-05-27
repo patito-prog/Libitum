@@ -1,9 +1,11 @@
 .card {
+    position: relative;
     padding: clamp(1.25rem, 3vw, 1.75rem);
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
     width: 100%;
+    max-width: 680px;
     margin: 0 auto;
 }
 
@@ -161,18 +163,29 @@
 }
 
 .backBtn {
-    background: transparent;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    padding: 0.35rem 0.9rem;
-    font-size: 0.83rem;
-    color: var(--text-secondary);
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: rgba(15, 18, 20, 0.72);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: var(--radius-pill);
+    padding: 0.4rem 0.9rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
     cursor: pointer;
     transition: all var(--transition-speed);
+    white-space: nowrap;
 
     &:hover {
+        background: rgba(33, 115, 119, 0.25);
         border-color: var(--color-primary);
-        color: var(--text-primary);
-        background: var(--color-primary-light);
+        color: #fff;
     }
 }

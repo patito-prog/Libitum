@@ -1,7 +1,7 @@
 .feedWrapper {
     position: relative;
     width: 100%;
-    height: calc(100vh - 64px);
+    height: calc(100dvh - 64px);
     background: var(--bg-main);
     overflow: hidden;
 }
@@ -111,9 +111,13 @@
     scroll-snap-align: start;
     flex-shrink: 0;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    padding: 130px 1rem 2rem;
+    padding: clamp(115px, 22vw, 140px) 1rem 1.5rem;
+    overflow-y: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar { display: none; }
 }
 
 .messageBox {

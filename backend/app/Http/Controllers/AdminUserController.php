@@ -21,11 +21,17 @@ class AdminUserController extends Controller
             abort(403, 'Solo los administradores pueden acceder a esta sección.');
         }
 
-        //Cambiar más adelante a paginate para no cargar todos los usuarios de golpe.
-        $users = User::with(['roles', 'artistProfile'])->get();
+        $users = User::with(['roles', 'artistProfile'])
+            ->when($request->filled('search'), fn($q) =>
+                $q->where(fn($q) =>
+                    $q->where('name',  'ilike', '%'.$request->search.'%')
+                      ->orWhere('email', 'ilike', '%'.$request->search.'%')
+                )
+            )
+            ->paginate(20);
 
         if($request->is('api/*') || $request->expectsJson()){
-            return response()->json(['error' => false, 'message' => 'Lista de usuarios recuperada', 'data' => $users, 'code' => 200], 200);
+            return response()->json(['error' => false, 'data' => $users], 200);
         }
 
         return Inertia::render('Admin/Users', ['users' => $users]);

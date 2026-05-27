@@ -27,12 +27,16 @@
 }
 
 .headline {
-    font-size: clamp(2rem, 5vw, 2.8rem);
+    font-size: clamp(2.2rem, 5.5vw, 3.4rem);
     font-weight: 900;
     color: var(--text-primary);
     margin: 0;
-    letter-spacing: -0.03em;
-    line-height: 1.15;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+    background: linear-gradient(135deg, var(--text-primary) 60%, var(--color-primary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .sub {
@@ -62,9 +66,10 @@
     padding: 1.4rem 1.25rem;
     background: var(--bg-card, rgba(255, 255, 255, 0.04));
     border: 1px solid var(--border-color);
+    border-top: 2px solid transparent;
     border-radius: var(--radius-lg, 16px);
     text-decoration: none;
-    transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
     position: relative;
     overflow: hidden;
 
@@ -73,10 +78,12 @@
     &:hover {
         transform: translateY(-3px);
         border-color: var(--color-primary);
+        border-top-color: var(--color-primary);
         background: rgba(33, 115, 119, 0.07);
+        box-shadow: var(--shadow-glow);
 
         .arrow { opacity: 1; transform: translateX(0); }
-        .cardIcon { transform: scale(1.1); }
+        .cardIcon { transform: scale(1.12); }
     }
 
     @media (max-width: 480px) {

@@ -4,11 +4,13 @@
     flex-direction: column;
     gap: 0.75rem;
     cursor: pointer;
-    transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+    border-left: 3px solid transparent;
+    transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease, border-color var(--transition-speed) ease;
 
     &:hover {
-        transform: translateY(-4px);
+        transform: translateY(-3px);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+        border-left-color: var(--color-primary);
     }
 }
 

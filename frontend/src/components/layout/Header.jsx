@@ -85,7 +85,7 @@ const Header = () => {
                         </button>
                         {dropdownOpen && (
                             <div className={styles.dropdownMenu} role="menu">
-                                <Link to={`/user/${user?.id}`} className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
+                                <Link to={`/artist/${user?.id}`} className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
                                     Mi perfil público
                                 </Link>
                                 <Link to="/my-qr" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
@@ -154,7 +154,7 @@ const Header = () => {
                     )}
                     {isArtist && (
                         <>
-                            <Link to={`/user/${user?.id}`} className={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Mi perfil público</Link>
+                            <Link to={`/artist/${user?.id}`} className={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Mi perfil público</Link>
                             <Link to="/my-qr" className={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Mi QR</Link>
                             <Link to="/estadisticas" className={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Estadísticas</Link>
                         </>

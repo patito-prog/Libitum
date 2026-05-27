@@ -4,3 +4,36 @@
     gap: clamp(0.75rem, 2vw, 1rem);
     margin-top: clamp(0.75rem, 2vw, 1rem);
 }
+
+.empty {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-top: 1rem;
+}
+
+.draftsSection {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.draftsTitle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+    margin: 0 0 0.75rem;
+}
+
+.draftsDot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-muted, #666);
+    flex-shrink: 0;
+}
