@@ -54,6 +54,13 @@ const AuthProvider = ({children}) => {
     //Atajo directo para saber si es admin, no es necesario que sea un estado, al revés, evitamos re-renderizados coordinando dos estados, esto depende de user, cuando user cambie, esto se cambiará también.
     const isAdmin = hasRole("admin");
 
+    const refreshUser = async () => {
+        try {
+            const response = await getData(pathGetUser);
+            if (!response.error) setUser(response.data);
+        } catch {}
+    };
+
     const logOut = async () => {
         try{
             await save(pathLogOut, {});
@@ -104,7 +111,8 @@ const AuthProvider = ({children}) => {
         logIn,
         logOut,
         register,
-        hasRole
+        hasRole,
+        refreshUser
     };
 
     return(

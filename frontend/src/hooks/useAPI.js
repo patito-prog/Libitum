@@ -12,9 +12,10 @@ const useAPI = () => {
         //Buscamos el token donde lo vamos a guardar, lo necesitamos porque usamos sanctum, lo guardamos en el localstorage.
         const token =  localStorage.getItem("token");
         //Preparamos las cabeceras.
+        const isFormData = options.body instanceof FormData;
         const headers = {
-            "Content-Type":"application/json",
-            "Accept":"application/json",
+            "Accept": "application/json",
+            ...(isFormData ? {} : { "Content-Type": "application/json" }),
             ...options.headers,
         };
 
@@ -67,6 +68,10 @@ const useAPI = () => {
         return callAPI(url, {method:"PATCH", body: JSON.stringify(body)});
     }
 
+    const uploadFile = (url, formData) => {
+        return callAPI(url, { method: 'POST', body: formData });
+    }
+
     return {
         loading,
         error,
@@ -74,7 +79,8 @@ const useAPI = () => {
         deleteData,
         save,
         edit,
-        patch
+        patch,
+        uploadFile
     }
 };
 

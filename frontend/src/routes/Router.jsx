@@ -11,6 +11,7 @@ import PageEvents from '../pages/private/PageEvents.jsx';
 import ArtistProfile from "../pages/public/ArtistProfile.jsx";
 import UserProfile from "../pages/public/UserProfile.jsx";
 import ArtistQR from "../pages/private/artist/ArtistQR.jsx";
+import EventDetail from "../pages/public/EventDetail.jsx";
 import AdminRoute from './guards/AdminRoute.jsx';
 import AdminDashboard from "../pages/private/admin/AdminDashboard.jsx";
 import Favorites from "../pages/private/Favorites.jsx";
@@ -32,6 +33,8 @@ const Router = () => {
             <Route path="/artist/:id" element={<ArtistProfile />} />
             {/* Perfil social de cualquier usuario — acceso libre */}
             <Route path="/user/:id" element={<UserProfile />} />
+            {/* Detalle de un evento — acceso libre */}
+            <Route path="/event/:id" element={<EventDetail />} />
             
             <Route element={<PrivateRoute/>}>
                 

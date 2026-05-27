@@ -45,6 +45,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::patch('/profile', [\App\Http\Controllers\ProfileController::class, 'update']);
+    Route::post('/profile/avatar', [\App\Http\Controllers\ProfileController::class, 'uploadAvatar']);
     Route::delete('/profile', [\App\Http\Controllers\ProfileController::class, 'destroy']);
 
     //RUTA FEED

@@ -58,6 +58,27 @@ class ProfileController extends Controller
         return Redirect::route('profile.edit');
     }
 
+    public function uploadAvatar(Request $request)
+    {
+        $request->validate([
+            'avatar' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        ]);
+
+        $user = $request->user();
+        $path = $request->file('avatar')->store('avatars', 'public');
+        // Use the request's actual host+port so the URL works regardless of APP_URL config
+        $url  = $request->getSchemeAndHttpHost() . '/storage/' . $path;
+
+        $user->avatar_url = $url;
+        $user->save();
+
+        return response()->json([
+            'error' => false,
+            'data'  => ['avatar_url' => $url],
+            'code'  => 200,
+        ]);
+    }
+
     /**
      * Delete the user's account.
      */

@@ -4,13 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class UserProfileController extends Controller
 {
     public function show(Request $request, $id)
     {
-        $currentUserId = Auth::id();
+        // Route is public — manually resolve the bearer token so Auth works without middleware.
+        $currentUserId = null;
+        if ($bearer = $request->bearerToken()) {
+            $token = PersonalAccessToken::findToken($bearer);
+            if ($token && $token->tokenable) {
+                $currentUserId = (int) $token->tokenable_id;
+            }
+        }
 
         $user = User::findOrFail($id);
         $role = $user->getRoleNames()->first() ?? 'spectator';
@@ -21,6 +28,8 @@ class UserProfileController extends Controller
             'avatar_url' => $user->avatar_url,
             'city'       => $user->city,
             'role'       => $role,
+            // Only expose email to the profile owner
+            'email'      => ($currentUserId === (int)$id) ? $user->email : null,
         ];
 
         if ($role === 'artist') {
@@ -36,16 +45,26 @@ class UserProfileController extends Controller
                 'followers_count' => $user->followers()->count(),
                 'following_count' => $user->following()->count(),
                 'is_following'    => $currentUserId
-                    ? $user->followers()->where('user_id', $currentUserId)->exists()
+                    ? $user->followers()->wherePivot('user_id', $currentUserId)->exists()
                     : false,
             ]);
         } else {
-            $following = $user->following()->with('artistProfile')->get();
+            $user->load(['events' => fn($q) => $q->with('status')]);
+
+            $now = now()->timestamp;
+            $sorted = $user->events->sortBy(function ($event) use ($now) {
+                $ts     = $event->event_date ? $event->event_date->timestamp : PHP_INT_MAX;
+                $isLive = $event->status?->name === 'live';
+
+                if ($isLive)       return 0 * 1e13 + $ts;   // live first, asc by date
+                if ($ts >= $now)   return 1 * 1e13 + $ts;   // upcoming, asc by date
+                return                    2 * 1e13 + (1e12 - $ts); // past, desc (recent first)
+            })->take(12)->values();
 
             $data = array_merge($base, [
-                'following'       => $following,
-                'following_count' => $following->count(),
-                'liked_count'     => $user->likes()->count(),
+                'events'          => $sorted,
+                'events_count'    => $user->events->count(),
+                'following_count' => $user->following()->count(),
             ]);
         }
 

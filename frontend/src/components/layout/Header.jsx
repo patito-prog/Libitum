@@ -97,10 +97,12 @@ const Header = () => {
             <div className={styles.userSection}>
                 {user ? (
                     <>
-                        <div className={styles.profileInfo}>
-                            <p className={styles.name}>{user.name}</p>
-                            <span className={styles.role}>{user.role}</span>
-                        </div>
+                        <Link to={`/user/${user.id}`} className={styles.profileLink}>
+                            <div className={styles.profileInfo}>
+                                <p className={styles.name}>{user.name}</p>
+                                <span className={styles.role}>{user.role}</span>
+                            </div>
+                        </Link>
                         <button onClick={handleLogout} className={styles.logoutBtn}>
                             Cerrar sesión
                         </button>
@@ -147,9 +149,14 @@ const Header = () => {
                         <NavLink to="/admin" className={mobileLinkClass} onClick={() => setMobileMenuOpen(false)}>Panel Admin</NavLink>
                     )}
                     {user && (
-                        <button onClick={handleLogout} className={styles.mobileLogoutBtn}>
-                            Cerrar sesión
-                        </button>
+                        <>
+                            <Link to={`/user/${user.id}`} className={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>
+                                Mi perfil
+                            </Link>
+                            <button onClick={handleLogout} className={styles.mobileLogoutBtn}>
+                                Cerrar sesión
+                            </button>
+                        </>
                     )}
                 </div>
             )}

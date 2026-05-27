@@ -177,6 +177,17 @@
 }
 
 /* ── Sección derecha ── */
+.profileLink {
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+    transition: background var(--transition-speed);
+    padding: 0.2rem 0.4rem;
+
+    &::after { display: none; }
+    &:hover { background: rgba(255, 255, 255, 0.05); }
+    &:hover .name { color: var(--color-primary); }
+}
+
 .userSection {
     display: flex;
     align-items: center;

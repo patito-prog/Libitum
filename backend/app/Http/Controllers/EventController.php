@@ -47,10 +47,9 @@ class EventController extends Controller
         //2. Buscamos el evento por ID y cargamos las categorías y el estado de este.
         //  toDo: Recoger los $event->attendees() para que pueda verse quien va a asistir.
         //  Hay que hacer una lógica de que si eres el creador puedes verlos y si no lo eres pues solo puedes ver el el evento en si.
-        $event->load('categories', 'status');
+        $event->load('categories', 'status', 'artist');
 
-        // Añadimos el estado del like manualmente al modelo cargado
-        $event->liked = $event->likedBy()->where('user_id', $userId)->exists();
+        $event->liked = $userId ? $event->likedBy()->where('user_id', $userId)->exists() : false;
 
         return ReturnHelper::return([
             'event' => $event,
