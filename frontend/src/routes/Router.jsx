@@ -38,15 +38,15 @@ const Router = () => {
             <Route path="/user/:id" element={<UserProfile />} />
             {/* Detalle de un evento — acceso libre */}
             <Route path="/event/:id" element={<EventDetail />} />
-            
+
             <Route path="/events/buscar" element={<SearchEvents />} />
+            <Route path="/feed" element={<Feed />} />
 
             <Route element={<PrivateRoute/>}>
                 <Route path="/" element={<Home />} />
                 <Route path="/events" element={<PageEvents />} />
                 <Route path="/my-qr" element={<ArtistQR />} />
                 <Route path="/estadisticas" element={<ArtistStats />} />
-                <Route path="/feed" element={<Feed />} />
                 <Route path="/favorites" element={<Favorites />} />
                 <Route path="/asistencias" element={<MyAttendance />} />
                 <Route path="*" element={<Error />} />

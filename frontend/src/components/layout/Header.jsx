@@ -72,7 +72,7 @@ const Header = () => {
                         Panel Admin
                     </NavLink>
                 )}
-                <NavLink to="/events/buscar" className={navLinkClass} ><img src="/icon-lupa.png" alt="Buscar" /></NavLink>
+                <NavLink to="/events/buscar" className={navLinkClass} >Buscar</NavLink>
                 {isArtist && (
                     <div className={styles.dropdown} ref={dropdownRef}>
                         <button

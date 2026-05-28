@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import useAPI from "../../hooks/useAPI.js";
 import useEventContext from "../../hooks/useEventContext.js";
+import useAuthContext from "../../hooks/useAuthContext.js";
+import useMessageContext from "../../hooks/useMessageContext.js";
 import Event from "../../components/Event.jsx";
 import styles from "./Feed.module.scss";
 import EventSkeleton from "../../components/common/EventSkeleton.jsx";
@@ -17,6 +20,9 @@ const STATUS_FILTERS = [
 const Feed = () => {
     const { getData, save, deleteData } = useAPI();
     const { toggleLike } = useEventContext();
+    const { user } = useAuthContext();
+    const { showMessageWithTime } = useMessageContext();
+    const navigate = useNavigate();
     const API = `${API_BASE}/api`;
     const [feedEvents, setFeedEvents] = useState([]);
     const [mode, setMode] = useState("discover");
@@ -87,6 +93,11 @@ const Feed = () => {
     }, [hasMore, mode, statusFilter, feedEvents.length, fetchEvents]);
 
     const handleInscribe = async (id, isSignedUp) => {
+        if (!user) {
+            showMessageWithTime('Para poder apuntarte debes registrarte primero', 'error');
+            setTimeout(() => navigate('/login'), 2000);
+            return;
+        }
         setFeedEvents(prev => prev.map(evt =>
             evt.id === id ? { ...evt, signed_up: !isSignedUp } : evt
         ));
