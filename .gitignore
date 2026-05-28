@@ -2,7 +2,15 @@
 .vscode
 ToDo.md
 
+# Claude Code
+.claude/
+
 # Vite
 .vite/
 node_modules/
 dist/
+
+# Entornos
+.env
+.env.local
+.env.*.local
