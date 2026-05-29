@@ -21,7 +21,7 @@ const SOCIAL_LINKS = [
 
 const EMPTY_FORM = {
     name: '', email: '', city: '', avatar_url: '',
-    bio: '', spotify_url: '', instagram_url: '', youtube_url: '', tiktok_url: '', donation_url: '',
+    bio: '', spotify_url: '', instagram_url: '', youtube_url: '', tiktok_url: '', donation_url: '', bizum_phone: '',
 };
 
 /**
@@ -107,6 +107,7 @@ const UserProfile = () => {
             avatar_url: profile.avatar_url ?? '',
             bio: ap?.bio ?? '', spotify_url: ap?.spotify_url ?? '', instagram_url: ap?.instagram_url ?? '',
             youtube_url: ap?.youtube_url ?? '', tiktok_url: ap?.tiktok_url ?? '', donation_url: ap?.donation_url ?? '',
+            bizum_phone: ap?.bizum_phone ?? '',
         });
         setEditMode(true);
     };
@@ -143,6 +144,7 @@ const UserProfile = () => {
                     bio: formData.bio || null, spotify_url: formData.spotify_url || null,
                     instagram_url: formData.instagram_url || null, youtube_url: formData.youtube_url || null,
                     tiktok_url: formData.tiktok_url || null, donation_url: formData.donation_url || null,
+                    bizum_phone: formData.bizum_phone || null,
                 });
             }
             setProfile(prev => ({

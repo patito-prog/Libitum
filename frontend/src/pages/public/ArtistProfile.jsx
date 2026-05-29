@@ -14,7 +14,7 @@ import styles from "./ArtistProfile.module.scss";
 
 const EMPTY_FORM = {
     bio: "", spotify_url: "", instagram_url: "",
-    youtube_url: "", tiktok_url: "", donation_url: "",
+    youtube_url: "", tiktok_url: "", donation_url: "", bizum_phone: "",
 };
 
 /**
@@ -62,6 +62,7 @@ const ArtistProfile = () => {
                 youtube_url:   p.youtube_url   ?? "",
                 tiktok_url:    p.tiktok_url    ?? "",
                 donation_url:  p.donation_url  ?? "",
+                bizum_phone:   p.bizum_phone   ?? "",
             });
         }
     }, [artist]);

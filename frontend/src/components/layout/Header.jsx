@@ -117,12 +117,23 @@ const Header = () => {
             <div className={styles.userSection}>
                 {user ? (
                     <>
-                        <Link to={`/user/${user.id}`} className={styles.profileLink}>
-                            <div className={styles.profileInfo}>
-                                <p className={styles.name}>{user.name}</p>
-                                <span className={styles.role}>{ROLE_LABELS[user.role] ?? user.role}</span>
+                        {/* El admin no tiene perfil público que ver/editar: mostramos
+                            su nombre como texto, sin enlace. El resto sí enlaza. */}
+                        {isAdmin ? (
+                            <div className={styles.profileLink}>
+                                <div className={styles.profileInfo}>
+                                    <p className={styles.name}>{user.name}</p>
+                                    <span className={styles.role}>{ROLE_LABELS[user.role] ?? user.role}</span>
+                                </div>
                             </div>
-                        </Link>
+                        ) : (
+                            <Link to={`/user/${user.id}`} className={styles.profileLink}>
+                                <div className={styles.profileInfo}>
+                                    <p className={styles.name}>{user.name}</p>
+                                    <span className={styles.role}>{ROLE_LABELS[user.role] ?? user.role}</span>
+                                </div>
+                            </Link>
+                        )}
                         <button onClick={handleLogout} className={styles.logoutBtn}>
                             Cerrar sesión
                         </button>
@@ -172,15 +183,16 @@ const Header = () => {
                     {isAdmin && (
                         <NavLink to="/admin" className={mobileLinkClass} onClick={() => setMobileMenuOpen(false)}>Panel Admin</NavLink>
                     )}
+                    {/* El admin no tiene perfil público: no le mostramos "Mi perfil". */}
+                    {user && !isAdmin && (
+                        <Link to={`/user/${user.id}`} className={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>
+                            Mi perfil
+                        </Link>
+                    )}
                     {user && (
-                        <>
-                            <Link to={`/user/${user.id}`} className={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>
-                                Mi perfil
-                            </Link>
-                            <button onClick={handleLogout} className={styles.mobileLogoutBtn}>
-                                Cerrar sesión
-                            </button>
-                        </>
+                        <button onClick={handleLogout} className={styles.mobileLogoutBtn}>
+                            Cerrar sesión
+                        </button>
                     )}
                 </div>
             )}

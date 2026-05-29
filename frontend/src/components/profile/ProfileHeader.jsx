@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import BizumCard from './BizumCard.jsx';
 import styles from '../../pages/public/UserProfile.module.scss';
 
 /**
@@ -78,6 +79,12 @@ const ProfileHeader = ({
                     </a>
                 )}
             </div>
+
+            {isArtist && artistProfile?.bizum_phone && !isOwnProfile && (
+                <div className={styles.bizumWrapper}>
+                    <BizumCard phone={artistProfile.bizum_phone} name={profile.name?.split(' ')[0]} />
+                </div>
+            )}
         </div>
     </div>
 );

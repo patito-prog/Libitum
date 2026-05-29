@@ -77,9 +77,15 @@ const ProfileForms = ({
                         ))}
                         <div className={`${styles.formGroup} ${styles.formGroupFull}`}>
                             <label className={styles.formLabel}>💛 Enlace de donación</label>
-                            <p className={styles.donationWarning}>Ko-fi, Buy Me a Coffee, PayPal, Patreon, GoFundMe o Twitch.</p>
+                            <p className={styles.donationWarning}>💡 Recomendado: <strong>Ko-fi</strong> (con Stripe) — el donante paga con tarjeta sin crear cuenta. Evita usar solo PayPal, que a veces obliga a registrarse. También: Buy Me a Coffee, Patreon, GoFundMe o Twitch.</p>
                             <input className={styles.formInput} type="url" name="donation_url"
                                 value={formData.donation_url} onChange={onChange} placeholder="https://ko-fi.com/..." />
+                        </div>
+                        <div className={`${styles.formGroup} ${styles.formGroupFull}`}>
+                            <label className={styles.formLabel}>💜 Bizum (opcional)</label>
+                            <p className={styles.donationWarning}>⚠️ Tu número será visible en tu perfil. Lo añades bajo tu responsabilidad.</p>
+                            <input className={styles.formInput} type="tel" name="bizum_phone"
+                                value={formData.bizum_phone} onChange={onChange} placeholder="600 00 00 00" />
                         </div>
                     </div>
                 </div>

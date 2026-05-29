@@ -1,3 +1,4 @@
+import BizumCard from './BizumCard.jsx';
 import styles from '../../pages/public/ArtistProfile.module.scss';
 
 // Redes que mostramos como chips si el artista las ha rellenado.
@@ -26,6 +27,10 @@ const ArtistPublicView = ({ profile, firstName }) => (
                 </a>
                 <p className={styles.donateDisclaimer}>Sin comisiones · Pago seguro</p>
             </div>
+        )}
+
+        {profile?.bizum_phone && (
+            <BizumCard phone={profile.bizum_phone} name={firstName} />
         )}
 
         {profile?.bio && (

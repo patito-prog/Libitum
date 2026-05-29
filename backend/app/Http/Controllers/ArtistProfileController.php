@@ -46,6 +46,21 @@ class ArtistProfileController extends Controller
                     $fail('La URL de donación debe ser de una plataforma de confianza: Ko-fi, Buy Me a Coffee, PayPal, Patreon, GoFundMe, Stripe o Twitch.');
                 },
             ],
+            // Móvil para Bizum (opcional). Lo valida un móvil español: 9 dígitos
+            // empezando por 6 o 7, admitiendo el prefijo +34 y espacios.
+            'bizum_phone'   => [
+                'nullable', 'string', 'max:20',
+                function ($attribute, $value, $fail) {
+                    if (!$value) return;
+                    $digits = preg_replace('/\D/', '', $value);
+                    if (strlen($digits) === 11 && str_starts_with($digits, '34')) {
+                        $digits = substr($digits, 2);
+                    }
+                    if (!preg_match('/^[67]\d{8}$/', $digits)) {
+                        $fail('El número de Bizum debe ser un móvil español válido (9 dígitos, empieza por 6 o 7).');
+                    }
+                },
+            ],
         ]);
 
         Auth::user()->artistProfile->update([
@@ -54,7 +69,8 @@ class ArtistProfileController extends Controller
             'instagram_url'=>$request->instagram_url,
             'youtube_url'=>$request->youtube_url,
             'tiktok_url'=>$request->tiktok_url,
-            'donation_url'=>$request->donation_url
+            'donation_url'=>$request->donation_url,
+            'bizum_phone'=>$request->bizum_phone,
         ]);
 
         // Respuesta para la API

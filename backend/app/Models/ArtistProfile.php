@@ -21,6 +21,7 @@ class ArtistProfile extends Model
         'youtube_url',
         'tiktok_url',
         'donation_url',
+        'bizum_phone',
     ];
 
     /** Usuario (artista) dueño de este perfil. */

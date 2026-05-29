@@ -54,10 +54,32 @@ const ArtistEditForm = ({
                     </div>
                     <input type="url" id="donation_url" name="donation_url"
                         value={profileForm.donation_url} onChange={onChange}
-                        placeholder="https://buymeacoffee.com/tu_usuario"
+                        placeholder="https://ko-fi.com/tu_usuario"
                         className={`${styles.input} ${styles.donationEditInput}`} />
+                    <p className={styles.donationEditTip}>
+                        💡 Recomendado: <strong>Ko-fi</strong> (conectando Stripe) — quien te dona paga con tarjeta <strong>sin crear cuenta</strong> y sin comisiones. Evita usar solo PayPal, porque a veces obliga al donante a registrarse.
+                    </p>
                     <p className={styles.donationEditPlatforms}>
                         Plataformas aceptadas: Ko-fi · Buy Me a Coffee · PayPal · Patreon · GoFundMe · Twitch
+                    </p>
+                </div>
+
+                <div className={styles.donationEditBlock}>
+                    <div className={styles.donationEditHeader}>
+                        <span className={styles.donationEditIcon}>💜</span>
+                        <div>
+                            <p className={styles.donationEditTitle}>Bizum (opcional)</p>
+                            <p className={styles.donationEditHint}>
+                                ¿Sin PayPal ni Ko-fi? Pon tu móvil y tus fans podrán hacerte un Bizum directo, sin comisiones.
+                            </p>
+                        </div>
+                    </div>
+                    <input type="tel" id="bizum_phone" name="bizum_phone"
+                        value={profileForm.bizum_phone} onChange={onChange}
+                        placeholder="600 00 00 00"
+                        className={`${styles.input} ${styles.donationEditInput}`} />
+                    <p className={styles.donationEditPlatforms}>
+                        ⚠️ Este número será <strong>visible públicamente</strong> en tu perfil. Lo añades bajo tu responsabilidad.
                     </p>
                 </div>
 

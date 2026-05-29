@@ -315,6 +315,20 @@
     line-height: 1.45;
 }
 
+/* Consejo destacado sobre qué plataforma usar (Ko-fi) */
+.donationEditTip {
+    font-size: 0.8rem;
+    color: var(--color-primary-deep);
+    background: var(--color-primary-light);
+    border: 1px solid rgba(26, 125, 130, 0.25);
+    border-radius: var(--radius-sm);
+    padding: 0.6rem 0.8rem;
+    margin: 0 0 0.5rem;
+    line-height: 1.5;
+
+    strong { color: var(--color-primary-deep); }
+}
+
 /* ── PREVIEW MÓVIL ── */
 .previewSection {
     display: flex;
