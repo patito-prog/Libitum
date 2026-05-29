@@ -93,7 +93,7 @@ const FloatingSelect = ({ id, name, label, onChange, children, ...props }) => (
  * @param {Array}    [props.initialValue=[]] ids preseleccionados (al editar)
  * @param {Function} props.onChange     Recibe el array de ids seleccionados
  */
-const FloatingMultiSelect = ({ id, name, label, onChange, options = [], initialValue = [] }) => {
+const FloatingMultiSelect = ({ name, label, onChange, options = [], initialValue = [] }) => {
     const [open, setOpen] = useState(false);
     const [selected, setSelected] = useState(initialValue);
     const ref = useRef(null);
@@ -120,7 +120,9 @@ const FloatingMultiSelect = ({ id, name, label, onChange, options = [], initialV
 
     return (
         <div className={`${styles.field} ${styles.multiField}`} ref={ref}>
-            <label htmlFor={id} className={`${styles.label} ${styles.floating}`}>{label}</label>
+            {/* Sin htmlFor: el control de categorías es un div personalizado, no un
+                input con id, así que asociar el label daría aviso de accesibilidad. */}
+            <span className={`${styles.label} ${styles.floating}`}>{label}</span>
             <div className={styles.multiTrigger} onClick={() => setOpen(o => !o)}>
                 {selectedNames.length === 0
                     ? <span className={styles.multiPlaceholder}>Elige categorías…</span>

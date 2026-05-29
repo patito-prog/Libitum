@@ -120,10 +120,10 @@ const Artists = () => {
                                 <div
                                     key={artist.id}
                                     className={styles.card}
-                                    onClick={() => navigate(`/artist/${artist.id}`)}
+                                    onClick={() => navigate(`/user/${artist.id}`)}
                                     role="button"
                                     tabIndex={0}
-                                    onKeyDown={e => e.key === 'Enter' && navigate(`/artist/${artist.id}`)}
+                                    onKeyDown={e => e.key === 'Enter' && navigate(`/user/${artist.id}`)}
                                 >
                                     <div className={styles.avatar}>
                                         {artist.avatar_url

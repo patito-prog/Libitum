@@ -66,9 +66,6 @@ const Header = () => {
                 {(isSpectator || isArtist) && (
                     <NavLink to="/favorites" className={navLinkClass}>Favoritos</NavLink>
                 )}
-                {isSpectator && (
-                    <NavLink to="/asistencias" className={navLinkClass}>Asistencias</NavLink>
-                )}
                 {isArtist && (
                     <NavLink to="/events" className={navLinkClass} end>Mis Eventos</NavLink>
                 )}
@@ -80,10 +77,8 @@ const Header = () => {
                     </NavLink>
                 )}
                 <NavLink to="/events/buscar" className={navLinkClass} >Buscar</NavLink>
-                <NavLink to="/artistas" className={navLinkClass}>Artistas</NavLink>
-                {user && !isAdmin && (
-                    <NavLink to={`/user/${user.id}`} className={navLinkClass}>Mi perfil</NavLink>
-                )}
+
+                {/* Desplegable "Más" del ARTISTA */}
                 {isArtist && (
                     <div className={styles.dropdown} ref={dropdownRef}>
                         <button
@@ -107,6 +102,36 @@ const Header = () => {
                                 </Link>
                                 <Link to={`/artist/${user?.id}`} className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
                                     Mi página de artista
+                                </Link>
+                                <Link to="/artistas" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
+                                    Buscar artistas
+                                </Link>
+                                <Link to="/asistencias" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
+                                    Mis asistencias
+                                </Link>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Desplegable "Más" del ESPECTADOR */}
+                {isSpectator && (
+                    <div className={styles.dropdown} ref={dropdownRef}>
+                        <button
+                            className={styles.dropdownTrigger}
+                            onClick={() => setDropdownOpen(o => !o)}
+                            aria-expanded={dropdownOpen}
+                            aria-haspopup="true"
+                        >
+                            Más <span className={dropdownOpen ? `${styles.chevron} ${styles.chevronUp}` : styles.chevron}>▾</span>
+                        </button>
+                        {dropdownOpen && (
+                            <div className={styles.dropdownMenu} role="menu">
+                                <Link to={`/user/${user?.id}`} className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
+                                    Mi perfil
+                                </Link>
+                                <Link to="/artistas" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
+                                    Buscar artistas
                                 </Link>
                                 <Link to="/asistencias" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
                                     Mis asistencias
