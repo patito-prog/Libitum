@@ -37,6 +37,13 @@ return [
 
     'mailers' => [
 
+        // Brevo por API HTTP (registrado en AppServiceProvider). Es el que usamos
+        // en producción porque Railway bloquea el SMTP saliente.
+        'brevo' => [
+            'transport' => 'brevo',
+            'key' => env('BREVO_KEY'),
+        ],
+
         'smtp' => [
             'transport' => 'smtp',
             'scheme' => env('MAIL_SCHEME'),
