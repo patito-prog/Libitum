@@ -1,6 +1,7 @@
 import EventProvider from './context/EventProvider.jsx';
 import Router from './routes/Router';
 import MessageApp from "./components/common/MessageApp.jsx";
+import ErrorBoundary from "./components/common/ErrorBoundary.jsx";
 import Container from "./components/layout/Container.jsx";
 import Header from "./components/layout/Header.jsx";
 import Content from "./components/layout/Content.jsx";
@@ -19,9 +20,11 @@ function App() {
       <Header />
       <Content>
         <MessageApp />
-        <EventProvider>
-          <Router />
-        </EventProvider>
+        <ErrorBoundary>
+          <EventProvider>
+            <Router />
+          </EventProvider>
+        </ErrorBoundary>
       </Content>
       <Footer />
       </Container>

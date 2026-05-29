@@ -127,9 +127,11 @@
 
     &:hover {
         background: var(--color-primary-hover);
+        color: #fff; /* forzamos blanco: si no, el hover global de enlaces lo dejaba ilegible */
         transform: translateY(-1px);
         box-shadow: 0 8px 22px rgba(26, 125, 130, 0.25);
     }
+    &:hover, &:focus, &:visited { color: #fff; }
     &::after { display: none; }
 }
 
