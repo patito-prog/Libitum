@@ -54,10 +54,10 @@ const useAPI = () => {
             });
 
             if(!response.ok){
-                // Si el back responde con error, intentamos sacar su mensaje;
-                // si no hay cuerpo, usamos el código HTTP como mensaje.
+                // Mensaje del back si lo trae; si no, uno amigable según el código.
+                // Así nunca enseñamos cosas técnicas tipo "HTTP 500" al usuario.
                 const errorBody = await response.json().catch(() => null);
-                const message = errorBody?.message ?? `HTTP ${response.status}`;
+                const message = errorBody?.message ?? friendlyByStatus(response.status);
                 // Adjuntamos el cuerpo y el status al error para que el componente
                 // pueda reaccionar a casos concretos (p.ej. needs_verification).
                 const err = new Error(message);
@@ -67,12 +67,34 @@ const useAPI = () => {
             }
             return await response.json();
         } catch (error){
+            // Si es un error nuestro (con status), ya lleva mensaje amigable.
+            // Si no (fallo de red: fetch lanza TypeError), lo traducimos.
+            if (!error.status) {
+                const netErr = new Error("No se ha podido conectar. Revisa tu conexión e inténtalo de nuevo.");
+                netErr.isNetwork = true;
+                setError(netErr.message);
+                throw netErr;
+            }
             setError(error.message);
             throw error; // lo relanzamos para que el componente decida qué hacer
         } finally{
             setLoading(false);
         }
     }
+
+    /** Mensaje amigable en español según el código HTTP cuando el back no manda uno. */
+    const friendlyByStatus = (status) => {
+        switch (status) {
+            case 401: return "Tu sesión no es válida. Vuelve a iniciar sesión.";
+            case 403: return "No tienes permiso para hacer esto.";
+            case 404: return "No hemos encontrado lo que buscabas.";
+            case 422: return "Revisa los datos del formulario.";
+            case 429: return "Demasiados intentos. Espera un momento e inténtalo de nuevo.";
+            default:  return status >= 500
+                ? "Ha ocurrido un error en el servidor. Inténtalo más tarde."
+                : "Algo ha ido mal. Inténtalo de nuevo.";
+        }
+    };
 
     /** GET. @param {string} url @returns {Promise<Object>} */
     const getData = (url) => callAPI(url, {method:"GET"});

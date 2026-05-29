@@ -24,6 +24,7 @@ const MessageProvider = ({ children }) => {
 	const [messageType, setMessageType] = useState(MESSAGE_TYPE.INFO); // controla el color/estilo
 	const [activeMessage, setActiveMessage] = useState(false);          // ¿se ve el toast?
 	const [timeMessageProgress, setTimeMessageProgress] = useState();   // ms restantes (barra de progreso)
+	const [messageDuration, setMessageDuration] = useState(5000);       // duración total (para la barra)
 	const intervalRef = useRef(null);
 
 	/**
@@ -65,10 +66,11 @@ const MessageProvider = ({ children }) => {
 	 * @param {string} [type="info"] Tipo (estilo)
 	 * @param {number} [milisecs=3000] Cuánto dura visible
 	 */
-	const showMessageWithTime = (newMessage, type = "info", milisecs = 3000) => {
+	const showMessageWithTime = (newMessage, type = "info", milisecs = 5000) => {
 		if(!isNumber(milisecs)) throw Error("ShowMessageTime-MessageProvider: The param of milisecs have to be a number");
 		// Si ya había un toast contando, cancelamos su intervalo antes de empezar otro.
 		if (intervalRef.current) clearInterval(intervalRef.current);
+		setMessageDuration(milisecs);
 		setTimeMessageProgress(milisecs);
 		showMessage(newMessage, type);
 		intervalRef.current = setInterval(() => {
@@ -90,6 +92,7 @@ const MessageProvider = ({ children }) => {
 		messageType,
 		activeMessage,
 		timeMessageProgress,
+		messageDuration,
 		showMessage,
 		hideMessage,
 		showMessageWithTime

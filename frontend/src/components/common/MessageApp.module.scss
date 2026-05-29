@@ -3,59 +3,91 @@
     top: clamp(4.5rem, 10vh, 6rem);
     right: clamp(0.75rem, 3vw, 1.5rem);
     z-index: 2000;
-    width: clamp(240px, 85vw, 360px);
-    padding: clamp(0.75rem, 2vw, 1rem) clamp(1rem, 2.5vw, 1.25rem);
+    width: clamp(300px, 90vw, 440px);
+    padding: clamp(1rem, 2.5vw, 1.35rem) clamp(1.1rem, 3vw, 1.6rem);
     display: flex;
     align-items: center;
-    gap: clamp(0.5rem, 1.5vw, 0.75rem);
-    border-radius: clamp(0.5rem, 1.5vw, 0.75rem);
-    border-left: 4px solid transparent;
-    background: rgba(42, 43, 44, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: var(--shadow-md);
-    animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    gap: clamp(0.7rem, 2vw, 1rem);
+    overflow: hidden;
+
+    /* Tema CLARO: tarjeta blanca cálida sobre el crema, no el gris oscuro de antes */
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-left: 5px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    box-shadow: 0 12px 32px rgba(22, 24, 26, 0.16);
+
+    /* Estado inicial (oculto): desplazado y transparente. La clase .visible lo
+       trae a su sitio. Al quitarla, vuelve aquí → animación de salida fluida. */
+    opacity: 0;
+    transform: translateX(calc(100% + 2rem)) scale(0.98);
+    transition:
+        opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+
+    &.visible {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
 
     p {
         margin: 0;
-        font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+        flex: 1;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
         font-weight: 600;
-        line-height: 1.4;
+        line-height: 1.45;
+        color: var(--text-primary);
     }
 
-    &.ok {
-        border-left-color: #27ae60;
-        .icon { color: #27ae60; }
-        p { color: #a8e6c0; }
-    }
-
-    &.error {
-        border-left-color: #c0392b;
-        .icon { color: #c0392b; }
-        p { color: #f1a9a0; }
-    }
-
-    &.info {
-        border-left-color: var(--color-primary);
-        .icon { color: var(--color-primary); }
-        p { color: var(--text-primary); }
-    }
+    &.ok      { border-left-color: #1f9d57; }
+    &.error   { border-left-color: var(--color-danger); }
+    &.warning { border-left-color: #d9970c; }
+    &.info    { border-left-color: var(--color-primary); }
 }
 
+/* Icono dentro de un círculo del color del tipo */
 .icon {
-    font-size: clamp(1rem, 2vw, 1.1rem);
-    font-weight: 700;
     flex-shrink: 0;
+    width: 2.2rem;
+    height: 2.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    font-weight: 800;
     line-height: 1;
+    color: #fff;
+
+    .ok &      { background: #1f9d57; }
+    .error &   { background: var(--color-danger); }
+    .warning & { background: #d9970c; }
+    .info &    { background: var(--color-primary); }
 }
 
-@keyframes slideInRight {
-    from {
-        transform: translateX(calc(100% + 2rem));
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
+/* Barra de progreso: se vacía de izquierda a derecha durante la vida del toast */
+.progress {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    width: 100%;
+    transform-origin: left center;
+    animation: shrinkBar linear forwards;
+
+    .ok &      { background: #1f9d57; }
+    .error &   { background: var(--color-danger); }
+    .warning & { background: #d9970c; }
+    .info &    { background: var(--color-primary); }
+}
+
+@keyframes shrinkBar {
+    from { transform: scaleX(1); }
+    to   { transform: scaleX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .container { transition: opacity 0.2s ease; transform: none; }
+    .container.visible { transform: none; }
+    .progress { animation: none; }
 }
