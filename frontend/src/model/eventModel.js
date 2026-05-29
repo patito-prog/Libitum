@@ -1,38 +1,19 @@
 "use strict";
 
-
-/**
- * Function to validate if an event object has all required fields valids.
- * @param {*} event 
- * @returns { boolean } 
- */
 export const eventIsValid = (event) => {
-    let isEventValid = true;
-    if (!event) isEventValid = false;
-    if (!isEventDateValid(event.event_date)) isEventValid = false;
-    if (!isPriceValid(event.price)) isEventValid = false;
-    if (!isCoverImageValid(event.cover_image)) isEventValid = false;
-    if (!isMaxCapacityValid(event.max_capacity)) isEventValid = false;
-    if (!isStatusValid(event.status_id)) isEventValid = false;
-    return isEventValid;
-}
+    if (!event) return false;
+    return (
+        isEventDateValid(event.event_date) &&
+        isPriceValid(event.price) &&
+        isMaxCapacityValid(event.max_capacity) &&
+        isStatusValid(event.status_id)
+    );
+};
 
-const isEventDateValid = (dateEvent) => {
-    
-}
+const isEventDateValid = (dateEvent) => !!dateEvent;
 
-const isPriceValid = (price) => {
-    console.log("Funcion validar precio no programada");
-}
+const isPriceValid = (price) => price === null || price === undefined || (!isNaN(price) && Number(price) >= 0);
 
-const isCoverImageValid = (coverImage) => {
-    console.log("Funcion validar cover image no programada");
-}
+const isMaxCapacityValid = (maxCapacity) => maxCapacity === null || maxCapacity === undefined || (!isNaN(maxCapacity) && Number(maxCapacity) >= 1);
 
-const isMaxCapacityValid = (maxCapacity) => {
-    console.log("Funcion validar capacidad maxima no programada");
-}
-
-const isStatusValid = (status) => {
-    console.log("Funcion validar status no programada");
-}
+const isStatusValid = (status) => status !== null && status !== undefined;

@@ -5,9 +5,14 @@ import API_BASE from "../../config/api.js";
 import useMessageContext from "../../hooks/useMessageContext.js";
 import MiniEvent from "../../components/MiniEvent.jsx";
 import MiniEventSkeleton from "../../components/common/MiniEvenSkeleton.jsx";
+import EmptyState from "../../components/common/EmptyState.jsx";
 import styles from "./Favorites.module.scss";
 import useEventContext from "../../hooks/useEventContext.js";
 
+/**
+ * "Mis favoritos": los eventos a los que el usuario ha dado like.
+ * Al quitar el like, el evento desaparece de la lista al instante.
+ */
 const Favorites = () => {
     const { getData, loading, error } = useAPI();
     const { showMessageWithTime } = useMessageContext();
@@ -39,21 +44,23 @@ const Favorites = () => {
                     {[1, 2, 3, 4, 5, 6].map(n => <MiniEventSkeleton key={n} />)}
                 </div>
             ) : error ? (
-                <p>Hubo un error al cargar.</p>
+                <EmptyState icon="⚠️" message="Hubo un error al cargar los favoritos." />
+            ) : favoriteEvents.length === 0 ? (
+                <EmptyState
+                    icon="🤍"
+                    message="Aún no le has dado me gusta a ningún evento."
+                    hint="Descubre eventos en Para Ti o en Buscar."
+                />
             ) : (
                 <div className={styles.grid}>
-                    {favoriteEvents.length > 0 ? (
-                        favoriteEvents.map(event => (
-                            <MiniEvent
-                                key={event.id}
-                                data={event}
-                                onClick={() => navigate(`/event/${event.id}`)}
-                                onLike={() => handleRemoveFavorite(event.id)}
-                            />
-                        ))
-                    ) : (
-                        <p>Aún no le has dado me gusta a ningún evento.</p>
-                    )}
+                    {favoriteEvents.map(event => (
+                        <MiniEvent
+                            key={event.id}
+                            data={event}
+                            onClick={() => navigate(`/event/${event.id}`)}
+                            onLike={() => handleRemoveFavorite(event.id)}
+                        />
+                    ))}
                 </div>
             )}
         </div>

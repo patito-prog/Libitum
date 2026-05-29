@@ -4,6 +4,7 @@ import useAPI from "../../hooks/useAPI.js";
 import useAuthContext from "../../hooks/useAuthContext.js";
 import useMessageContext from "../../hooks/useMessageContext.js";
 import Loader from "../../components/common/Loader.jsx";
+import BackButton from "../../components/common/BackButton.jsx";
 import UserListModal from "../../components/common/UserListModal.jsx";
 import ProfileHeader from "../../components/profile/ProfileHeader.jsx";
 import ProfileForms from "../../components/profile/ProfileForms.jsx";
@@ -23,6 +24,13 @@ const EMPTY_FORM = {
     bio: '', spotify_url: '', instagram_url: '', youtube_url: '', tiktok_url: '', donation_url: '',
 };
 
+/**
+ * Perfil social de un usuario (/user/:id) — la versión "dentro de la app".
+ *
+ * Si es tu propio perfil, puedes editar tus datos, avatar y contraseña; si es
+ * el de otro, puedes seguirlo (si es artista) y ver sus eventos/redes. Distingue
+ * artista de espectador para mostrar bio, redes sociales y donaciones.
+ */
 const UserProfile = () => {
     const { id } = useParams();
     const { getData, save, deleteData, patch, uploadFile, loading } = useAPI();
@@ -180,6 +188,8 @@ const UserProfile = () => {
 
     return (
         <div className={styles.page}>
+
+            {!isOwnProfile && <BackButton />}
 
             <ProfileHeader
                 profile={profile}

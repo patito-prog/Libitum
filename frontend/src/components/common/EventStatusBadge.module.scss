@@ -1,0 +1,17 @@
+.badge {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-pill);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    &.published { background: var(--color-primary-light); color: #5ab8bc; border: 1px solid rgba(33,115,119,0.3); }
+    &.live      { background: rgba(255, 201, 172, 0.15);  color: var(--color-accent); border: 1px solid rgba(255,201,172,0.25); }
+    &.draft     { background: rgba(22, 24, 26, 0.06);  color: var(--text-secondary); }
+    &.finished  { background: rgba(22, 24, 26, 0.06);  color: var(--text-secondary); }
+    &.cancelled { background: rgba(232, 74, 64, 0.12);   color: #f87171; }
+}

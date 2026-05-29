@@ -23,7 +23,11 @@
     }
 }
 
-.avatarWrapper { flex-shrink: 0; }
+.avatarWrapper {
+    flex-shrink: 0;
+    position: relative;
+    display: inline-block;
+}
 
 .avatar,
 .avatarPlaceholder {
@@ -44,6 +48,59 @@
     color: #fff;
 }
 
+/* Punto rojo pulsante sobre el avatar cuando el artista está en directo */
+.avatarLiveDot {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 18px;
+    height: 18px;
+    background: #ff3b30;
+    border: 2px solid var(--bg-main, #0f1214);
+    border-radius: 50%;
+    animation: livePulseRing 1.8s ease-out infinite;
+}
+
+@keyframes livePulseRing {
+    0%   { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.7); }
+    70%  { box-shadow: 0 0 0 8px rgba(255, 59, 48, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); }
+}
+
+/* Badge "EN DIRECTO" junto al nombre */
+.liveBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(255, 59, 48, 0.15);
+    border: 1px solid rgba(255, 59, 48, 0.4);
+    color: #ff3b30;
+    border-radius: var(--radius-pill);
+    padding: 0.2rem 0.65rem;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    transition: background var(--transition-speed);
+
+    &::after { display: none; }
+    &:hover { background: rgba(255, 59, 48, 0.25); }
+}
+
+.livePulse {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    background: #ff3b30;
+    border-radius: 50%;
+    animation: blink 1.2s ease-in-out infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.2; }
+}
+
 .headerInfo {
     flex: 1;
     display: flex;
@@ -61,11 +118,13 @@
 }
 
 .name {
-    font-size: 1.6rem;
-    font-weight: 800;
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    font-weight: 900;
     color: var(--text-primary);
     margin: 0;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.04em;
+    line-height: 1;
 }
 
 .roleBadge {
@@ -80,7 +139,7 @@
         border: 1px solid rgba(33, 115, 119, 0.3);
     }
     &.spectator, &.user {
-        background: rgba(255, 255, 255, 0.06);
+        background: rgba(22, 24, 26, 0.05);
         color: var(--text-secondary);
         border: 1px solid var(--border-color);
     }
@@ -342,7 +401,7 @@
     border-radius: var(--radius-pill);
     font-size: 0.82rem;
     font-weight: 600;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(22, 24, 26, 0.05);
     border: 1px solid var(--border-color);
     color: var(--text-secondary);
     text-decoration: none;
@@ -356,14 +415,24 @@
 .eventsSection { display: flex; flex-direction: column; gap: 1rem; }
 
 .sectionTitle {
-    font-size: 1rem;
-    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 800;
     color: var(--text-primary);
     margin: 0;
-    letter-spacing: 0.01em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    font-size: 0.8rem;
-    color: var(--text-secondary);
+
+    &::before {
+        content: '';
+        width: 22px;
+        height: 3px;
+        background: var(--color-primary);
+        border-radius: 2px;
+    }
 }
 
 /* Grid de eventos — estilo Instagram */
@@ -386,6 +455,30 @@
 
     &::after { display: none; }
     &:hover .eventInfo { opacity: 1; }
+}
+
+.eventCardLive {
+    outline: 2px solid #ff3b30;
+    outline-offset: -2px;
+    z-index: 1;
+
+    .eventInfo { opacity: 1; background: rgba(0, 0, 0, 0.45); }
+}
+
+/* Badge "EN DIRECTO" flotante sobre la tarjeta de la grid */
+.liveCardBadge {
+    position: absolute;
+    top: 0.45rem;
+    left: 0.45rem;
+    z-index: 2;
+    background: #ff3b30;
+    color: #fff;
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-pill);
+    pointer-events: none;
 }
 
 .eventCover {
@@ -450,7 +543,7 @@
     &.live      { background: rgba(249, 115, 22, 0.25); color: #fb923c; }
     &.finished  { background: rgba(255,255,255,0.1);    color: rgba(255,255,255,0.5); }
     &.cancelled { background: rgba(239, 68, 68, 0.2);  color: #f87171; }
-    &.draft     { background: rgba(255,255,255,0.07);   color: var(--text-muted); }
+    &.draft     { background: rgba(22, 24, 26, 0.06);   color: var(--text-muted); }
 }
 
 /* Grid de artistas seguidos (espectador) */

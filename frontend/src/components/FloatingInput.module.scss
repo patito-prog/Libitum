@@ -1,7 +1,7 @@
 .field {
     position: relative;
-    background: rgba(255, 255, 255, 0.05);
-    border-bottom: 2px solid rgba(255, 255, 255, 0.12);
+    background: rgba(22, 24, 26, 0.04);
+    border-bottom: 2px solid var(--border-color);
     border-radius: 4px 4px 0 0;
     padding: clamp(1rem, 2.5vw, 1.25rem) clamp(0.5rem, 1.5vw, 0.75rem) 6px;
     margin-top: clamp(0.75rem, 2vw, 1rem);

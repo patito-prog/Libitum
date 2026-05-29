@@ -1,124 +1,422 @@
+/* ════════════════════════════════════════════════
+   HOME — Diseño editorial bold
+   Inspiración: magazine layouts, tipografía masiva
+   ════════════════════════════════════════════════ */
+
 .page {
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 3rem 1.25rem 5rem;
     display: flex;
     flex-direction: column;
-    gap: 3rem;
+    overflow-x: hidden;
 }
 
-/* ── HERO ── */
-.hero {
+/* ── Contenido centrado ── */
+.inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 3.5rem 1.5rem 6rem;
     display: flex;
     flex-direction: column;
+    gap: 4rem;
+    width: 100%;
+}
+
+/* ══════════════
+   TICKER MARQUEE
+   ══════════════ */
+.ticker {
+    width: 100%;
+    overflow: hidden;
+    background: var(--color-primary);
+    padding: 0.55rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.tickerTrack {
+    display: flex;
+    gap: 0;
+    width: max-content;
+    animation: marquee 22s linear infinite;
+
+    &:hover { animation-play-state: paused; }
+}
+
+.tickerItem {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.9);
+    padding: 0 2rem;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
     gap: 0.6rem;
 }
 
-.greeting {
-    font-size: 1rem;
-    color: var(--text-secondary);
-    margin: 0;
-    font-weight: 500;
+.tickerDot {
+    color: var(--color-accent);
+    font-size: 0.6rem;
 }
 
-.name {
-    color: var(--color-primary);
-    font-weight: 700;
+@keyframes marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
 }
 
-.headline {
-    font-size: clamp(2.2rem, 5.5vw, 3.4rem);
-    font-weight: 900;
+/* ══════════════
+   HERO
+   ══════════════ */
+.hero {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding-top: 0.5rem;
+}
+
+/* Eyebrow editorial: marca + año, separados, con línea inferior */
+.eyebrow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 0.6rem;
+    border-bottom: 2px solid var(--text-primary);
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
     color: var(--text-primary);
-    margin: 0;
+}
+
+.eyebrowMark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    span { color: var(--color-primary); }
+}
+
+.eyebrowYear { color: var(--color-primary); }
+
+/* Wrapper con posición relativa para superponer la palabra fantasma */
+.headlineWrap {
+    position: relative;
+    isolation: isolate;
+}
+
+/* Palabra fantasma gigante (solo contorno) detrás del titular */
+.ghost {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-4deg);
+    z-index: -1;
+    max-width: 100%;
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 14vw, 14rem);
+    font-weight: 900;
+    line-height: 0.8;
+    color: transparent;
+    -webkit-text-stroke: 1.5px rgba(26, 125, 130, 0.16);
+    text-stroke: 1.5px rgba(26, 125, 130, 0.16);
+    pointer-events: none;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.heroMeta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+
+    strong { color: var(--text-primary); }
+}
+
+.heroPulse {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-light);
+    animation: pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 3px var(--color-primary-light); }
+    50%       { box-shadow: 0 0 0 7px transparent; }
+}
+
+.roleTag {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 0.2rem 0.7rem;
+    border-radius: var(--radius-pill);
+}
+
+.roleArtist {
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+    border: 1px solid rgba(33, 115, 119, 0.3);
+}
+
+.roleSpec {
+    background: rgba(255, 201, 172, 0.12);
+    color: var(--color-accent);
+    border: 1px solid rgba(255, 201, 172, 0.25);
+}
+
+/* Titular en tres líneas apiladas, estilo editorial */
+.headlineStack {
+    display: flex;
+    flex-direction: column;
+    line-height: 0.92;
+    gap: 0.05em;
+    animation: fadeSlideUp 0.7s cubic-bezier(0.22, 0.8, 0.4, 1) both;
+}
+
+@keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.line1 {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 9vw, 8rem);
+    overflow-wrap: break-word;
+    font-weight: 900;
     letter-spacing: -0.04em;
-    line-height: 1.1;
-    background: linear-gradient(135deg, var(--text-primary) 60%, var(--color-primary) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--color-primary);
+    display: block;
+}
+
+/* Texto con contorno (outlined) — contraste con sólido crea profundidad */
+.line2 {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 9vw, 8rem);
+    overflow-wrap: break-word;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    display: block;
+    color: transparent;
+    -webkit-text-stroke: 2.5px var(--text-primary);
+    text-stroke: 2.5px var(--text-primary);
+}
+
+/* Tercera línea en coral sólido — el "pop" de color vivo */
+.line3 {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 9vw, 8rem);
+    overflow-wrap: break-word;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    color: var(--color-accent);
+    display: block;
+}
+
+/* Asterisco decorativo coral — pegado al titular, gira lento */
+.deco {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 4%;
+    font-size: clamp(2.5rem, 7vw, 4.5rem);
+    color: var(--color-accent);
+    animation: spinSlow 16s linear infinite;
+    pointer-events: none;
+    user-select: none;
+    z-index: 2;
+
+    @media (max-width: 600px) { display: none; }
+}
+
+@keyframes spinSlow {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+.heroBottom {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    margin-top: 0.5rem;
+
+    @media (max-width: 540px) { gap: 0.9rem; }
+}
+
+/* Línea conectora horizontal editorial (— texto) */
+.connector {
+    flex-shrink: 0;
+    width: 56px;
+    height: 3px;
+    background: var(--color-primary);
+    margin-top: 0.6rem;
 }
 
 .sub {
     font-size: 1rem;
     color: var(--text-secondary);
-    margin: 0.25rem 0 0;
-    max-width: 520px;
-    line-height: 1.6;
+    line-height: 1.65;
+    max-width: 480px;
+    margin: 0;
+    animation: fadeSlideUp 0.9s 0.2s cubic-bezier(0.22, 0.8, 0.4, 1) both;
 }
 
-/* ── GRID DE CARDS ── */
+/* ══════════════
+   NAVIGATION GRID
+   ══════════════ */
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.85rem;
+    background: transparent;
 
     @media (max-width: 480px) {
         grid-template-columns: 1fr 1fr;
-        gap: 0.75rem;
+        gap: 0.65rem;
     }
 }
 
 .card {
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
-    padding: 1.4rem 1.25rem;
-    background: var(--bg-card, rgba(255, 255, 255, 0.04));
+    justify-content: space-between;
+    padding: 1.5rem 1.25rem 1.25rem;
+    background: var(--bg-surface);
     border: 1px solid var(--border-color);
-    border-top: 2px solid transparent;
-    border-radius: var(--radius-lg, 16px);
+    border-radius: var(--radius-md);
     text-decoration: none;
-    transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
-    position: relative;
     overflow: hidden;
+    min-height: 140px;
+    box-shadow: 0 4px 14px rgba(22, 24, 26, 0.06);
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+
+    animation: cardReveal 0.5s calc(var(--delay, 0s) + 0.3s) cubic-bezier(0.22, 0.8, 0.4, 1) both;
 
     &::after { display: none; }
 
+    /* Barra de color superior que se revela al hover */
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--color-primary);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.25s ease;
+    }
+
     &:hover {
-        transform: translateY(-3px);
+        background: var(--color-primary);
         border-color: var(--color-primary);
-        border-top-color: var(--color-primary);
-        background: rgba(33, 115, 119, 0.07);
-        box-shadow: var(--shadow-glow);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 26px rgba(22, 24, 26, 0.14);
 
-        .arrow { opacity: 1; transform: translateX(0); }
-        .cardIcon { transform: scale(1.12); }
+        &::before { transform: scaleX(1); }
+
+        .cardNum   { opacity: 0.18; color: #fff; }
+        .cardTitle { color: #fff; }
+        .cardDesc  { color: rgba(255, 255, 255, 0.85); }
+        .cardArrow { opacity: 1; transform: translateX(0); color: #fff; }
     }
 
-    @media (max-width: 480px) {
-        padding: 1.1rem 1rem;
+    /* ── Ritmo mixto: algunas tarjetas vienen rellenas de color ── */
+    /* Cada 3ª: bloque teal sólido (texto claro) */
+    &:nth-child(3n) {
+        background: var(--color-primary);
+        border-color: transparent;
+
+        .cardNum   { color: #fff; opacity: 0.16; }
+        .cardTitle { color: #fff; }
+        .cardDesc  { color: rgba(255, 255, 255, 0.82); }
+        .cardArrow { color: #fff; }
+
+        &:hover { background: var(--color-primary-deep); border-color: transparent; }
     }
+
+    /* Cada 4ª: bloque coral sólido (texto oscuro) */
+    &:nth-child(4n) {
+        background: var(--color-accent);
+        border-color: transparent;
+
+        .cardNum   { color: var(--text-primary); opacity: 0.18; }
+        .cardTitle { color: var(--text-primary); }
+        .cardDesc  { color: rgba(22, 24, 26, 0.7); }
+        .cardArrow { color: var(--text-primary); }
+
+        &:hover {
+            background: var(--color-accent-hover);
+            border-color: transparent;
+            .cardTitle, .cardDesc, .cardArrow { color: var(--text-primary); }
+            .cardDesc { color: rgba(22, 24, 26, 0.7); }
+        }
+    }
+
+    @media (max-width: 480px) { min-height: 110px; padding: 1.1rem 1rem 1rem; }
 }
 
-.cardIcon {
-    font-size: 1.6rem;
+@keyframes cardReveal {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Número grande como elemento decorativo de fondo */
+.cardNum {
+    position: absolute;
+    top: -0.1em;
+    right: 0.3rem;
+    font-family: var(--font-display);
+    font-size: 5rem;
+    font-weight: 900;
+    color: var(--text-primary);
+    opacity: 0.04;
     line-height: 1;
-    transition: transform 0.18s ease;
-    display: block;
-    margin-bottom: 0.2rem;
+    letter-spacing: -0.04em;
+    pointer-events: none;
+    user-select: none;
+    transition: opacity 0.25s ease;
+}
+
+.cardBody {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    position: relative;
+    z-index: 1;
 }
 
 .cardTitle {
-    font-size: 1rem;
-    font-weight: 700;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 800;
     color: var(--text-primary);
     margin: 0;
+    letter-spacing: -0.02em;
+    transition: color 0.2s ease;
 }
 
 .cardDesc {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: var(--text-secondary);
     margin: 0;
     line-height: 1.45;
-    flex: 1;
 }
 
-.arrow {
-    font-size: 1rem;
+.cardArrow {
+    font-size: 1.1rem;
     color: var(--color-primary);
-    margin-top: 0.5rem;
     opacity: 0;
-    transform: translateX(-6px);
-    transition: opacity 0.18s ease, transform 0.18s ease;
+    transform: translateX(-8px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    position: relative;
+    z-index: 1;
+    margin-top: 0.5rem;
 }

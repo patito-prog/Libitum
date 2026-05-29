@@ -3,6 +3,13 @@ import useAPI from "./useAPI.js";
 import useMessageContext from "./useMessageContext.js";
 import API_BASE from "../config/api.js";
 
+/**
+ * Hook con toda la lógica del panel de administración.
+ *
+ * Saca de la vista todo el "cómo": gestiona las dos pestañas (usuarios/eventos),
+ * la búsqueda de usuarios con debounce, la paginación, y las acciones de borrar
+ * usuario/evento y cambiar rol. El AdminDashboard solo pinta lo que le devuelve.
+ */
 const useAdminDashboard = () => {
     const [activeTab, setActiveTab]   = useState("users");
     const [users, setUsers]           = useState([]);
@@ -68,8 +75,8 @@ const useAdminDashboard = () => {
         if (activeTab === "events" && !eventsLoaded) fetchEvents();
     }, [activeTab]);
 
+    /** Borra un usuario y lo quita de la lista (actualizando el total). */
     const deleteUser = async (id) => {
-        if (!window.confirm("¿Seguro que quieres eliminar a este usuario?")) return;
         try {
             await deleteData(`${API_BASE}/api/admin/users/${id}`);
             setUsers(prev => prev.filter(u => u.id !== id));
@@ -80,8 +87,8 @@ const useAdminDashboard = () => {
         }
     };
 
+    /** Borra un evento por moderación y lo quita de la lista. */
     const deleteEvent = async (id) => {
-        if (!window.confirm("¿Seguro que quieres borrar este evento?")) return;
         try {
             await deleteData(`${API_BASE}/api/admin/events/${id}`);
             setEvents(prev => prev.filter(e => e.id !== id));
@@ -91,6 +98,7 @@ const useAdminDashboard = () => {
         }
     };
 
+    /** Cambia el rol de un usuario y refleja el cambio en la tabla. */
     const updateUserRole = async (userId, newRole) => {
         try {
             const res = await patch(`${API_BASE}/api/admin/users/${userId}`, { role: newRole });

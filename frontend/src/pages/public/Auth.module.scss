@@ -10,6 +10,7 @@
 }
 
 .authCard {
+    position: relative;
     background: var(--bg-surface);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -21,14 +22,51 @@
     width: 100%;
     max-width: 440px;
     text-align: center;
+    overflow: hidden;
+    animation: authIn 0.55s cubic-bezier(0.22, 0.8, 0.4, 1) both;
+
+    /* Asterisco decorativo gigante de fondo */
+    &::before {
+        content: '✦';
+        position: absolute;
+        top: -2.5rem;
+        right: -1.5rem;
+        font-size: 9rem;
+        color: var(--color-primary);
+        opacity: 0.06;
+        pointer-events: none;
+        line-height: 1;
+    }
+}
+
+@keyframes authIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .title {
-    font-size: clamp(1.6rem, 4vw, 2rem);
-    font-weight: 800;
+    position: relative;
+    font-family: var(--font-display);
+    font-size: clamp(1.7rem, 5vw, 2.2rem);
+    font-weight: 900;
     color: var(--text-primary);
-    margin-bottom: 0.4rem;
-    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    text-transform: uppercase;
+    overflow-wrap: break-word;
+    hyphens: auto;
+
+    /* Barra de acento bajo el título */
+    &::after {
+        content: '';
+        display: block;
+        width: 48px;
+        height: 4px;
+        background: var(--color-primary);
+        border-radius: 2px;
+        margin: 0.75rem auto 0;
+    }
 }
 
 .subtitle {
@@ -204,7 +242,7 @@
     input { display: none; }
 
     &:hover {
-        background: rgba(255, 255, 255, 0.04);
+        background: rgba(22, 24, 26, 0.035);
         border-color: rgba(255, 255, 255, 0.12);
     }
 

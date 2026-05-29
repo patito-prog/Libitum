@@ -3,7 +3,7 @@ import useAuthContext from "../../hooks/useAuthContext.js";
 
 const AdminRoute = () => {
     // Si 'loading' no existe en tu contexto, será undefined (falso)
-    const { user, loading } = useAuthContext();
+    const { user, loadingAuth } = useAuthContext();
     
     // EL TRUCO: Miramos si hay un token guardado. 
     // OJO: Si vuestro token se llama diferente en el localStorage, cámbialo aquí.
@@ -12,7 +12,7 @@ const AdminRoute = () => {
     let element = <div className="loading-screen">Verificando permisos...</div>;
 
     // 1. Si el contexto dice que carga OR si hay un token pero el usuario aún es null (está viajando)
-    if (loading || (hasToken && user === null)) {
+    if (loadingAuth || (hasToken && user === null)) {
         element = <div className="loading-screen">Verificando permisos...</div>;
     } 
     // 2. Si ya llegó el usuario y es admin

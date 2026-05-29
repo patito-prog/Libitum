@@ -7,8 +7,11 @@ import useMessageContext from "../../hooks/useMessageContext.js";
 import Event from "../../components/Event.jsx";
 import styles from "./Feed.module.scss";
 import EventSkeleton from "../../components/common/EventSkeleton.jsx";
+import EmptyState from "../../components/common/EmptyState.jsx";
+import LoadingDots from "../../components/common/LoadingDots.jsx";
 import API_BASE from "../../config/api.js";
 
+// Chips de filtro por estado que se muestran sobre el feed.
 const STATUS_FILTERS = [
     { value: null,          label: 'Todos' },
     { value: 'live',        label: 'En directo' },
@@ -17,6 +20,14 @@ const STATUS_FILTERS = [
     { value: 'cancelled',   label: 'Cancelado' },
 ];
 
+/**
+ * Feed "Para Ti" — la pantalla principal estilo TikTok/Instagram.
+ *
+ * Tiene dos modos ("Siguiendo" / "Descubrir") y filtro por estado. Pagina con
+ * scroll infinito vía IntersectionObserver (un centinela al final dispara la
+ * siguiente página). Como el modo descubrir pide eventos en orden aleatorio,
+ * deduplicamos por id al fusionar páginas para no repetir tarjetas.
+ */
 const Feed = () => {
     const { getData, save, deleteData } = useAPI();
     const { toggleLike } = useEventContext();
@@ -27,7 +38,7 @@ const Feed = () => {
     const [feedEvents, setFeedEvents] = useState([]);
     const [mode, setMode] = useState("discover");
     const [statusFilter, setStatusFilter] = useState(null);
-    const [page, setPage] = useState(1);
+    const [, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const [initialLoading, setInitialLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
@@ -51,7 +62,17 @@ const Feed = () => {
             const paginator = response?.data;
             const newEvents = paginator?.data ?? [];
 
-            setFeedEvents(prev => isReset ? newEvents : [...prev, ...newEvents]);
+            // El feed usa orden aleatorio paginado → un evento puede repetirse
+            // entre páginas. Deduplicamos por id para evitar keys duplicadas en React.
+            setFeedEvents(prev => {
+                const merged = isReset ? newEvents : [...prev, ...newEvents];
+                const seen = new Set();
+                return merged.filter(e => {
+                    if (seen.has(e.id)) return false;
+                    seen.add(e.id);
+                    return true;
+                });
+            });
             setHasMore((paginator?.current_page ?? 1) < (paginator?.last_page ?? 1));
             setFetchError(false);
         } catch {
@@ -69,6 +90,7 @@ const Feed = () => {
         setHasMore(true);
         setFeedEvents([]);
         fetchEvents(1, mode, statusFilter, true);
+        feedContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
     }, [mode, statusFilter]);
 
     // IntersectionObserver para cargar más al llegar al final
@@ -128,35 +150,37 @@ const Feed = () => {
 
     return (
         <div className={styles.feedWrapper}>
-            <div className={styles.topNav}>
-                <button
-                    type="button"
-                    className={`${styles.navBtn} ${mode === 'following' ? styles.active : ''}`}
-                    onClick={() => setMode('following')}
-                >
-                    Siguiendo
-                </button>
-                <span className={styles.separator}>|</span>
-                <button
-                    type="button"
-                    className={`${styles.navBtn} ${mode === 'discover' ? styles.active : ''}`}
-                    onClick={() => setMode('discover')}
-                >
-                    Para Ti
-                </button>
-            </div>
-
-            <div className={styles.filterBar}>
-                {STATUS_FILTERS.map(({ value, label }) => (
+            <div className={styles.feedHeader}>
+                <div className={styles.topNav}>
                     <button
-                        key={label}
                         type="button"
-                        className={`${styles.filterChip} ${statusFilter === value ? styles.filterChipActive : ''} ${value ? styles[`chip_${value}`] : ''}`}
-                        onClick={() => setStatusFilter(value)}
+                        className={`${styles.navBtn} ${mode === 'following' ? styles.active : ''}`}
+                        onClick={() => setMode('following')}
                     >
-                        {label}
+                        Siguiendo
                     </button>
-                ))}
+                    <span className={styles.separator}>|</span>
+                    <button
+                        type="button"
+                        className={`${styles.navBtn} ${mode === 'discover' ? styles.active : ''}`}
+                        onClick={() => setMode('discover')}
+                    >
+                        Para Ti
+                    </button>
+                </div>
+
+                <div className={styles.filterBar}>
+                    {STATUS_FILTERS.map(({ value, label }) => (
+                        <button
+                            key={label}
+                            type="button"
+                            className={`${styles.filterChip} ${statusFilter === value ? styles.filterChipActive : ''} ${value ? styles[`chip_${value}`] : ''}`}
+                            onClick={() => setStatusFilter(value)}
+                        >
+                            {label}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             <div className={styles.feedContainer} ref={feedContainerRef}>
@@ -167,36 +191,29 @@ const Feed = () => {
                         </div>
                     ))
                 ) : fetchError ? (
-                    <div className={styles.messageBox}>
-                        <p>Hubo un error al cargar el feed.</p>
-                    </div>
+                    <EmptyState icon="⚠️" message="Hubo un error al cargar el feed." />
                 ) : feedEvents.length === 0 ? (
-                    <div className={styles.messageBox}>
-                        <p>
-                            {statusFilter
+                    <EmptyState
+                        icon="🎵"
+                        message={
+                            statusFilter
                                 ? `No hay eventos con estado "${STATUS_FILTERS.find(s => s.value === statusFilter)?.label}" por ahora.`
                                 : mode === 'following'
-                                    ? "No sigues a nadie o no han publicado eventos aún. ¡Descubre nuevos artistas en 'Para Ti'!"
+                                    ? "No sigues a nadie aún."
                                     : "No hay eventos nuevos por ahora."
-                            }
-                        </p>
-                    </div>
+                        }
+                        hint={mode === 'following' ? "Descubre nuevos artistas en 'Para Ti'." : undefined}
+                    />
                 ) : (
                     <>
                         {feedEvents.map(event => (
                             <div key={event.id} className={styles.snapItem}>
-                                <Event data={event} onLike={handleFeedLike} onInscribe={handleInscribe} />
+                                <Event data={event} onLike={handleFeedLike} onInscribe={handleInscribe} compact />
                             </div>
                         ))}
 
                         <div ref={sentinelRef} className={styles.loadingMoreContainer}>
-                            {loadingMore && (
-                                <div className={styles.loadingMore}>
-                                    <span className={styles.dot} />
-                                    <span className={styles.dot} />
-                                    <span className={styles.dot} />
-                                </div>
-                            )}
+                            {loadingMore && <LoadingDots />}
                             {!loadingMore && !hasMore && (
                                 <p className={styles.endMessage}>
                                     Ya has visto todos los eventos publicados ✦

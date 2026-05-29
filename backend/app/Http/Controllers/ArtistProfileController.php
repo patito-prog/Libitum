@@ -7,17 +7,25 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use \App\Models\Event;
 
+/**
+ * Gestiona el perfil público del artista (la landing del QR).
+ * Permite al artista editar su bio/redes/donación y expone la vista pública
+ * con sus próximos eventos y estadísticas.
+ */
 class ArtistProfileController extends Controller
 {
-   
-    // Plataformas de pago/donación reconocidas. Solo se permiten URLs de estos dominios
-    // para evitar que artistas pongan enlaces fraudulentos que roben a sus seguidores.
+    // Plataformas de donación admitidas. Solo aceptamos URLs de estos dominios
+    // para que un artista no pueda colar un enlace fraudulento a sus seguidores.
     private const TRUSTED_DONATION_DOMAINS = [
         'ko-fi.com', 'buymeacoffee.com', 'paypal.com', 'paypal.me',
         'patreon.com', 'gofundme.com', 'stripe.com', 'twitch.tv',
         'streamlabs.com', 'github.com', 'opencollective.com',
     ];
 
+    /**
+     * Actualiza el perfil de artista del usuario logueado (bio, redes, donación).
+     * La URL de donación se valida contra la lista de dominios de confianza.
+     */
     public function update(Request $request)
     {
         $request->validate([
@@ -62,15 +70,23 @@ class ArtistProfileController extends Controller
         return back();
     }
 
+    /**
+     * Devuelve el perfil público de un artista (GET /artists/{id}).
+     * Incluye su perfil, próximos eventos publicados, nº de seguidores y si el
+     * usuario actual ya lo sigue. Devuelve 404 si el id no es de un artista.
+     *
+     * @param int $id Id del artista
+     */
     public function show(Request $request, $id){
         $currentUserId = Auth::id();
 
         $artist = User::with([
             'artistProfile',
-            'events' => function ($q) {
+            'createdEvents' => function ($q) {
                 $q->with('status')
                   ->whereHas('status', fn($s) => $s->whereIn('name', ['published', 'live']))
-                  ->latest();
+                  ->where('event_date', '>=', now())
+                  ->orderBy('event_date');
             }
         ])->findOrFail($id);
 
@@ -91,6 +107,11 @@ class ArtistProfileController extends Controller
         ]);
     }
 
+    /**
+     * Estadísticas del artista logueado: audiencia (seguidores totales y nuevos
+     * del último mes) e impacto de sus eventos (creados, próximos, inscripciones,
+     * likes, desglose por estado y evento más popular). Solo para artistas.
+     */
     public function statistics(Request $request)
     {
         $artist = $request->user();

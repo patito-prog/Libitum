@@ -1,5 +1,10 @@
+import { Link } from 'react-router-dom';
 import styles from '../../pages/public/UserProfile.module.scss';
 
+/**
+ * Cabecera del perfil social (avatar, nombre, rol, stats y botones de acción).
+ * Si el artista está en directo, muestra el punto pulsante y el badge "EN DIRECTO".
+ */
 const ProfileHeader = ({
     profile, isOwnProfile, isArtist,
     isFollowing, followLoading, artistProfile,
@@ -11,6 +16,9 @@ const ProfileHeader = ({
                 ? <img src={profile.avatar_url} alt={profile.name} className={styles.avatar} />
                 : <div className={styles.avatarPlaceholder}>{profile.name?.charAt(0).toUpperCase()}</div>
             }
+            {profile.is_live && (
+                <span className={styles.avatarLiveDot} title="En directo ahora" />
+            )}
         </div>
 
         <div className={styles.headerInfo}>
@@ -19,6 +27,12 @@ const ProfileHeader = ({
                 <span className={`${styles.roleBadge} ${styles[profile.role]}`}>
                     {isArtist ? '🎸 Artista' : '🎧 Espectador'}
                 </span>
+                {profile.is_live && (
+                    <Link to={`/event/${profile.live_event_id}`} className={styles.liveBadge}>
+                        <span className={styles.livePulse} />
+                        EN DIRECTO
+                    </Link>
+                )}
             </div>
 
             {profile.city && <p className={styles.city}>📍 {profile.city}</p>}

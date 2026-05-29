@@ -1,5 +1,6 @@
 import styles from '../../pages/public/ArtistProfile.module.scss';
 
+// Redes que mostramos como chips si el artista las ha rellenado.
 const SOCIAL_LINKS = [
     { key: 'spotify_url',   icon: '🎵', label: 'Spotify'   },
     { key: 'instagram_url', icon: '📸', label: 'Instagram' },
@@ -7,6 +8,7 @@ const SOCIAL_LINKS = [
     { key: 'tiktok_url',    icon: '🎶', label: 'TikTok'    },
 ];
 
+/** Vista pública del artista: bio, redes sociales y bloque de donación. */
 const ArtistPublicView = ({ profile, firstName }) => (
     <>
         {profile?.donation_url && (

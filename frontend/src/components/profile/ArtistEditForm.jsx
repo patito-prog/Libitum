@@ -7,6 +7,11 @@ const SOCIAL_LINKS = [
     { key: 'tiktok_url',    icon: '🎶', label: 'TikTok',    placeholder: 'https://tiktok.com/@tu_usuario'      },
 ];
 
+/**
+ * Formulario para que el artista edite su página pública (bio, redes, donación)
+ * con una previsualización tipo móvil de cómo queda. Presentacional: el estado
+ * y el guardado los lleva ArtistProfile.
+ */
 const ArtistEditForm = ({
     artist, profileForm, onChange, onSave, saveLoading, onCancel,
     mobilePreview, onTogglePreview,
@@ -79,7 +84,7 @@ const ArtistEditForm = ({
                                 <div className={styles.previewHero}>
                                     <div className={styles.previewAvatar}>
                                         {artist.avatar_url
-                                            ? <img src={artist.avatar_url} alt="" />
+                                            ? <img src={artist.avatar_url} alt={artist.name} />
                                             : <span>{artist.name?.charAt(0).toUpperCase()}</span>
                                         }
                                     </div>

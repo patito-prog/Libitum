@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import BackButton from "../../components/common/BackButton.jsx";
 import useAPI from "../../hooks/useAPI.js";
 import useAuthContext from "../../hooks/useAuthContext.js";
 import useMessageContext from "../../hooks/useMessageContext.js";
@@ -16,6 +17,13 @@ const EMPTY_FORM = {
     youtube_url: "", tiktok_url: "", donation_url: "",
 };
 
+/**
+ * Página pública del artista (/artist/:id) — la landing a la que apunta su QR.
+ *
+ * Es la cara "de cara al fan": banner, datos, redes, botón de donación y sus
+ * próximos eventos. Si la abre el propio artista, puede editar su perfil y ver
+ * una previsualización de cómo lo ven los demás.
+ */
 const ArtistProfile = () => {
     const { id } = useParams();
     const { getData, save, deleteData, patch, loading } = useAPI();
@@ -112,7 +120,12 @@ const ArtistProfile = () => {
     return (
         <div className={styles.page}>
 
-            <div className={styles.heroBanner} />
+            <div className={styles.heroBanner}>
+                <BackButton />
+                <span className={styles.bannerGhost} aria-hidden="true">
+                    {(firstName || 'ARTISTA').toUpperCase()}
+                </span>
+            </div>
 
             <ArtistHero
                 artist={artist}
@@ -141,7 +154,7 @@ const ArtistProfile = () => {
                 <ArtistPublicView profile={artist.artist_profile} firstName={firstName} />
             )}
 
-            <ArtistEventsSection events={artist.events} />
+            <ArtistEventsSection events={artist.created_events} />
         </div>
     );
 };

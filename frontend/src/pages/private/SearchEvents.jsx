@@ -4,6 +4,8 @@ import useAPI from '../../hooks/useAPI.js';
 import useEventContext from '../../hooks/useEventContext.js';
 import MiniEvent from '../../components/MiniEvent.jsx';
 import MiniEventSkeleton from '../../components/common/MiniEvenSkeleton.jsx';
+import EmptyState from '../../components/common/EmptyState.jsx';
+import LoadingDots from '../../components/common/LoadingDots.jsx';
 import styles from './SearchEvents.module.scss';
 import API_BASE from '../../config/api.js';
 
@@ -16,6 +18,13 @@ const STATUS_FILTERS = [
 
 const API_URL = `${API_BASE}/api/events/search`;
 
+/**
+ * Buscador público de eventos.
+ *
+ * Busca por texto (con debounce para no llamar en cada tecla), y filtra por
+ * categoría y estado. Pagina con scroll infinito. Al entrar muestra ya eventos
+ * recientes sin tener que escribir nada.
+ */
 const SearchEvents = () => {
     const { getData } = useAPI();
     const { categories, toggleLike } = useEventContext();
@@ -26,11 +35,11 @@ const SearchEvents = () => {
     const [categoryFilter, setCategory] = useState(null);
     const [statusFilter, setStatus]     = useState(null);
     const [results, setResults]         = useState([]);
-    const [page, setPage]               = useState(1);
+    const [, setPage]                   = useState(1);
     const [hasMore, setHasMore]         = useState(false);
     const [loading, setLoading]         = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
-    const [searched, setSearched]       = useState(false);
+    const [, setSearched]               = useState(false);
 
     const sentinelRef = useRef(null);
     const isFetching  = useRef(false);
@@ -66,12 +75,12 @@ const SearchEvents = () => {
         }
     }, [getData]);
 
+    // Carga inicial: eventos recientes sin filtros
     useEffect(() => {
-        if (!debouncedQuery && !categoryFilter && !statusFilter) {
-            setResults([]);
-            setSearched(false);
-            return;
-        }
+        fetchResults(1, '', null, null, true);
+    }, []);
+
+    useEffect(() => {
         setPage(1);
         fetchResults(1, debouncedQuery, categoryFilter, statusFilter, true);
     }, [debouncedQuery, categoryFilter, statusFilter]);
@@ -152,14 +161,8 @@ const SearchEvents = () => {
             <div className={styles.results}>
                 {loading ? (
                     [1, 2, 3].map(n => <MiniEventSkeleton key={n} />)
-                ) : !searched ? (
-                    <div className={styles.hint}>
-                        <p>Escribe algo o selecciona un filtro para buscar eventos</p>
-                    </div>
                 ) : results.length === 0 ? (
-                    <div className={styles.empty}>
-                        <p>No se encontraron eventos con esos criterios.</p>
-                    </div>
+                    <EmptyState icon="🔍" message="No se encontraron eventos con esos criterios." />
                 ) : (
                     <>
                         <p className={styles.count}>{results.length} resultado{results.length !== 1 ? 's' : ''}</p>
@@ -172,13 +175,7 @@ const SearchEvents = () => {
                             />
                         ))}
                         <div ref={sentinelRef} className={styles.loadMore}>
-                            {loadingMore && (
-                                <>
-                                    <span className={styles.dot} />
-                                    <span className={styles.dot} />
-                                    <span className={styles.dot} />
-                                </>
-                            )}
+                            {loadingMore && <LoadingDots />}
                         </div>
                     </>
                 )}

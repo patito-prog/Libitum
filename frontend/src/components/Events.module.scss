@@ -5,6 +5,54 @@
     margin-top: clamp(0.75rem, 2vw, 1rem);
 }
 
+.eventRow {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    position: relative;
+
+    > :first-child { flex: 1; min-width: 0; }
+}
+
+.cancelBtn {
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    border-left: 1px solid var(--border-color);
+    padding: 0 0.9rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    transition: all var(--transition-speed);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+
+    &:hover {
+        background: rgba(255, 201, 172, 0.12);
+        color: var(--color-accent);
+        border-left-color: rgba(255, 201, 172, 0.3);
+    }
+}
+
+.deleteBtn {
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    border-left: 1px solid var(--border-color);
+    padding: 0 0.9rem;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--text-secondary);
+    transition: all var(--transition-speed);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+
+    &:hover {
+        background: rgba(232, 74, 64, 0.1);
+        color: #f87171;
+        border-left-color: rgba(232, 74, 64, 0.3);
+    }
+}
+
 .empty {
     color: var(--text-secondary);
     font-size: 0.95rem;

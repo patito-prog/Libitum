@@ -8,11 +8,14 @@
 }
 
 .title {
-    font-size: clamp(1.8rem, 4vw, 2.4rem);
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 6vw, 3.4rem);
     font-weight: 900;
     color: var(--text-primary);
     margin: 0;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    text-transform: uppercase;
 }
 
 .subtitle {
@@ -28,12 +31,24 @@
 }
 
 .sectionTitle {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--text-primary);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     margin: 0;
+
+    &::before {
+        content: '';
+        width: 22px;
+        height: 3px;
+        background: var(--color-primary);
+        border-radius: 2px;
+    }
 }
 
 .grid {
@@ -43,7 +58,7 @@
 }
 
 .statCard {
-    background: var(--bg-card, rgba(255, 255, 255, 0.04));
+    background: var(--bg-card, rgba(22, 24, 26, 0.035));
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg, 16px);
     padding: 1.5rem 1.25rem;
@@ -53,10 +68,11 @@
 }
 
 .statValue {
-    font-size: 2.4rem;
+    font-family: var(--font-display);
+    font-size: clamp(2.6rem, 7vw, 3.4rem);
     font-weight: 900;
     line-height: 1;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.04em;
     background: linear-gradient(135deg, var(--color-primary) 0%, #5ab8bc 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;

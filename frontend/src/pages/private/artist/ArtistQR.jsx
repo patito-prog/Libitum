@@ -1,11 +1,17 @@
 import { useRef } from 'react';
-import { QRCodeCanvas } from 'qrcode.react'; 
+import { QRCodeCanvas } from 'qrcode.react';
 import useAuthContext from '../../../hooks/useAuthContext.js';
-import styles from './ArtistQR.module.scss'; // 🔥 Importamos los estilos
+import BackButton from '../../../components/common/BackButton.jsx';
+import styles from './ArtistQR.module.scss';
 
+/**
+ * Genera el código QR del artista, que apunta a su página pública (/artist/:id).
+ * La idea es imprimirlo y ponerlo en la actuación para que el público lo escanee
+ * y pueda donar. Permite descargarlo como PNG. Solo accesible para artistas.
+ */
 const ArtistQR = () => {
     const { user } = useAuthContext();
-    const qrRef = useRef(null); 
+    const qrRef = useRef(null);
 
     const downloadQR = () => {
         const canvas = qrRef.current.querySelector('canvas');
@@ -24,6 +30,9 @@ const ArtistQR = () => {
 
     return (
         <div className={styles.qrWrapper}>
+            <div className={styles.qrBackRow}>
+                <BackButton />
+            </div>
             {!user && (
                 <div className={styles.qrLoading}>
                     <p>Cargando información...</p>

@@ -1,8 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import styles from './FloatingInput.module.scss';
 
+/* Familia de inputs con label flotante (estilo Material): la etiqueta sube
+   cuando el campo está enfocado o tiene valor. */
+
+// Tipos cuya etiqueta debe ir siempre arriba (su valor por defecto no es vacío visualmente).
 const ALWAYS_FLOAT_TYPES = ['datetime-local', 'date', 'time', 'month', 'week'];
 
+/** Input de texto con label flotante. Acepta cualquier prop nativa vía ...props. */
 const FloatingInput = ({ id, name, label, placeholder = '', type = 'text', onChange, ...props }) => {
     const [focused, setFocused] = useState(false);
     const [hasValue, setHasValue] = useState(!!props.defaultValue);
@@ -34,6 +39,7 @@ const FloatingInput = ({ id, name, label, placeholder = '', type = 'text', onCha
     );
 };
 
+/** Igual que FloatingInput pero con textarea (descripciones largas). */
 const FloatingTextarea = ({ id, name, label, placeholder = '', rows = 4, onChange, ...props }) => {
     const [focused, setFocused] = useState(false);
     const [hasValue, setHasValue] = useState(!!props.defaultValue);
@@ -65,6 +71,7 @@ const FloatingTextarea = ({ id, name, label, placeholder = '', rows = 4, onChang
     );
 };
 
+/** Select nativo con la etiqueta siempre flotando. Las opciones van como children. */
 const FloatingSelect = ({ id, name, label, onChange, children, ...props }) => (
     <div className={styles.field}>
         <label htmlFor={id} className={`${styles.label} ${styles.floating}`}>
@@ -76,11 +83,22 @@ const FloatingSelect = ({ id, name, label, onChange, children, ...props }) => (
     </div>
 );
 
+/**
+ * Desplegable de selección múltiple (lo usamos para las categorías del evento).
+ * Mantiene su propia lista de seleccionados y avisa al padre con un evento
+ * sintético { target: { name, value } } para encajar con el handler genérico.
+ *
+ * @param {Object}   props
+ * @param {Array}    props.options      [{id, name}] opciones disponibles
+ * @param {Array}    [props.initialValue=[]] ids preseleccionados (al editar)
+ * @param {Function} props.onChange     Recibe el array de ids seleccionados
+ */
 const FloatingMultiSelect = ({ id, name, label, onChange, options = [], initialValue = [] }) => {
     const [open, setOpen] = useState(false);
     const [selected, setSelected] = useState(initialValue);
     const ref = useRef(null);
 
+    // Cerrar el desplegable al hacer click fuera.
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (ref.current && !ref.current.contains(e.target)) setOpen(false);
@@ -89,6 +107,7 @@ const FloatingMultiSelect = ({ id, name, label, onChange, options = [], initialV
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    // Añade o quita una opción y notifica al padre con la lista resultante.
     const toggle = (optId) => {
         const next = selected.includes(optId)
             ? selected.filter(x => x !== optId)

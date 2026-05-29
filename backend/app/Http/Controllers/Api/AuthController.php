@@ -11,11 +11,17 @@ use Illuminate\Support\Facades\Hash;
 use \App\Models\ArtistProfile;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Autenticación vía API con tokens de Sanctum (login, registro, logout).
+ * El SPA de React guarda el token y lo manda como Bearer en cada petición.
+ */
 class AuthController extends Controller
 {
+    /**
+     * Login: valida credenciales y devuelve un token Sanctum si son correctas.
+     */
     public function verify(Request $request)
     {
-        //Validamos que nos manden email y contraseña
         $request->validate([
             'email' => 'required|email',
             'password' => 'required'
@@ -30,7 +36,7 @@ class AuthController extends Controller
             ], 401);
         }
 
-        //Si todo va bien, sacamos al usuario y le creamos el token
+        // Credenciales correctas: recuperamos el usuario y le emitimos un token Sanctum.
         $usuario = Auth::user();
         $token = $usuario->createToken('auth_token')->plainTextToken;
 

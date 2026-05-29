@@ -1,5 +1,10 @@
 import styles from '../../pages/public/ArtistProfile.module.scss';
 
+/**
+ * Cabecera de la página pública del artista (avatar + nombre + seguidores).
+ * El botón cambia según quién mire: "Editar perfil" si es el dueño, o
+ * "Seguir/Siguiendo" si es un visitante.
+ */
 const ArtistHero = ({ artist, isOwnProfile, isFollowing, followLoading, editMode, onToggleEdit, onFollow }) => (
     <div className={styles.hero}>
         <div className={styles.avatarWrapper}>

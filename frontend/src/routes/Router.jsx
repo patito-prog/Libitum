@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
-import Home from '../pages/public/Home.jsx';
+import RootPage from '../pages/public/RootPage.jsx';
 import About from '../pages/public/About.jsx';
 import Contact from '../pages/public/Contact.jsx';
 import Login from '../pages/public/Login.jsx';
@@ -42,8 +42,10 @@ const Router = () => {
             <Route path="/events/buscar" element={<SearchEvents />} />
             <Route path="/feed" element={<Feed />} />
 
+            {/* Raíz pública: Landing para invitados, Home para autenticados */}
+            <Route path="/" element={<RootPage />} />
+
             <Route element={<PrivateRoute/>}>
-                <Route path="/" element={<Home />} />
                 <Route path="/events" element={<PageEvents />} />
                 <Route path="/my-qr" element={<ArtistQR />} />
                 <Route path="/estadisticas" element={<ArtistStats />} />

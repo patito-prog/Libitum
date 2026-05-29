@@ -1,5 +1,6 @@
 import styles from "./Admin.module.scss";
 
+/** Botón de acción del admin con icono opcional (ej. eliminar). */
 const AdminActionButton = ({ onClick, label, icon }) => {
     return (
         <button className={styles.buttonAdmin} onClick={onClick}>

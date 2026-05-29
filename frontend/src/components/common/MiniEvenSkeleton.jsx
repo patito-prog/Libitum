@@ -1,5 +1,6 @@
 import styles from './MiniEventSkeleton.module.scss';
 
+/** Esqueleto (placeholder animado) de la tarjeta compacta mientras carga el listado. */
 const MiniEventSkeleton = () => {
     return (
         <div className={styles.skeletonCard}>

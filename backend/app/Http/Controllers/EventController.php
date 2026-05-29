@@ -18,18 +18,18 @@ use Illuminate\Support\Str;
 class EventController extends Controller
 {
     /**
-     * 1. Muestra la lista de eventos (GET)
+     * Lista los eventos creados por el artista logueado (GET /events).
+     * Los devuelve del más nuevo al más viejo, con su nº de inscritos y un flag
+     * de si el propio artista les ha dado like.
      */
     public function index(Request $request)
     {
-        // 1. Obtenemos el usuario (que tiene la sesión abierta).
-        $user = Auth::user();
-        //Obtenemos la id para recoger los me gusta de sus eventos
+        $user   = Auth::user();
         $userId = $user->id;
 
-        // Buscamos los eventos creados por el artista y los ordenamos por los más nuevos mostrando los likes que tiene.
         $events = $user->createdEvents()
-        ->with(['categories', 'status']) 
+        ->with(['categories', 'status'])
+        ->withCount('attendees')
         ->withExists(['likedBy as liked' => function ($query) use ($userId) {
             $query->where('user_id', $userId);
         }])
@@ -41,13 +41,21 @@ class EventController extends Controller
             'component' => 'Events/Index'
         ]);
     }
+    /**
+     * Devuelve el detalle de un evento (GET /events/{event}).
+     *
+     * Carga categorías, estado y artista, y añade dos flags calculados para el
+     * usuario actual: si le ha dado like y si está apuntado. Si no hay sesión,
+     * ambos van a false.
+     *
+     * @param Event $event Inyectado por route-model binding
+     */
     public function show(Event $event)
     {
         $userId = Auth::id();
-        //2. Buscamos el evento por ID y cargamos las categorías y el estado de este.
-        //  toDo: Recoger los $event->attendees() para que pueda verse quien va a asistir.
-        //  Hay que hacer una lógica de que si eres el creador puedes verlos y si no lo eres pues solo puedes ver el el evento en si.
+
         $event->load('categories', 'status', 'artist');
+        $event->loadCount('attendees'); // nº de inscritos, para mostrar plazas
 
         $event->liked     = $userId ? $event->likedBy()->where('user_id', $userId)->exists()  : false;
         $event->signed_up = $userId ? $event->attendees()->where('user_id', $userId)->exists() : false;
@@ -60,16 +68,18 @@ class EventController extends Controller
 
 
     /**
-     * Función que crea un evento.
-     * @param Request $request
+     * Crea un evento (POST /events).
      *
+     * Los datos ya vienen validados por StoreEventRequest. Generamos un slug
+     * único a partir del título y, si llegan categorías, las asociamos en la
+     * tabla pivote category_event.
+     *
+     * @param StoreEventRequest $request Petición ya validada
      */
     public function store(StoreEventRequest $request)
     {
-        //  1. Recogemos los datos validados por StoreEventRequest.
         $data = $request->validated();
 
-        // Creamos el evento y mandamos a la base de datos (Eloquent ORM).
         $event = Event::create([
             'user_id' => Auth::id(),
             'title' => $data['title'],
@@ -80,33 +90,33 @@ class EventController extends Controller
             'longitude' => $data['longitude'] ?? null,
             'event_date' => $data['event_date'],
             'price' => $data['price'] ?? 0.00,
-            'status_id' => $data['status_id'] ?? 2,
-            'max_capacity' => $data['max_capacity'] ?? null,
+            'status_id'      => $data['status_id']      ?? 2,
+            'max_capacity'   => $data['max_capacity']   ?? null,
+            'duration_hours' => $data['duration_hours'] ?? null,
         ]);
 
-        // 4. Si vienen categorías en la $request, las asociamos.
+        // Si vienen categorías, las enganchamos en la tabla pivote.
         if (!empty($data['categories'])) {
-            // attach() inserta en la tabla category_event.
             $event->categories()->attach($data['categories']);
         }
 
-        // Devolvemos el evento con sus categorías cargadas
         return ReturnHelper::ok("Evento creado correctamente", [
             'event' => $event->load('categories', 'status')
         ]);
     }
 
     /**
-     * Función que edita el evento del usuario que esté usando la web en la base de datos.
+     * Actualiza un evento existente (PUT /events/{event}).
+     * Regenera el slug por si cambió el título y sincroniza las categorías
+     * (sync deja exactamente las que lleguen, quitando las que ya no estén).
      *
-     * @param Request $request //El cuerpo con todos o algunos datos editados del evento.
-     * @param $eventID
+     * @param UpdateEventRequest $request Petición ya validada
+     * @param Event              $event   Evento a actualizar (route-model binding)
      */
     public function update(UpdateEventRequest $request, Event $event)
     {
         $data = $request->validated();
 
-        // 4. Actualizamos el evento.
         $event->update([
             'title' => $data['title'],
             'slug' => Str::slug($data['title'] . '-' . uniqid()),
@@ -116,8 +126,9 @@ class EventController extends Controller
             'longitude' => $data['longitude'] ?? null,
             'event_date' => $data['event_date'],
             'price' => $data['price'] ?? 0.00,
-            'status_id' => $data['status_id'],
-            'max_capacity' => $data['max_capacity'] ?? null,
+            'status_id'      => $data['status_id'],
+            'max_capacity'   => $data['max_capacity']   ?? null,
+            'duration_hours' => $data['duration_hours'] ?? null,
         ]);
 
         $event->categories()->sync($data['categories'] ?? []);
@@ -170,7 +181,7 @@ class EventController extends Controller
         return response()->json(['event' => $event]);
     }
 
-    //--------------------------- RUTAS SIN `artist` MIDDLEWARE -------------------------------------
+    /* ──────────  Acciones del espectador (sin middleware artist)  ────────── */
 
     public function inscription(Request $request)
     {
@@ -205,12 +216,16 @@ class EventController extends Controller
         ]);
     }
 
+    /**
+     * Lista los eventos a los que el usuario está apuntado (sus asistencias),
+     * con un flag de si les ha dado like.
+     */
     public function signedUp(Request $request)
     {
         $user = Auth::user();
         $userId = $user->id;
-        //  1.  Hacemos la petición a la base de datos.
-        $events = $user->events()->with(['categories', 'status']) // Cargamos relaciones necesarias
+
+        $events = $user->events()->with(['categories', 'status'])
             ->withExists(['likedBy as liked' => function ($query) use ($userId) {
                 $query->where('user_id', $userId);
             }])->get();
@@ -243,47 +258,42 @@ class EventController extends Controller
 
     }
 
-    //METODOS PARA ADMIN
+    /* ───────────────  Endpoints de administración  ─────────────── */
+
+    /** Lista TODOS los eventos (de cualquier artista) para el panel admin. */
     public function allEventsForAdmin()
     {
-        $userId = Auth::id();
-        // Usamos with('user') para que nos traiga también los datos del creador.
+        // Cargamos artista y estado, y contamos asistentes de cada evento.
         $events = Event::with(['artist', 'status'])
             ->withCount('attendees')
             ->latest()
             ->get();
 
-        // Lo devolvemos de la misma forma que AdminUserController
-        // para que tu response.data de React lo lea perfectamente.
         return ReturnHelper::return([
             'data' => $events
         ]);
     }
 
     /**
-     * Elimina cualquier evento de la base de datos.
+     * Borra cualquier evento por moderación (solo admin).
+     * findOrFail lanza 404 si no existe. Antes de borrar desvinculamos
+     * categorías y likes para no dejar filas huérfanas en las pivotes.
+     *
+     * @param int $id Id del evento
      */
     public function destroyByAdmin($id)
     {
-        // Buscamos el evento real por su ID a la fuerza.
-        // Si no existe, lanzará un error 404 automáticamente.
-        $event = Event::findOrFail($id);
-        
-        // Guardamos el título en una variable para el mensaje final
-        $titulo = $event->title;
+        $event  = Event::findOrFail($id);
+        $titulo = $event->title; // lo guardamos para el mensaje final
 
-        // 2. Por seguridad, si tu base de datos es estricta, 
-        // desvinculamos las categorías y likes antes de borrar el evento.
         $event->categories()->detach();
-        $event->likedBy()->detach(); 
-        
-        // 3. Borramos el evento de verdad
+        $event->likedBy()->detach();
         $event->delete();
 
         return ReturnHelper::ok("El evento '$titulo' ha sido eliminado por moderación.");
     }
 
-    //METODO DE BÚSQUEDA PÚBLICA
+    /* ───────────────  Búsqueda pública de eventos  ─────────────── */
     public function search(Request $request)
     {
         $userId = Auth::id();
@@ -315,10 +325,41 @@ class EventController extends Controller
             $query->whereHas('categories', fn($q) => $q->where('categories.id', $request->category_id));
         }
 
-        // Filtro por estado
-        $allowedStatuses = ['draft', 'published', 'live', 'finished', 'cancelled'];
-        if ($request->filled('status') && in_array($request->status, $allowedStatuses)) {
-            $query->whereHas('status', fn($q) => $q->where('name', $request->status));
+        // Los borradores nunca son públicos
+        $query->whereHas('status', fn($q) => $q->where('name', '!=', 'draft'));
+
+        // Filtro por estado efectivo (misma lógica de fecha que el feed)
+        if ($request->filled('status')) {
+            $now = now();
+
+            switch ($request->status) {
+                case 'published':
+                    $query->whereHas('status', fn($q) => $q->whereIn('name', ['published', 'live']))
+                          ->where('event_date', '>', $now);
+                    break;
+
+                case 'live':
+                    $query->whereHas('status', fn($q) => $q->whereIn('name', ['published', 'live']))
+                          ->where('event_date', '<=', $now)
+                          ->whereRaw(
+                              "event_date + (COALESCE(duration_hours, 2)::integer * INTERVAL '1 hour') > NOW()"
+                          );
+                    break;
+
+                case 'finished':
+                    $query->whereHas('status', fn($q) => $q->whereNotIn('name', ['draft', 'cancelled']))
+                          ->where(function ($q) {
+                              $q->whereHas('status', fn($sq) => $sq->where('name', 'finished'))
+                                ->orWhereRaw(
+                                    "event_date + (COALESCE(duration_hours, 2)::integer * INTERVAL '1 hour') <= NOW()"
+                                );
+                          });
+                    break;
+
+                case 'cancelled':
+                    $query->whereHas('status', fn($q) => $q->where('name', 'cancelled'));
+                    break;
+            }
         }
 
         $events = $query->latest()->paginate(12);
@@ -347,7 +388,7 @@ class EventController extends Controller
         return response()->json(['error' => false, 'data' => ['cover_image' => $url]]);
     }
 
-    //METODO PARA FAVORITOS
+    /* ───────────────  Favoritos (eventos con like)  ─────────────── */
     public function favorites(Request $request)
     {
         $user = Auth::user();

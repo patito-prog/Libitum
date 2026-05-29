@@ -11,19 +11,18 @@ class UpdateEventRequest extends FormRequest
     /**
      * Determine if the user is authorized to make this request.
      */
+    /**
+     * Puede editar el evento su dueño (si tiene el permiso de Spatie) o un admin.
+     */
     public function authorize(): bool
     {
-        //  1. Recoge el evento por el ID que está dentro del parámetro.
         $event = $this->route()->parameter('event');
-        //  2. Recogemos el usuario.
-        $user = Auth::user();
-        // 3. ¿Es el dueño del evento?.
-        $isOwner = $user->id === $event->user_id;
-        // 4. ¿Tiene el permiso de Spatie para editar eventos?.
+        $user  = Auth::user();
+
+        $isOwner       = $user->id === $event->user_id;
         $hasPermission = $user->can('editar evento');
-        // 5. ¿Es el administrador? (El admin puede editar todo).
-        $isAdmin = $user->hasRole('admin');
-        // Devolvemos TRUE si es el dueño con permiso || si es admin.
+        $isAdmin       = $user->hasRole('admin');
+
         return ($isOwner && $hasPermission) || $isAdmin;
     }
 
@@ -46,7 +45,8 @@ class UpdateEventRequest extends FormRequest
             // Validamos que llegue un array de categorías y que los IDs existan
             'categories' => 'nullable|array',
             'categories.*' => 'exists:categories,id',
-            'max_capacity' => 'nullable|integer|min:1',
+            'max_capacity'   => 'nullable|integer|min:1',
+            'duration_hours' => 'nullable|integer|min:1|max:240',
         ];
     }
 

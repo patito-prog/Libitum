@@ -7,6 +7,11 @@ const SOCIAL_INPUTS = [
     { key: 'tiktok_url',    label: '🎶 TikTok',     placeholder: 'https://tiktok.com/@...'      },
 ];
 
+/**
+ * Formularios de edición del perfil: datos básicos + avatar, campos de artista
+ * (bio, redes, donación) y cambio de contraseña. Es presentacional: recibe el
+ * estado y los handlers por props desde UserProfile.
+ */
 const ProfileForms = ({
     formData, onChange, onSave, saveLoading, onCancel,
     isArtist, profile,
@@ -98,17 +103,17 @@ const ProfileForms = ({
                     <div className={`${styles.formGroup} ${styles.formGroupFull}`}>
                         <label className={styles.formLabel}>Contraseña actual</label>
                         <input className={styles.formInput} type="password" name="current_password"
-                            value={pwForm.current_password} onChange={onPwChange} required />
+                            value={pwForm.current_password} onChange={onPwChange} required autoComplete="current-password" />
                     </div>
                     <div className={styles.formGroup}>
                         <label className={styles.formLabel}>Nueva contraseña</label>
                         <input className={styles.formInput} type="password" name="password"
-                            value={pwForm.password} onChange={onPwChange} minLength={8} required />
+                            value={pwForm.password} onChange={onPwChange} minLength={8} required autoComplete="new-password" />
                     </div>
                     <div className={styles.formGroup}>
                         <label className={styles.formLabel}>Confirmar nueva contraseña</label>
                         <input className={styles.formInput} type="password" name="password_confirmation"
-                            value={pwForm.password_confirmation} onChange={onPwChange} required />
+                            value={pwForm.password_confirmation} onChange={onPwChange} required autoComplete="new-password" />
                     </div>
                 </div>
             </div>

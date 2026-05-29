@@ -10,8 +10,14 @@ use Illuminate\Support\Facades\DB;
 use App\Models\ArtistProfile;
 use \App\Models\Event;
 
+/**
+ * Gestión de usuarios desde el panel de administración.
+ * Listar (con búsqueda y paginación), ver, cambiar rol y eliminar usuarios.
+ * Todos los métodos comprueban que quien llama es admin.
+ */
 class AdminUserController extends Controller
 {
+    /** Lista usuarios paginados, con búsqueda opcional por nombre o email. */
     public function index(Request $request)
     {
         if(!Auth::user()->hasRole('admin')){
@@ -46,26 +52,31 @@ class AdminUserController extends Controller
         return Inertia::render('Admin/UserDetail', ['user' => $user, 'role' => $roleName]);
     }
 
+    /**
+     * Actualiza datos y/o rol de un usuario (admin).
+     * Va dentro de una transacción para que el cambio de rol y la creación del
+     * perfil de artista (si pasa a artista) se hagan de forma atómica.
+     *
+     * @param int $id Id del usuario
+     */
     public function update(Request $request, $id){
          $user = User::findOrFail($id);
 
        $request->validate([
             'name' => 'sometimes|string|max:255',
             'email' => 'sometimes|email|unique:users,email,'.$user->id,
-            'role' => 'sometimes|string|in:admin,artist,spectator' // Validamos que el rol exista
+            'role' => 'sometimes|string|in:admin,artist,spectator'
         ]);
 
         DB::transaction(function () use ($user, $request) {
-            // Actualizamos los datos básicos
             $user->update($request->only(['name', 'surname', 'email']));
 
-            // Si el admin ha mandado un rol nuevo, usamos Spatie para cambiarlo
             if ($request->has('role')) {
                 $newRole = $request->role;
-                // syncRoles borra el rol anterior y le pone el nuevo
-                $user->syncRoles([$newRole]); 
+                // syncRoles (Spatie) quita el rol anterior y deja solo el nuevo.
+                $user->syncRoles([$newRole]);
 
-                //creamos la tabla de artista si el nuevo rol es artist y no tiene perfil de artista.
+                // Si ahora es artista y no tenía perfil, se lo creamos vacío.
                 if($newRole === 'artist' && !$user->artistProfile){
                     ArtistProfile::create([
                         'user_id' => $user->id,
@@ -74,7 +85,7 @@ class AdminUserController extends Controller
             }
         });
 
-        $user->load(['roles', 'artistProfile']); // Recargamos las relaciones para que el frontend tenga la info actualizada.
+        $user->load(['roles', 'artistProfile']); // recargamos relaciones para devolver datos frescos
         $roleName = $user->getRoleNames()->first() ?? 'spectator';
 
         if($request->is('api/*') || $request->expectsJson()){
@@ -92,6 +103,13 @@ class AdminUserController extends Controller
         return back();
     }
 
+    /**
+     * Elimina un usuario (admin). No puede borrarse a sí mismo.
+     * Dentro de una transacción limpia primero todo lo que cuelga de él
+     * (perfil de artista, follows, asistencias y eventos creados) y luego lo borra.
+     *
+     * @param int $id Id del usuario
+     */
     public function destroy(Request $request, $id){
         $user = User::findOrFail($id);
 
@@ -103,10 +121,10 @@ class AdminUserController extends Controller
             if ($user->artistProfile) {
                 $user->artistProfile()->delete();
             }
-            $user->following()->detach(); 
-            $user->followers()->detach(); 
-            $user->events()->detach(); 
-            Event::where('user_id', $user->id)->delete();
+            $user->following()->detach();  // a quién seguía
+            $user->followers()->detach();  // quién le seguía
+            $user->events()->detach();     // asistencias (pivote event_user)
+            Event::where('user_id', $user->id)->delete(); // eventos que creó
 
             $user->delete();
         });

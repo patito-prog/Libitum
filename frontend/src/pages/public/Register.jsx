@@ -5,6 +5,10 @@ import useMessageContext from '../../hooks/useMessageContext.js';
 import { validateRegister } from "../../utils/validations/index.js";
 import styles from './Auth.module.scss';
 
+/**
+ * Pantalla de registro. Si el rol elegido es artista, muestra campos extra
+ * (como la URL de donación). Valida en cliente antes de mandar al back.
+ */
 const Register = () => {
     const initialData = {
         name: "",

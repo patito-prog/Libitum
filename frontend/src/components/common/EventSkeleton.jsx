@@ -1,5 +1,6 @@
 import styles from './EventSkeleton.module.scss';
 
+/** Esqueleto (placeholder animado) de la tarjeta grande mientras carga el feed. */
 const EventSkeleton = () => {
     return (
         <div className={styles.skeletonCard}>

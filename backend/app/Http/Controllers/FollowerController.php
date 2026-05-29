@@ -9,14 +9,17 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/**
+ * Gestiona la relación de seguimiento entre usuarios y artistas.
+ * Se apoya en las relaciones Eloquent following()/followers() del modelo User,
+ * así que las altas/bajas son syncWithoutDetaching / detach sobre la pivote 'follows'.
+ */
 class FollowerController extends Controller
 {
-//Gracias a que los modelos heredan de Eloquent podemos usar métodos como findOrFail, belongsToMany, syncWithoutDetaching o detach para gestionar las relaciones entre usuarios y artistas de forma sencilla, sin tener que escribir consultas SQL manualmente.
-
-    //Muestra la lista de artistas a los que sigue el usuario actual.
+    /** Lista los artistas a los que sigue el usuario actual. */
     public function index(Request $request)
     {
-        //Usamos with para traernos también la información del perfil del artista desde la tabla artidt_profiles, así en el frontend tenemos toda la info que necesitamos para mostrar la lista de favoritos.
+        // Cargamos también artistProfile para tener toda la info en el front de una.
         $favorites = Auth::user()->following()->with('artistProfile')->get();
 
         if($request->expectsJson() || $request->is('api/*')){
@@ -31,6 +34,7 @@ class FollowerController extends Controller
         return Inertia::render('Profile/Favorites', ['favorites' => $favorites]);
     }
 
+    /** Lista los seguidores del artista actual (solo si es artista). */
     public function followers(Request $request){
         if(!Auth::user()->hasRole('artist')){
             if ($request->is('api/*') || $request->expectsJson()) {
@@ -50,12 +54,15 @@ class FollowerController extends Controller
         }
         return Inertia::render('Profile/Followers', ['followers' => $followers]);
     }
-    //El usuario que ya esta registrado empieza a seguir a un artista.
+    /**
+     * El usuario actual empieza a seguir a un artista.
+     * @param int $id Id del artista a seguir
+     */
     public function store($id, Request $request)
     {
         $artist = User::findOrFail($id);
 
-        //Verificamos que el usuario a quien quiere seguir sea un artista.
+        // Solo se puede seguir a artistas.
         if(!$artist->hasRole('artist')){
             if ($request->is('api/*') || $request->expectsJson()) {
                 return response()->json(['error' => true, 'message' => 'Solo puedes seguir a artistas.', 'code' => 403], 403);
@@ -63,7 +70,8 @@ class FollowerController extends Controller
             abort(403, 'Solo puedes seguir a artistas.');
         }
 
-        //Asociamos las ID en la tabla pivote follows, usamos syncWithoutDetaching para no eliminar los seguimientos anteriores del usuario y también el problema de duplicados o que salte un error 500 de SQL por culpa del unique.
+        // syncWithoutDetaching evita duplicados (y el 500 por el unique) sin
+        // borrar los seguimientos previos del usuario.
         Auth::user()->following()->syncWithoutDetaching([$id]);
 
         if ($request->is('api/*') || $request->expectsJson()) {
@@ -77,10 +85,13 @@ class FollowerController extends Controller
         return back();
     }
 
-    //El usuario deja de seguir al artista.
+    /**
+     * El usuario actual deja de seguir a un artista.
+     * @param int $id Id del artista
+     */
     public function destroy($id, Request $request)
     {
-        //Elimina la relación de seguimiento entre el usuario y el artista en la tabla pivote follows.
+        // detach quita la fila de la pivote follows.
         Auth::user()->following()->detach($id);
         if ($request->is('api/*') || $request->expectsJson()) {
             return response()->json([

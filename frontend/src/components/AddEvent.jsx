@@ -2,9 +2,13 @@ import { useState } from 'react';
 import useEventContext from '../hooks/useEventContext.js';
 import { FloatingInput, FloatingTextarea, FloatingSelect, FloatingMultiSelect } from './FloatingInput.jsx';
 import LocationInput from './LocationInput.jsx';
-import FloatingOptionsSelect from './FloatingOptionsSelect.jsx';
 import styles from './AddEvent.module.scss';
 
+/**
+ * Formulario de crear/editar evento. El mismo componente sirve para ambos:
+ * si editMode está activo guarda con updateEvent, si no con saveEvent. Toda la
+ * lógica y el estado viven en el EventContext; aquí solo pintamos los campos.
+ */
 const AddEvent = () => {
     const {
         event,
@@ -30,11 +34,18 @@ const AddEvent = () => {
     const handleCancel = editMode ? changeDecisionEditMode : changeDecisionAddEvent;
     const handleSubmit = editMode ? updateEvent : saveEvent;
 
-    //CAMBIÉ EL MÉTODO CON EL PREVENT DEFAULT Y PUSE EL BOTON TIPO BUTTON PORQUE SE PETABA PERO OBVIO PON LO QUE HAYAS HECHO.
     const handleFormSubmit = (e) => {
         e.preventDefault();
         handleSubmit();
     };
+
+    // Si el evento tiene un estado no editable (live/finished), usar 'published' como valor seguro
+    // para evitar que el navegador elija la primera opción del select (draft) al editar.
+    const editableNames    = ['draft', 'published'];
+    const currentName      = statuses.find(s => s.id === event.status_id)?.name;
+    const safeStatusId     = editableNames.includes(currentName)
+        ? event.status_id
+        : (statuses.find(s => s.name === 'published')?.id ?? event.status_id);
 
     return (
         <form className={styles.page} onSubmit={handleFormSubmit}>
@@ -73,7 +84,12 @@ const AddEvent = () => {
 
                 <div className={styles.grid}>
                     <div className={styles.locationCol}>
-                        <LocationInput onLocationChange={setLocation} />
+                        <LocationInput
+                                onLocationChange={setLocation}
+                                initialValue={event.location || ''}
+                                initialLat={event.latitude}
+                                initialLng={event.longitude}
+                            />
                     </div>
 
                     <div className={styles.rightCol}>
@@ -116,19 +132,46 @@ const AddEvent = () => {
 
                 <div className={styles.footer}>
                     <FloatingSelect
-                        id="status_id"
-                        name="status_id"
-                        label="Estado"
-                        defaultValue={event.status_id}
+                        id="duration_hours"
+                        name="duration_hours"
+                        label="Duración del evento"
+                        defaultValue={event.duration_hours ?? ''}
                         onChange={changeStatusNewEvent}
                     >
-                        {statuses?.length > 0 && <FloatingOptionsSelect data={statuses} />}
+                        <option value="">Sin especificar (2 h por defecto)</option>
+                        <option value="1">1 hora</option>
+                        <option value="2">2 horas</option>
+                        <option value="3">3 horas</option>
+                        <option value="4">4 horas</option>
+                        <option value="6">6 horas</option>
+                        <option value="8">8 horas</option>
+                        <option value="12">12 horas</option>
+                        <option value="24">1 día</option>
+                        <option value="48">2 días</option>
+                        <option value="72">3 días</option>
+                    </FloatingSelect>
+
+                    <FloatingSelect
+                        id="status_id"
+                        name="status_id"
+                        label="Visibilidad"
+                        defaultValue={safeStatusId}
+                        onChange={changeStatusNewEvent}
+                    >
+                        {statuses
+                            .filter(s => ['draft', 'published'].includes(s.name))
+                            .map(s => (
+                                <option key={s.id} value={s.id}>
+                                    {s.name === 'draft' ? 'Borrador (solo tú lo ves)' : 'Publicado (visible para todos)'}
+                                </option>
+                            ))
+                        }
                     </FloatingSelect>
                 </div>
             </div>
 
             <div className={styles.acceptCancel}>
-                <button className={styles.cancelBtn} onClick={handleCancel}>
+                <button type="button" className={styles.cancelBtn} onClick={handleCancel}>
                     Cancelar
                 </button>
                 <button type="submit" className={styles.submitBtn}>

@@ -4,6 +4,13 @@ import useAuthContext from '../../hooks/useAuthContext.js';
 import { ROLE_LABELS } from '../../utils/validations';
 import styles from './Header.module.scss';
 
+/**
+ * Cabecera/navegación de la app.
+ *
+ * Muestra unos enlaces u otros según el rol (espectador, artista, admin) y la
+ * sesión. En escritorio tiene un desplegable "Más" para el artista; en móvil
+ * colapsa en un menú hamburguesa. Ambos se cierran al hacer click fuera.
+ */
 const Header = () => {
     const { user, logOut } = useAuthContext();
     const navigate = useNavigate();
@@ -63,7 +70,7 @@ const Header = () => {
                     <NavLink to="/asistencias" className={navLinkClass}>Asistencias</NavLink>
                 )}
                 {isArtist && (
-                    <NavLink to="/events" className={navLinkClass}>Mis Eventos</NavLink>
+                    <NavLink to="/events" className={navLinkClass} end>Mis Eventos</NavLink>
                 )}
                 {isAdmin && (
                     <NavLink to="/admin" className={({ isActive }) =>
@@ -85,14 +92,17 @@ const Header = () => {
                         </button>
                         {dropdownOpen && (
                             <div className={styles.dropdownMenu} role="menu">
-                                <Link to={`/artist/${user?.id}`} className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
-                                    Mi perfil público
+                                <Link to={`/user/${user?.id}`} className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
+                                    Mi perfil
+                                </Link>
+                                <Link to="/estadisticas" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
+                                    Estadísticas
                                 </Link>
                                 <Link to="/my-qr" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
                                     Mi QR
                                 </Link>
-                                <Link to="/estadisticas" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
-                                    Estadísticas
+                                <Link to={`/artist/${user?.id}`} className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
+                                    Mi página de artista
                                 </Link>
                                 <Link to="/asistencias" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
                                     Mis asistencias
@@ -150,11 +160,11 @@ const Header = () => {
                         <NavLink to="/asistencias" className={mobileLinkClass} onClick={() => setMobileMenuOpen(false)}>Mis asistencias</NavLink>
                     )}
                     {isArtist && (
-                        <NavLink to="/events" className={mobileLinkClass} onClick={() => setMobileMenuOpen(false)}>Mis Eventos</NavLink>
+                        <NavLink to="/events" className={mobileLinkClass} onClick={() => setMobileMenuOpen(false)} end>Mis Eventos</NavLink>
                     )}
                     {isArtist && (
                         <>
-                            <Link to={`/artist/${user?.id}`} className={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Mi perfil público</Link>
+                            <Link to={`/artist/${user?.id}`} className={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Mi página de artista</Link>
                             <Link to="/my-qr" className={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Mi QR</Link>
                             <Link to="/estadisticas" className={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Estadísticas</Link>
                         </>

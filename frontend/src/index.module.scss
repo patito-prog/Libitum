@@ -1,62 +1,70 @@
 /* =====================================================
-   SISTEMA DE DISEÑO LIBITUM
-   Paleta: Teal corporativo + Salmón + Dark elegante
+   SISTEMA DE DISEÑO LIBITUM — EDITORIAL VIVO
+   Fondo crema cálido + Teal corporativo bold + Salmón
+   Alto contraste, tipografía masiva, color en bloques
    ===================================================== */
 :root {
-    /* Colores corporativos */
-    --color-primary:       #217377;
-    --color-primary-hover: #18585b;
-    --color-primary-light: rgba(33, 115, 119, 0.15);
-    --color-primary-glow:  rgba(33, 115, 119, 0.35);
+    /* ── Colores corporativos ── */
+    --color-primary:       #1a7d82;   /* teal vivo (un pelín más brillante que #217377 para que reviente sobre crema) */
+    --color-primary-deep:  #14595d;
+    --color-primary-hover: #145d61;
+    --color-primary-light: rgba(26, 125, 130, 0.12);
+    --color-primary-glow:  rgba(26, 125, 130, 0.28);
 
-    --color-accent:        #ffc9ac;
-    --color-accent-hover:  #ffb897;
-    --color-accent-glow:   rgba(255, 201, 172, 0.3);
+    --color-accent:        #ff8a5b;   /* coral/salmón saturado para contraste vivo */
+    --color-accent-soft:   #ffc9ac;   /* salmón corporativo suave (fills) */
+    --color-accent-hover:  #ff7440;
+    --color-accent-glow:   rgba(255, 138, 91, 0.3);
 
     --color-danger:        #e84a40;
     --color-danger-hover:  #bd3b33;
 
-    /* Fondos */
-    --bg-main:    #0f1214;
-    --bg-surface: rgba(22, 26, 28, 0.92);
-    --bg-card:    rgba(18, 22, 24, 0.97);
-    --bg-overlay: rgba(0, 0, 0, 0.65);
+    /* ── Fondos (TEMA CLARO) ── */
+    --bg-main:    #f4efe3;            /* crema cálido */
+    --bg-surface: #ffffff;            /* tarjetas blancas */
+    --bg-card:    #ffffff;
+    --bg-ink:     #16181a;            /* bloques oscuros de contraste */
+    --bg-overlay: rgba(20, 22, 24, 0.55);
 
-    /* Textos */
-    --text-primary:   #eef2f3;
-    --text-secondary: #8a9496;
-    --text-muted:     rgba(138, 148, 150, 0.5);
+    /* ── Textos ── */
+    --text-primary:   #16181a;        /* casi negro */
+    --text-secondary: #5a615f;
+    --text-muted:     #9aa09d;
+    --text-on-dark:   #f4efe3;        /* texto sobre bloques oscuros/teal */
 
-    /* Bordes */
-    --border-color:       rgba(255, 255, 255, 0.07);
+    /* ── Bordes ── */
+    --border-color:       rgba(22, 24, 26, 0.12);
+    --border-strong:      rgba(22, 24, 26, 0.85);
     --border-color-focus: var(--color-primary);
 
-    /* Radios */
+    /* ── Radios ── */
     --radius-sm:   8px;
     --radius-md:   12px;
     --radius-lg:   18px;
     --radius-xl:   24px;
     --radius-pill: 999px;
 
-    /* Sombras */
-    --shadow-sm:   0 2px 8px rgba(0, 0, 0, 0.35);
-    --shadow-md:   0 6px 24px rgba(0, 0, 0, 0.45);
-    --shadow-lg:   0 16px 48px rgba(0, 0, 0, 0.55);
-    --shadow-glow: 0 0 20px var(--color-primary-glow);
+    /* ── Sombras (suaves sobre crema) ── */
+    --shadow-sm:   0 2px 8px rgba(22, 24, 26, 0.06);
+    --shadow-md:   0 8px 24px rgba(22, 24, 26, 0.10);
+    --shadow-lg:   0 20px 50px rgba(22, 24, 26, 0.16);
+    --shadow-glow: 0 10px 30px var(--color-primary-glow);
+    /* Sombra dura editorial (offset sólido, estilo cartel) */
+    --shadow-hard: 5px 5px 0 var(--color-primary);
 
-    /* Tipografía */
+    /* ── Tipografía ── */
     --font-display: 'Syne', 'Inter', system-ui, sans-serif;
     --font-body:    'Inter', system-ui, -apple-system, sans-serif;
 
-    /* Transición */
+    /* ── Transición ── */
     --transition-speed: 0.22s;
 
-    /* Legacy aliases */
-    --fondo-oscuro:           #0f1214;
-    --color-principal:        #217377;
-    --color-secundario-claro: #eef2f3;
-    --color-letra-claro:      #eef2f3;
-    --color-rosa-contraste:   #ffc9ac;
+    /* ── Legacy aliases ── */
+    --fondo-oscuro:           #f4efe3;
+    --color-principal:        #1a7d82;
+    --color-secundario-claro: #16181a;
+    --color-letra-claro:      #16181a;
+    --color-rosa-contraste:   #ff8a5b;
     --color-rojo-danger:      #e84a40;
     --color-rojo-danger-dark: #bd3b33;
 }
@@ -74,10 +82,12 @@ html {
 
 body {
     background-color: var(--bg-main);
-    /* Gradiente atmosférico: el teal aparece arriba-izquierda, el salmón abajo-derecha */
+    /* Manchas de color vivas: teal arriba-izquierda, coral abajo-derecha.
+       Sobre crema se leen como lavados de color que dan energía sin tapar el texto. */
     background-image:
-        radial-gradient(ellipse 80% 60% at 10% 0%,   rgba(33, 115, 119, 0.14) 0%, transparent 60%),
-        radial-gradient(ellipse 70% 50% at 90% 100%,  rgba(255, 201, 172, 0.09) 0%, transparent 55%);
+        radial-gradient(ellipse 70% 55% at 0% 0%,    rgba(26, 125, 130, 0.18) 0%, transparent 55%),
+        radial-gradient(ellipse 65% 50% at 100% 100%, rgba(255, 138, 91, 0.16) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 90% 5%,    rgba(255, 201, 172, 0.20) 0%, transparent 50%);
     background-attachment: fixed;
     color: var(--text-primary);
     font-family: var(--font-body);
@@ -88,32 +98,32 @@ body {
     overflow-x: hidden;
 }
 
-/* Grain — capa de textura de película fotográfica sobre toda la app.
-   Hace que el fondo oscuro se sienta cálido en lugar de vacío. */
+/* Grain sutil para textura de papel impreso */
 body::after {
     content: '';
     position: fixed;
     inset: -50%;
     width: 200%;
     height: 200%;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='0.4'/%3E%3C/svg%3E");
-    opacity: 0.032;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='0.5'/%3E%3C/svg%3E");
+    opacity: 0.045;
+    mix-blend-mode: multiply;
     pointer-events: none;
     z-index: 9999;
 }
 
-/* Headings: Syne da un carácter editorial y artístico sin perder legibilidad */
+/* Headings: Syne con carácter editorial */
 h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
     color: var(--text-primary);
-    line-height: 1.15;
-    letter-spacing: -0.025em;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
 }
 
 /* ── Scrollbar ── */
-::-webkit-scrollbar       { width: 5px; height: 5px; }
+::-webkit-scrollbar       { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 999px; }
+::-webkit-scrollbar-thumb { background: rgba(22,24,26,0.18); border-radius: 999px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-primary); }
 
 /* ── Links base ── */
@@ -121,32 +131,24 @@ a {
     color: var(--color-primary);
     text-decoration: none;
 
-    &:hover { color: var(--text-primary); }
+    &:hover { color: var(--color-primary-deep); }
 }
 
 ul { list-style: none; }
 
-/* ── Clase cristal compartida ── */
+/* ── Clase "cristal" (ahora bloque estructurado editorial) ──
+   Mantiene el nombre por compatibilidad pero ya no es glassmorphism:
+   tarjeta blanca, borde grueso definido y sombra dura desplazada. */
 .cristal {
-    background: rgba(255, 255, 255, 0.04);
-    backdrop-filter: blur(20px) saturate(160%);
-    -webkit-backdrop-filter: blur(20px) saturate(160%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-top: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: var(--radius-lg);
-    box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.06);
-    background-image:
-        radial-gradient(ellipse at 15% 20%, rgba(33, 115, 119, 0.16) 0%, transparent 55%),
-        radial-gradient(ellipse at 85% 80%, rgba(255, 201, 172, 0.08) 0%, transparent 50%);
+    background: var(--bg-surface);
+    border: 2px solid var(--text-primary);
+    border-radius: var(--radius-md);
+    box-shadow: 4px 4px 0 var(--text-primary);
     color: var(--text-primary);
-    transition: box-shadow var(--transition-speed);
+    transition: box-shadow var(--transition-speed), transform var(--transition-speed);
 
     &:hover {
-        box-shadow:
-            0 12px 40px rgba(0, 0, 0, 0.45),
-            0 0 0 1px rgba(33, 115, 119, 0.12),
-            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        transform: translate(-2px, -2px);
+        box-shadow: 6px 6px 0 var(--color-primary);
     }
 }

@@ -9,7 +9,7 @@ const AdminDashboard = () => {
         activeTab, setActiveTab,
         users, events, loading,
         userSearch, setUserSearch,
-        userPage, setUserPage, usersMeta,
+        setUserPage, usersMeta,
         deleteUser, deleteEvent, updateUserRole,
     } = useAdminDashboard();
 

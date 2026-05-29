@@ -5,6 +5,10 @@ import useMessageContext from "../../hooks/useMessageContext.js";
 import { validateLogin } from "../../utils/validations/auth.js";
 import styles from './Auth.module.scss';
 
+/**
+ * Pantalla de login. Valida en cliente, llama a logIn del AuthContext y
+ * redirige a donde el usuario quería ir (o al feed por defecto).
+ */
 const Login = () => {
     const initialCredentials = {
         email: "",
@@ -44,7 +48,7 @@ const Login = () => {
             showMessageWithTime("¡Bienvenido/a de nuevo!", "ok");
             nav(from, { replace: true });
             
-        } catch(error) {
+        } catch {
             showMessageWithTime("Credenciales incorrectas o problema de conexión.", "error");
         } finally {
             setLoading(false);

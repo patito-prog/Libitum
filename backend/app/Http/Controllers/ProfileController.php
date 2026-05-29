@@ -11,6 +11,10 @@ use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/**
+ * Gestiona la cuenta del usuario logueado: editar datos, subir avatar,
+ * cambiar contraseña y borrar la cuenta. Responde en JSON para el SPA.
+ */
 class ProfileController extends Controller
 {
     /**

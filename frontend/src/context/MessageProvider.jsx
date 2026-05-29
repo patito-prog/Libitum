@@ -1,25 +1,37 @@
 import React, { createContext, useState, useRef } from "react";
 import {isNumber} from '../utils/validations/index.js';
 
+/**
+ * Contexto de mensajes (toasts).
+ *
+ * Centraliza el aviso flotante de la app: el texto, su tipo (ok/error/info/
+ * warning, que decide el color) y una barra de progreso para autocerrarlo.
+ * Cualquier parte de la app lanza un toast con `showMessageWithTime(...)`.
+ */
 const messageContext = createContext();
 
 const MessageProvider = ({ children }) => {
 	const [message, setMessage] = useState("");
-	// Se me ha ocurrido probar con enum para saber que tipo de mensaje es ya que es un tipo de dato que no manejo bien.
-	//He visto que en JS no existen los enum como tal, pero se puede simular.
+
+	// JS no tiene enums, así que simulamos uno con un objeto para los tipos de mensaje.
 	const MESSAGE_TYPE = {
 		OK: "OK",
 		ERROR: "ERROR",
 		INFO: "INFO",
 		WARNING: "WARNING",
 	};
-	// Se utilizaría de manera opcional para el diseño del mensaje.
-	const [messageType, setMessageType] = useState(MESSAGE_TYPE.INFO);
-	const [activeMessage, setActiveMessage] = useState(false);
-	const [timeMessageProgress, setTimeMessageProgress] = useState()
+
+	const [messageType, setMessageType] = useState(MESSAGE_TYPE.INFO); // controla el color/estilo
+	const [activeMessage, setActiveMessage] = useState(false);          // ¿se ve el toast?
+	const [timeMessageProgress, setTimeMessageProgress] = useState();   // ms restantes (barra de progreso)
 	const intervalRef = useRef(null);
 
-	//Como es opcional la función de añadir un tipo de mensaje, por defecto sera INFO.
+	/**
+	 * Muestra un mensaje. El tipo es opcional (por defecto INFO) y solo afecta
+	 * al estilo visual.
+	 * @param {string} newMessage Texto a mostrar
+	 * @param {string} [type="info"] ok | error | warning | info
+	 */
 	const showMessage = (newMessage, type = "info") => {
 		setMessage(newMessage);
 		switch (type.toLowerCase()) {
@@ -38,15 +50,24 @@ const MessageProvider = ({ children }) => {
 		setActiveMessage(true);
 	};
 
+	/** Oculta el toast y resetea su estado. */
 	const hideMessage = () => {
 		setMessage("");
 		setMessageType(MESSAGE_TYPE.INFO);
 		setActiveMessage(false);
 	};
 
+	/**
+	 * Muestra un mensaje que se autocierra. Lleva una barra de progreso que va
+	 * descontando de 10 en 10 ms hasta llegar a 0, momento en el que se oculta.
+	 *
+	 * @param {string} newMessage Texto
+	 * @param {string} [type="info"] Tipo (estilo)
+	 * @param {number} [milisecs=3000] Cuánto dura visible
+	 */
 	const showMessageWithTime = (newMessage, type = "info", milisecs = 3000) => {
 		if(!isNumber(milisecs)) throw Error("ShowMessageTime-MessageProvider: The param of milisecs have to be a number");
-		// Cancelar intervalo anterior si había uno activo.
+		// Si ya había un toast contando, cancelamos su intervalo antes de empezar otro.
 		if (intervalRef.current) clearInterval(intervalRef.current);
 		setTimeMessageProgress(milisecs);
 		showMessage(newMessage, type);

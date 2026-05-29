@@ -1,5 +1,7 @@
-
-
+/**
+ * Pinta las <option> de un select a partir de un array [{id, name}].
+ * Pensado para meterse como children dentro de un FloatingSelect.
+ */
 const FloatingOptionsSelect = (props) => {
     const options = props.data;
     return(

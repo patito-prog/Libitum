@@ -1,5 +1,6 @@
 import styles from "./Admin.module.scss";
 
+/** Tabla genérica del admin: recibe las cabeceras y las filas como children. */
 const AdminTable = ({ headers, children }) => (
     <table className={styles.adminTable}>
         <thead>

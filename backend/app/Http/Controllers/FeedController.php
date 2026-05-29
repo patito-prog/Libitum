@@ -6,8 +6,19 @@ use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * Construye el feed "Para Ti".
+ */
 class FeedController extends Controller
 {
+    /**
+     * Devuelve el feed paginado.
+     *
+     * Dos modos: 'following' (eventos de los artistas que sigo, por fecha) y
+     * 'discover' (de cualquiera menos los míos, en orden aleatorio). Nunca
+     * incluye borradores. Admite filtro por estado EFECTIVO (calculado por la
+     * fecha real + duración, no por el estado guardado).
+     */
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -36,10 +47,44 @@ class FeedController extends Controller
             $query->where('user_id', '!=', $userId)->inRandomOrder(); 
         }
 
-        // Filtro por estado del evento
-        $allowedStatuses = ['draft', 'published', 'live', 'finished', 'cancelled'];
-        if ($request->filled('status') && in_array($request->status, $allowedStatuses)) {
-            $query->whereHas('status', fn($q) => $q->where('name', $request->status));
+        // Filtro por estado efectivo calculado por fecha real.
+        // Se usa aritmética de intervalos PostgreSQL sin placeholders PDO para evitar
+        // el conflicto del operador ? de JSON con los bind params de PDO.
+        if ($request->filled('status')) {
+            $now = now();
+
+            switch ($request->status) {
+                case 'published':
+                    // Próximos: aún no han empezado
+                    $query->whereHas('status', fn($q) => $q->whereIn('name', ['published', 'live']))
+                          ->where('event_date', '>', $now);
+                    break;
+
+                case 'live':
+                    // En curso: empezaron pero no ha pasado su duración
+                    $query->whereHas('status', fn($q) => $q->whereIn('name', ['published', 'live']))
+                          ->where('event_date', '<=', $now)
+                          ->whereRaw(
+                              "event_date + (COALESCE(duration_hours, 2)::integer * INTERVAL '1 hour') > NOW()"
+                          );
+                    break;
+
+                case 'finished':
+                    // Terminados: eventos cuya duración ha transcurrido O que están
+                    // almacenados como 'finished' (datos existentes antes de la migración)
+                    $query->whereHas('status', fn($q) => $q->whereNotIn('name', ['draft', 'cancelled']))
+                          ->where(function ($q) {
+                              $q->whereHas('status', fn($sq) => $sq->where('name', 'finished'))
+                                ->orWhereRaw(
+                                    "event_date + (COALESCE(duration_hours, 2)::integer * INTERVAL '1 hour') <= NOW()"
+                                );
+                          });
+                    break;
+
+                case 'cancelled':
+                    $query->whereHas('status', fn($q) => $q->where('name', 'cancelled'));
+                    break;
+            }
         }
 
         // Filtro de zona/ciudad (Funciona para ambos modos)

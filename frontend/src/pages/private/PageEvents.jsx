@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import AddEvent from '../../components/AddEvent.jsx';
 import Events from '../../components/Events.jsx';
 import ButtonAdd from '../../components/common/ButtonAdd.jsx';
@@ -11,6 +11,10 @@ const TITLES = {
     default: 'Mis eventos',
 };
 
+/**
+ * "Mis eventos" (vista del artista). Conmuta entre el listado de sus eventos y
+ * el formulario de crear/editar según el modo activo del EventContext.
+ */
 const PageEvents = () => {
     const { getEvents, addMode, editMode, event, changeDecisionAddEvent, resetModes } = useEventContext();
 

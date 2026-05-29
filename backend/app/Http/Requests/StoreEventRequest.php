@@ -35,12 +35,12 @@ class StoreEventRequest extends FormRequest
             'longitude' => 'nullable|numeric|between:-180,180',
             'event_date' => 'required|date',
             'price' => 'nullable|numeric|min:0',
-            // De momento validamos que status sea uno de estos, ajústalo a tu lógica
             'status_id' => 'nullable|integer',
-            // Validamos que 'categories' sea un array y que los IDs existan en la tabla
+            // categories debe ser un array de ids que existan en la tabla categories.
             'categories' => 'nullable|array',
             'categories.*' => 'exists:categories,id',
-            'max_capacity' => 'nullable|integer|min:1',
+            'max_capacity'   => 'nullable|integer|min:1',
+            'duration_hours' => 'nullable|integer|min:1|max:240', // hasta 10 días
         ];
     }
 

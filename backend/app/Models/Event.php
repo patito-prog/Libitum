@@ -7,6 +7,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+/**
+ * Modelo de Evento.
+ *
+ * Pertenece a un artista (user_id) y se relaciona con categorías, estado,
+ * asistentes (event_user) y likes. Lo más particular es `effective_status_name`:
+ * un atributo calculado que deriva el estado real del evento a partir de su
+ * fecha y duración (ver getEffectiveStatusNameAttribute), en vez de fiarse solo
+ * del estado guardado en BD.
+ */
 class Event extends Model
 {
     use HasFactory;
@@ -14,16 +23,46 @@ class Event extends Model
     protected $fillable = [
         'user_id', 'title', 'slug', 'description',
         'location', 'latitude', 'longitude',
-        'event_date', 'price', 'cover_image', 'max_capacity', 'status_id'
+        'event_date', 'duration_hours', 'price', 'cover_image', 'max_capacity', 'status_id',
     ];
 
     protected $casts = [
-        'event_date' => 'datetime',
-        'price' => 'decimal:2',
-        'latitude' => 'float',
-        'longitude' => 'float',
+        'event_date'     => 'datetime',
+        'price'          => 'decimal:2',
+        'latitude'       => 'float',
+        'longitude'      => 'float',
+        'duration_hours' => 'integer',
         'is_highlighted' => 'boolean',
     ];
+
+    protected $appends = ['effective_status_name'];
+
+    /**
+     * Estado efectivo calculado a partir de la fecha real del evento.
+     * draft/cancelled/finished nunca se sobreescriben (decisión manual del artista).
+     * published/live se calculan dinámicamente:
+     *   - evento termina hace >4h  → finished
+     *   - evento en ventana [-4h, +1h] → live
+     *   - evento en el futuro       → published
+     */
+    public function getEffectiveStatusNameAttribute(): string
+    {
+        $stored = $this->status?->name ?? 'draft';
+
+        // draft y cancelled nunca cambian automáticamente
+        if (in_array($stored, ['draft', 'cancelled'])) return $stored;
+
+        if (!$this->event_date) return $stored;
+
+        $now      = now();
+        $start    = $this->event_date;
+        $duration = $this->duration_hours ?? 2; // 2h por defecto si no se especifica
+        $end      = $start->copy()->addHours($duration);
+
+        if ($now->gte($end))    return 'finished'; // ya terminó
+        if ($now->gte($start))  return 'live';     // en curso
+        return 'published';                        // aún no ha comenzado
+    }
 
     // Relación con el artista (Qué artista ha hecho este evento)
     public function artist(): BelongsTo

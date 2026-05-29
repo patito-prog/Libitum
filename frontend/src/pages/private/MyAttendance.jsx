@@ -3,27 +3,64 @@ import useAPI from '../../hooks/useAPI.js';
 import useEventContext from '../../hooks/useEventContext.js';
 import Event from '../../components/Event.jsx';
 import MiniEventSkeleton from '../../components/common/MiniEvenSkeleton.jsx';
+import EmptyState from '../../components/common/EmptyState.jsx';
 import styles from './MyAttendance.module.scss';
 import appStyles from '../../App.module.scss';
-import { formatDate, STATUS_LABELS } from '../../utils/validations';
+import { formatDate, getStatusName } from '../../utils/validations';
+import EventStatusBadge from '../../components/common/EventStatusBadge.jsx';
 import API_BASE from '../../config/api.js';
+import { mapsUrl } from '../../config/googleMaps.js';
 
 const API = `${API_BASE}/api`;
 
+/** día / mes corto para el mini-stub de fecha. */
+const splitDate = (iso) => {
+    if (!iso) return { day: '--', month: '' };
+    const d = new Date(iso);
+    return {
+        day:   String(d.getDate()).padStart(2, '0'),
+        month: d.toLocaleString('es-ES', { month: 'short' }).replace('.', '').toUpperCase(),
+    };
+};
+
+/**
+ * Tarjeta de una asistencia: stub de fecha + datos + acciones (recordatorio y
+ * darse de baja). Al pulsar el cuerpo dispara onExpand (abre el detalle).
+ */
 const AttendanceCard = ({ event, onRemindToggle, onLeave, onExpand }) => {
-    const { id, title, location, event_date, status, liked, pivot } = event;
-    const statusName = status?.name ?? '';
+    const { id, title, location, event_date, pivot, latitude, longitude } = event;
     const remindMe = pivot?.remind_me ?? false;
+    const { day, month } = splitDate(event_date);
 
     return (
         <div className={`${styles.card} ${appStyles.cristal}`}>
             <div className={styles.main} onClick={onExpand}>
-                <div className={styles.headerRow}>
-                    <p className={styles.title}>{title}</p>
-                    <span className={`${styles.badge} ${styles[statusName]}`}>{STATUS_LABELS[statusName] ?? statusName}</span>
+                <div className={styles.dateStub}>
+                    <span className={styles.stubDay}>{day}</span>
+                    <span className={styles.stubMonth}>{month}</span>
                 </div>
-                {location && <p className={styles.location}>📍 {location}</p>}
-                {event_date && <p className={styles.date}>🗓 {formatDate(event_date)}</p>}
+
+                <div className={styles.mainInfo}>
+                    <div className={styles.headerRow}>
+                        <p className={styles.title}>{title}</p>
+                        <EventStatusBadge event={event} />
+                    </div>
+                    {location && (
+                        <div className={styles.locationRow}>
+                            <p className={styles.location}>📍 {location}</p>
+                            <a
+                                href={mapsUrl(latitude, longitude, location)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={styles.mapsBtn}
+                                onClick={e => e.stopPropagation()}
+                            >
+                                Cómo llegar ↗
+                            </a>
+                        </div>
+                    )}
+                    {event_date && <p className={styles.date}>🗓 {formatDate(event_date)}</p>}
+                </div>
             </div>
 
             <div className={styles.actions}>
@@ -46,6 +83,13 @@ const AttendanceCard = ({ event, onRemindToggle, onLeave, onExpand }) => {
     );
 };
 
+/**
+ * "Mis asistencias": los eventos a los que el usuario se ha apuntado.
+ *
+ * Los separa en Próximos y Pasados (según el estado efectivo) y permite
+ * activar/desactivar el recordatorio por email o darse de baja. Al pulsar una
+ * tarjeta se abre el detalle del evento dentro de la misma página.
+ */
 const MyAttendance = () => {
     const { getData, patch, deleteData } = useAPI();
     const { toggleLike } = useEventContext();
@@ -104,6 +148,19 @@ const MyAttendance = () => {
         );
     }
 
+    const upcoming = events.filter(e => !['finished', 'cancelled'].includes(getStatusName(e)));
+    const past     = events.filter(e =>  ['finished', 'cancelled'].includes(getStatusName(e)));
+
+    const renderList = (list) => list.map(event => (
+        <AttendanceCard
+            key={event.id}
+            event={event}
+            onRemindToggle={handleRemindToggle}
+            onLeave={handleLeave}
+            onExpand={() => setSelected(event)}
+        />
+    ));
+
     return (
         <div className={styles.page}>
             <h1>Mis asistencias</h1>
@@ -113,22 +170,26 @@ const MyAttendance = () => {
                     {[1, 2, 3].map(n => <MiniEventSkeleton key={n} />)}
                 </div>
             ) : events.length === 0 ? (
-                <div className={styles.empty}>
-                    <p>Todavía no te has apuntado a ningún evento.</p>
-                    <p className={styles.hint}>Descubre eventos en <strong>Para Ti</strong> o en <strong>Buscar</strong>.</p>
-                </div>
+                <EmptyState
+                    icon="🎟️"
+                    message="Todavía no te has apuntado a ningún evento."
+                    hint="Descubre eventos en Para Ti o en Buscar."
+                />
             ) : (
-                <div className={styles.list}>
-                    {events.map(event => (
-                        <AttendanceCard
-                            key={event.id}
-                            event={event}
-                            onRemindToggle={handleRemindToggle}
-                            onLeave={handleLeave}
-                            onExpand={() => setSelected(event)}
-                        />
-                    ))}
-                </div>
+                <>
+                    {upcoming.length > 0 && (
+                        <section>
+                            <h2 className={styles.sectionTitle}>Próximos</h2>
+                            <div className={styles.list}>{renderList(upcoming)}</div>
+                        </section>
+                    )}
+                    {past.length > 0 && (
+                        <section>
+                            <h2 className={styles.sectionTitle}>Pasados</h2>
+                            <div className={styles.list}>{renderList(past)}</div>
+                        </section>
+                    )}
+                </>
             )}
         </div>
     );

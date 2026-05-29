@@ -9,6 +9,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
+/**
+ * Modelo de Usuario (sirve para los tres roles: espectador, artista y admin,
+ * gestionados con Spatie). Centraliza las relaciones: perfil de artista,
+ * seguidores/seguidos, eventos creados, asistencias y likes.
+ */
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -37,23 +42,22 @@ class User extends Authenticatable
         return $this->hasOne(ArtistProfile::class);
     }
 
-    //Relación de seguidores (followers) y seguidos (following).
+    /**
+     * Artistas a los que ESTE usuario sigue.
+     * Relación N:M sobre la tabla pivote 'follows': user_id (quien sigue) →
+     * artist_id (a quién sigue). withTimestamps guarda cuándo se dio el follow.
+     */
     public function following() : \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        //Explicación del método belongsToMany:
-        //1. El primer argumento es el modelo con el que queremos establecer la relación, en este caso es el mismo modelo User porque tanto los seguidores como los seguidos son usuarios.
-        //2. El segundo argumento es el nombre de la tabla pivote que almacena las relaciones, en este caso es 'follows'.
-        //3. El tercer argumento es la clave foránea que representa al usuario que sigue (user_id).
-        //4. El cuarto argumento es la clave foránea que representa al artista seguido (artist_id).
-        //5. withTimestamps() es un método que le dice a Laravel que también queremos que se gestionen automáticamente los campos created_at y updated_at en la tabla pivote.
-        //Con esta relación, cuando llamemos a $user->following, Laravel hará una consulta a la tabla 'follows' para encontrar todas las filas donde 'user_id' sea igual al ID del usuario actual, y luego traerá los usuarios relacionados a través de 'artist_id'.
         return $this->belongsToMany(User::class, 'follows', 'user_id', 'artist_id')->withTimestamps();
     }
 
-    //Los seguidores de un artista.
+    /**
+     * Seguidores de este artista. Es la relación inversa de following():
+     * mismas claves pero invertidas (artist_id → user_id).
+     */
     public function followers() : \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        //Viendo el método anterior podemos entender que aquí simplemente invertimos el orden de las claves foráneas para obtener la relación inversa, es decir, los usuarios que siguen a un artista específico.
         return $this->belongsToMany(User::class, 'follows', 'artist_id', 'user_id')->withTimestamps();
     }
     /**

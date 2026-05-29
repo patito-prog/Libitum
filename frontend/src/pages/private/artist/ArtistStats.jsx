@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import useAPI from '../../../hooks/useAPI.js';
 import API_BASE from '../../../config/api.js';
 import Loader from '../../../components/common/Loader.jsx';
+import BackButton from '../../../components/common/BackButton.jsx';
 import styles from './ArtistStats.module.scss';
 
 const STATUS_LABELS = {
@@ -13,6 +14,7 @@ const STATUS_LABELS = {
     cancelled: { label: 'Cancelado',  icon: '❌' },
 };
 
+/** Tarjeta de una métrica: número grande + etiqueta + sub-texto opcional. */
 const StatCard = ({ value, label, sub }) => (
     <div className={styles.statCard}>
         <strong className={styles.statValue}>{value}</strong>
@@ -21,6 +23,11 @@ const StatCard = ({ value, label, sub }) => (
     </div>
 );
 
+/**
+ * Estadísticas del artista: audiencia (seguidores), impacto de sus eventos
+ * (inscripciones, likes, desglose por estado) y su evento más popular.
+ * Pide los datos ya agregados a /api/artist/statistics.
+ */
 const ArtistStats = () => {
     const { getData, loading } = useAPI();
     const [stats, setStats] = useState(null);
@@ -39,6 +46,7 @@ const ArtistStats = () => {
 
     return (
         <div className={styles.page}>
+            <BackButton />
             <h1 className={styles.title}>Estadísticas</h1>
             <p className={styles.subtitle}>Un vistazo rápido a tu impacto en Libitum.</p>
 

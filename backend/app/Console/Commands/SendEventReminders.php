@@ -7,12 +7,19 @@ use App\Models\Event;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 
+/**
+ * Comando que envía por email los recordatorios de eventos.
+ *
+ * Se ejecuta con `php artisan reminders:send` y está programado a diario en
+ * routes/console.php. Busca eventos de las próximas 24h que tengan asistentes
+ * con el recordatorio activado y les manda el aviso.
+ */
 class SendEventReminders extends Command
 {
-    // Lo que escribes en terminal: php artisan reminders:send
     protected $signature   = 'reminders:send';
     protected $description = 'Envía recordatorios de email para eventos que ocurren en las próximas 24 horas';
 
+    /** Lógica del comando: busca eventos próximos con recordatorio y envía los emails. */
     public function handle(): void
     {
         // Ventana de tiempo: desde ahora hasta dentro de 24 horas.
@@ -47,7 +54,6 @@ class SendEventReminders extends Command
             }
         }
 
-        // El método info() escribe en la consola (y en el log del scheduler).
         $this->info("Recordatorios enviados: {$sent}");
     }
 }

@@ -2,6 +2,10 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './UserListModal.module.scss';
 
+/**
+ * Modal con una lista de usuarios (seguidores / siguiendo). Al pulsar uno,
+ * navega a su perfil y cierra el modal.
+ */
 const UserListModal = ({ title, users, loading, onClose }) => {
     const navigate = useNavigate();
 

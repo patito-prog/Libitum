@@ -1,24 +1,23 @@
+import { Link } from 'react-router-dom';
 import { formatDate } from '../../utils/validations';
+import EventStatusBadge from '../common/EventStatusBadge.jsx';
 import styles from '../../pages/public/ArtistProfile.module.scss';
 
+/** Sección "Próximos eventos" del perfil del artista; cada tarjeta enlaza al detalle. */
 const ArtistEventsSection = ({ events }) => (
     <section className={styles.eventsSection}>
         <h2>Próximos eventos</h2>
         {events?.length > 0 ? (
             <div className={styles.eventsGrid}>
                 {events.map(event => (
-                    <div key={event.id} className={styles.eventCard}>
+                    <Link key={event.id} to={`/event/${event.id}`} className={styles.eventCard}>
                         {event.cover_image && (
                             <img src={event.cover_image} alt={event.title} className={styles.eventCover} />
                         )}
                         <div className={styles.eventBody}>
                             <div className={styles.eventHeader}>
                                 <h3 className={styles.eventTitle}>{event.title}</h3>
-                                {event.status && (
-                                    <span className={`${styles.badge} ${styles[event.status.name]}`}>
-                                        {event.status.name}
-                                    </span>
-                                )}
+                                <EventStatusBadge event={event} />
                             </div>
                             {event.event_date && <p className={styles.eventMeta}>🗓 {formatDate(event.event_date)}</p>}
                             {event.location  && <p className={styles.eventMeta}>📍 {event.location}</p>}
@@ -28,7 +27,7 @@ const ArtistEventsSection = ({ events }) => (
                                     : 'Entrada gratuita'}
                             </p>
                         </div>
-                    </div>
+                    </Link>
                 ))}
             </div>
         ) : (
