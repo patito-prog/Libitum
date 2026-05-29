@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import AddEvent from '../../components/AddEvent.jsx';
 import Events from '../../components/Events.jsx';
-import ButtonAdd from '../../components/common/ButtonAdd.jsx';
 import styles from './PageEvents.module.scss';
 import useEventContext from '../../hooks/useEventContext.js';
 
@@ -28,17 +27,17 @@ const PageEvents = () => {
 
     return (
         <div className={styles.pageEvents}>
-            <h1>{title}</h1>
+            <div className={styles.header}>
+                <h1>{title}</h1>
+                {/* Botón visible junto al título para crear un evento nuevo. */}
+                {!showForm && (
+                    <button className={styles.createBtn} onClick={changeDecisionAddEvent}>
+                        <span aria-hidden="true">+</span> Crear evento
+                    </button>
+                )}
+            </div>
 
             {showForm ? <AddEvent key={editMode ? event.id : 'new'} /> : <Events />}
-
-            {!showForm && (
-                <ButtonAdd
-                    title="Añadir evento"
-                    alt="Añadir evento"
-                    onClick={changeDecisionAddEvent}
-                />
-            )}
         </div>
     );
 };

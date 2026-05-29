@@ -56,6 +56,7 @@ class ProductionSeeder extends Seeder
             ['name' => 'Teatro',  'icon' => 'Mic',   'color' => '#c2185b'],
             ['name' => 'Danza',   'icon' => 'Heart', 'color' => '#3949ab'],
             ['name' => 'Circo',   'icon' => 'Star',  'color' => '#43a047'],
+            ['name' => 'Otro',    'icon' => 'Star',  'color' => '#64748b'],
         ];
 
         foreach ($categorias as $cat) {

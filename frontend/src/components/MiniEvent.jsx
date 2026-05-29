@@ -2,7 +2,7 @@ import styles from './MiniEvent.module.scss';
 import appStyles from '../App.module.scss';
 import EventStatusBadge from './common/EventStatusBadge.jsx';
 import useEventContext from "../hooks/useEventContext.js";
-import { mapsUrl } from '../config/googleMaps.js';
+import { mapsUrl } from '../config/maps.js';
 
 /** Descompone la fecha ISO en día / mes corto / hora para el resguardo. */
 const splitDate = (iso) => {

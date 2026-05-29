@@ -80,6 +80,10 @@ const Header = () => {
                     </NavLink>
                 )}
                 <NavLink to="/events/buscar" className={navLinkClass} >Buscar</NavLink>
+                <NavLink to="/artistas" className={navLinkClass}>Artistas</NavLink>
+                {user && !isAdmin && (
+                    <NavLink to={`/user/${user.id}`} className={navLinkClass}>Mi perfil</NavLink>
+                )}
                 {isArtist && (
                     <div className={styles.dropdown} ref={dropdownRef}>
                         <button
@@ -164,6 +168,7 @@ const Header = () => {
                         <NavLink to="/feed" className={mobileLinkClass} onClick={() => setMobileMenuOpen(false)}>Para Ti</NavLink>
                     )}
                     <NavLink to="/events/buscar" className={mobileLinkClass} onClick={() => setMobileMenuOpen(false)}>Buscar</NavLink>
+                    <NavLink to="/artistas" className={mobileLinkClass} onClick={() => setMobileMenuOpen(false)}>Artistas</NavLink>
                     {(isSpectator || isArtist) && (
                         <NavLink to="/favorites" className={mobileLinkClass} onClick={() => setMobileMenuOpen(false)}>Favoritos</NavLink>
                     )}

@@ -87,6 +87,43 @@ class ArtistProfileController extends Controller
     }
 
     /**
+     * Lista pública de artistas (GET /artists), con búsqueda opcional por nombre.
+     * Devuelve cada artista con su perfil, nº de seguidores y si el usuario
+     * actual ya lo sigue. Paginado y ordenado por más seguidos.
+     */
+    public function index(Request $request)
+    {
+        $currentUserId = Auth::id();
+        $q = trim((string) $request->query('q', ''));
+
+        $artists = User::role('artist')
+            ->with('artistProfile')
+            ->withCount('followers')
+            ->when($q !== '', fn($query) => $query->where('name', 'like', "%{$q}%"))
+            ->orderByDesc('followers_count')
+            ->orderBy('name')
+            ->paginate(12)
+            ->withQueryString();
+
+        // Ids de artistas que el usuario actual sigue (para pintar el botón).
+        $followingIds = $currentUserId
+            ? Auth::user()->following()->pluck('users.id')->all()
+            : [];
+
+        $artists->getCollection()->transform(function ($artist) use ($followingIds) {
+            $data = $artist->toArray();
+            $data['is_following'] = in_array($artist->id, $followingIds, true);
+            return $data;
+        });
+
+        return response()->json([
+            'error' => false,
+            'message' => 'Listado de artistas',
+            'data' => $artists,
+        ]);
+    }
+
+    /**
      * Devuelve el perfil público de un artista (GET /artists/{id}).
      * Incluye su perfil, próximos eventos publicados, nº de seguidores y si el
      * usuario actual ya lo sigue. Devuelve 404 si el id no es de un artista.

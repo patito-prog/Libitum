@@ -28,6 +28,8 @@ Route::post('/email/resend', [EmailVerificationController::class, 'resend'])
 
 Route::get('/events/search', [EventController::class, 'search']); // Búsqueda pública de eventos.
 Route::get('/events/{event}', [EventController::class, 'show']); //  ARTISTA/USUARIO puede ver un evento.
+// Listado/búsqueda pública de artistas (para explorar y seguir).
+Route::get('/artists', [ArtistProfileController::class, 'index']);
 // Cualquiera puede ver el perfil de un artista (página QR/donación).
 Route::get('/artists/{id}', [ArtistProfileController::class, 'show']);
 // Perfil social público de cualquier usuario (artista o espectador).

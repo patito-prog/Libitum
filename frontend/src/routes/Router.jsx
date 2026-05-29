@@ -20,6 +20,7 @@ const Register      = lazy(() => import('../pages/public/Register.jsx'));
 const Error         = lazy(() => import('../pages/public/Error.jsx'));
 const EmailVerified = lazy(() => import('../pages/public/EmailVerified.jsx'));
 const ArtistProfile = lazy(() => import('../pages/public/ArtistProfile.jsx'));
+const Artists       = lazy(() => import('../pages/public/Artists.jsx'));
 const UserProfile   = lazy(() => import('../pages/public/UserProfile.jsx'));
 const EventDetail   = lazy(() => import('../pages/public/EventDetail.jsx'));
 const SearchEvents  = lazy(() => import('../pages/private/SearchEvents.jsx'));
@@ -54,6 +55,7 @@ const Router = () => {
                 <Route path="/event/:id" element={<EventDetail />} />
 
                 <Route path="/events/buscar" element={<SearchEvents />} />
+                <Route path="/artistas" element={<Artists />} />
                 <Route path="/feed" element={<Feed />} />
 
                 {/* Raíz pública: Landing para invitados, Home para autenticados */}

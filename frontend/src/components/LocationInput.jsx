@@ -1,28 +1,15 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { useLoadScript, GoogleMap, useGoogleMap } from '@react-google-maps/api';
+import { useState, useCallback, useRef } from 'react';
+import MapView from './common/MapView.jsx';
+import { searchPlaces } from '../utils/geocode.js';
 import styles from './LocationInput.module.scss';
-import { MAPS_LIBRARIES, MAPS_OPTIONS, MAPS_KEY } from '../config/googleMaps.js';
-
-// AdvancedMarker — debe renderizarse dentro de <GoogleMap>
-const AdvancedMarker = ({ position }) => {
-    const map = useGoogleMap();
-
-    useEffect(() => {
-        if (!map) return;
-        const MarkerEl = window.google?.maps?.marker?.AdvancedMarkerElement;
-        if (!MarkerEl) return;
-
-        const marker = new MarkerEl({ position, map });
-        return () => { marker.map = null; };
-    }, [map, position?.lat, position?.lng]);
-
-    return null;
-};
 
 /**
- * Buscador de ubicación con autocompletado de Google Places + mini-mapa.
- * Espera a que cargue el script de Maps antes de montar el contenido real
- * (LocationInputInner). Devuelve al padre {location, latitude, longitude}.
+ * Buscador de ubicación con autocompletado de OpenStreetMap (Nominatim) y
+ * mini-mapa con Leaflet. Gratis, sin clave de API ni tarjeta.
+ *
+ * Pide sugerencias con debounce y, al elegir una, ya tiene las coordenadas
+ * (Nominatim las devuelve) y pinta el mini-mapa. Devuelve al padre
+ * {location, latitude, longitude}.
  *
  * @param {Object}   props
  * @param {Function} props.onLocationChange Callback con la ubicación elegida
@@ -31,35 +18,6 @@ const AdvancedMarker = ({ position }) => {
  * @param {number}   [props.initialLng]     Lng inicial (al editar)
  */
 const LocationInput = ({ onLocationChange, initialValue, initialLat, initialLng }) => {
-    const { isLoaded } = useLoadScript({
-        googleMapsApiKey: MAPS_KEY,
-        libraries: MAPS_LIBRARIES,
-        language: 'es',
-    });
-
-    if (!isLoaded) return (
-        <div className={styles.field}>
-            <span className={`${styles.label} ${styles.floating}`}>Ubicación</span>
-            <input className={styles.input} disabled placeholder="Cargando..." />
-        </div>
-    );
-
-    return (
-        <LocationInputInner
-            onLocationChange={onLocationChange}
-            initialValue={initialValue}
-            initialLat={initialLat}
-            initialLng={initialLng}
-        />
-    );
-};
-
-/**
- * Contenido real del buscador (ya con el script de Maps cargado).
- * Pide sugerencias a Places con debounce y, al elegir una, saca sus coordenadas
- * con fetchFields y pinta el mini-mapa.
- */
-const LocationInputInner = ({ onLocationChange, initialValue, initialLat, initialLng }) => {
     const [focused,     setFocused]     = useState(false);
     const [value,       setValue]       = useState(initialValue ?? '');
     const [suggestions, setSuggestions] = useState([]);
@@ -69,45 +27,25 @@ const LocationInputInner = ({ onLocationChange, initialValue, initialLat, initia
     const debounceRef = useRef(null);
 
     const fetchSuggestions = useCallback(async (input) => {
-        if (!input || input.length < 2) { setSuggestions([]); return; }
-        try {
-            const { AutocompleteSuggestion } = await window.google.maps.importLibrary('places');
-            const { suggestions: results }   = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
-                input,
-                language: 'es',
-            });
-            setSuggestions(results ?? []);
-        } catch {
-            setSuggestions([]);
-        }
+        const results = await searchPlaces(input);
+        setSuggestions(results);
     }, []);
 
     const handleChange = (e) => {
         const input = e.target.value;
         setValue(input);
         clearTimeout(debounceRef.current);
-        debounceRef.current = setTimeout(() => fetchSuggestions(input), 300);
+        // 400ms de debounce: Nominatim pide no abusar (1 req/s).
+        debounceRef.current = setTimeout(() => fetchSuggestions(input), 400);
     };
 
-    const handleSelect = async (suggestion) => {
-        const pred      = suggestion.placePrediction;
-        const main      = pred.mainText.toString();
-        const secondary = pred.secondaryText?.toString();
-        const text      = main + (secondary ? `, ${secondary}` : '');
-
+    const handleSelect = (place) => {
+        // Texto cortito y legible: las 3 primeras partes del nombre completo.
+        const text = place.label.split(',').slice(0, 3).join(',').trim();
         setValue(text);
         setSuggestions([]);
-
-        try {
-            const place = pred.toPlace();
-            await place.fetchFields({ fields: ['location'] });
-            const lat = place.location.lat();
-            const lng = place.location.lng();
-            setCoords({ lat, lng });
-            onLocationChange({ location: text, latitude: lat, longitude: lng });
-        } catch {
-            onLocationChange({ location: text, latitude: null, longitude: null });
-        }
+        setCoords({ lat: place.lat, lng: place.lng });
+        onLocationChange({ location: text, latitude: place.lat, longitude: place.lng });
     };
 
     const floating = focused || !!value;
@@ -130,13 +68,13 @@ const LocationInputInner = ({ onLocationChange, initialValue, initialLat, initia
 
             {suggestions.length > 0 && (
                 <ul className={styles.suggestions}>
-                    {suggestions.map((s, i) => {
-                        const pred      = s.placePrediction;
-                        const main      = pred.mainText.toString();
-                        const secondary = pred.secondaryText?.toString();
+                    {suggestions.map((s) => {
+                        const parts     = s.label.split(',');
+                        const main      = parts[0].trim();
+                        const secondary = parts.slice(1, 3).join(',').trim();
                         return (
                             <li
-                                key={i}
+                                key={s.id}
                                 className={styles.suggestion}
                                 onMouseDown={() => handleSelect(s)}
                             >
@@ -149,14 +87,7 @@ const LocationInputInner = ({ onLocationChange, initialValue, initialLat, initia
             )}
 
             {coords && (
-                <GoogleMap
-                    mapContainerClassName={styles.map}
-                    center={coords}
-                    zoom={15}
-                    options={MAPS_OPTIONS}
-                >
-                    <AdvancedMarker position={coords} />
-                </GoogleMap>
+                <MapView lat={coords.lat} lng={coords.lng} zoom={15} className={styles.map} />
             )}
         </div>
     );

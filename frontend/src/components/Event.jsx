@@ -1,20 +1,15 @@
-import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useLoadScript, GoogleMap, useGoogleMap } from '@react-google-maps/api';
 import styles from './Event.module.scss';
 import appStyles from '../App.module.scss';
 import { formatDate, getStatusName } from '../utils/validations';
 import EventStatusBadge from './common/EventStatusBadge.jsx';
 import Button from './common/Button.jsx';
+import MapView from './common/MapView.jsx';
 import useEventContext from '../hooks/useEventContext.js';
-import { MAPS_LIBRARIES, MAPS_OPTIONS, MAPS_KEY, mapsUrl } from '../config/googleMaps.js';
+import { mapsUrl } from '../config/maps.js';
 
 // Estados en los que un espectador puede apuntarse a un evento.
 const INSCRIBABLE = ['published', 'live'];
-
-// Mapa del feed: se puede mover y hacer zoom, pero la rueda solo hace zoom con Ctrl
-// (gestureHandling 'cooperative') para no romper el scroll vertical del Para Ti.
-const MAPS_OPTIONS_FEED = { ...MAPS_OPTIONS, gestureHandling: 'cooperative' };
 
 /**
  * Parte una fecha ISO en día / mes corto / hora para el sello tipo entrada.
@@ -29,27 +24,6 @@ const splitDate = (iso) => {
         month: d.toLocaleString('es-ES', { month: 'short' }).replace('.', '').toUpperCase(),
         time:  d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
     };
-};
-
-/**
- * Marcador del mapa usando la API nueva (AdvancedMarkerElement).
- * No pinta nada en el DOM de React: se engancha al mapa por imperativo dentro
- * del effect, por eso devuelve null. Debe ir dentro de un <GoogleMap>.
- * @param {{position:{lat:number,lng:number}}} props
- */
-const AdvancedMarker = ({ position }) => {
-    const map = useGoogleMap();
-
-    useEffect(() => {
-        if (!map) return;
-        const MarkerEl = window.google?.maps?.marker?.AdvancedMarkerElement;
-        if (!MarkerEl) return;
-
-        const marker = new MarkerEl({ position, map });
-        return () => { marker.map = null; };
-    }, [map, position?.lat, position?.lng]);
-
-    return null;
 };
 
 /**
@@ -71,12 +45,6 @@ const Event = ({ data, onBack, onLike, onInscribe, editable = false, compact = f
     const dateParts = splitDate(event_date);
 
     const { toggleLike, setEventForEdit } = useEventContext();
-
-    const { isLoaded } = useLoadScript({
-        googleMapsApiKey: MAPS_KEY,
-        libraries: MAPS_LIBRARIES,
-        language: 'es',
-    });
 
     const handleLikeClick = () => {
         if (onLike) onLike(id);
@@ -162,17 +130,10 @@ const Event = ({ data, onBack, onLike, onInscribe, editable = false, compact = f
                     )}
                 </div>
 
-                {coords && isLoaded && (
+                {coords && (
                     compact ? (
                         <div className={styles.compactMap}>
-                            <GoogleMap
-                                mapContainerClassName={styles.map}
-                                center={coords}
-                                zoom={14}
-                                options={MAPS_OPTIONS_FEED}
-                            >
-                                <AdvancedMarker position={coords} />
-                            </GoogleMap>
+                            <MapView lat={coords.lat} lng={coords.lng} zoom={14} className={styles.map} />
                             <a
                                 href={mapsUrl(latitude, longitude, location)}
                                 target="_blank"
@@ -185,14 +146,7 @@ const Event = ({ data, onBack, onLike, onInscribe, editable = false, compact = f
                         </div>
                     ) : (
                         <div className={styles.mapWrapper}>
-                            <GoogleMap
-                                mapContainerClassName={styles.map}
-                                center={coords}
-                                zoom={15}
-                                options={MAPS_OPTIONS}
-                            >
-                                <AdvancedMarker position={coords} />
-                            </GoogleMap>
+                            <MapView lat={coords.lat} lng={coords.lng} zoom={15} className={styles.map} />
                             <a
                                 href={mapsUrl(latitude, longitude, location)}
                                 target="_blank"

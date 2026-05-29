@@ -9,7 +9,7 @@ import appStyles from '../../App.module.scss';
 import { formatDate, getStatusName } from '../../utils/validations';
 import EventStatusBadge from '../../components/common/EventStatusBadge.jsx';
 import API_BASE from '../../config/api.js';
-import { mapsUrl } from '../../config/googleMaps.js';
+import { mapsUrl } from '../../config/maps.js';
 
 const API = `${API_BASE}/api`;
 

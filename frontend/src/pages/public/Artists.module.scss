@@ -1,0 +1,164 @@
+.page {
+    width: 100%;
+    max-width: clamp(320px, 92dvw, 1000px);
+    margin: 0 auto;
+    padding: clamp(1.5rem, 4vw, 2.5rem) clamp(0.75rem, 3vw, 1.5rem);
+
+    h1 {
+        font-family: var(--font-display);
+        font-size: clamp(2rem, 6vw, 3.2rem);
+        font-weight: 900;
+        margin: 0;
+        color: var(--text-primary);
+        letter-spacing: -0.04em;
+        line-height: 1;
+        text-transform: uppercase;
+    }
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    margin: 0.6rem 0 1.5rem;
+    font-size: 1rem;
+}
+
+.searchBox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.7rem 1rem;
+    margin-bottom: 1.75rem;
+
+    &:focus-within { border-color: var(--color-primary); box-shadow: 0 0 0 3px var(--color-primary-light); }
+}
+
+.searchIcon { font-size: 1.1rem; opacity: 0.7; }
+
+.searchInput {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-family: inherit;
+
+    &::placeholder { color: var(--text-muted); }
+}
+
+.clearBtn {
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.5rem;
+    padding: 1.5rem 1rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed), border-color var(--transition-speed);
+
+    &:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--color-primary);
+    }
+}
+
+.avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-primary-light);
+    color: var(--color-primary-deep);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.8rem;
+
+    img { width: 100%; height: 100%; object-fit: cover; }
+}
+
+.name {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.followers {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+}
+
+.followBtn {
+    margin-top: 0.4rem;
+    background: var(--color-primary);
+    color: #fff;
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-pill);
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 0.45rem 1.1rem;
+    cursor: pointer;
+    transition: background var(--transition-speed), color var(--transition-speed), transform var(--transition-speed);
+
+    &:hover:not(:disabled) { background: var(--color-primary-hover); transform: translateY(-1px); }
+    &:disabled { opacity: 0.6; cursor: wait; }
+
+    &.following {
+        background: transparent;
+        color: var(--color-primary);
+
+        &:hover:not(:disabled) {
+            background: rgba(232, 74, 64, 0.08);
+            border-color: var(--color-danger);
+            color: var(--color-danger);
+        }
+    }
+}
+
+.center {
+    display: flex;
+    justify-content: center;
+    padding: 2rem 0;
+}
+
+.moreBtn {
+    background: transparent;
+    border: 1px solid var(--color-primary);
+    color: var(--color-primary);
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 0.7rem 1.6rem;
+    cursor: pointer;
+    transition: background var(--transition-speed), color var(--transition-speed);
+
+    &:hover:not(:disabled) { background: var(--color-primary); color: #fff; }
+    &:disabled { opacity: 0.6; cursor: wait; }
+}
