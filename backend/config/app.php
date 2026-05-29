@@ -56,6 +56,15 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | URL del Frontend (SPA)
+    |--------------------------------------------------------------------------
+    | A dónde redirigimos tras verificar el correo y a dónde apuntan los enlaces
+    | de los emails (ver evento, etc). En producción es el dominio de Vercel.
+    */
+    'frontend_url' => env('FRONTEND_URL', 'http://localhost:5173'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

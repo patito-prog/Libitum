@@ -4,6 +4,7 @@ use App\Http\Controllers\StatusController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\EmailVerificationController;
 use App\Http\Controllers\FollowerController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\EventController;
@@ -15,6 +16,15 @@ use App\Http\Controllers\UserProfileController;
 // --- RUTA PÚBLICA (No necesita token, porque venimos a pedirlo) ---
 Route::post('/login', [AuthController::class, 'verify']);
 Route::post('/register', [AuthController::class, 'register']);
+
+// --- VERIFICACIÓN DE CORREO ---
+// El enlace del email cae aquí (firmado): verifica y redirige al frontend.
+Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+    ->middleware('signed')
+    ->name('api.verification.verify');
+// Reenviar el correo de verificación (público, con throttle).
+Route::post('/email/resend', [EmailVerificationController::class, 'resend'])
+    ->middleware('throttle:6,1');
 
 Route::get('/events/search', [EventController::class, 'search']); // Búsqueda pública de eventos.
 Route::get('/events/{event}', [EventController::class, 'show']); //  ARTISTA/USUARIO puede ver un evento.

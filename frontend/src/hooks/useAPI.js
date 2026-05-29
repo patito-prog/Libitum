@@ -58,7 +58,12 @@ const useAPI = () => {
                 // si no hay cuerpo, usamos el código HTTP como mensaje.
                 const errorBody = await response.json().catch(() => null);
                 const message = errorBody?.message ?? `HTTP ${response.status}`;
-                throw new Error(message);
+                // Adjuntamos el cuerpo y el status al error para que el componente
+                // pueda reaccionar a casos concretos (p.ej. needs_verification).
+                const err = new Error(message);
+                err.body = errorBody;
+                err.status = response.status;
+                throw err;
             }
             return await response.json();
         } catch (error){

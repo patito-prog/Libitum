@@ -1,6 +1,7 @@
 import useAuthContext from '../../hooks/useAuthContext.js';
 import Home from './Home.jsx';
 import Landing from './Landing.jsx';
+import Loading from '../../components/common/Loading.jsx';
 
 /**
  * Ruta raíz "/": muestra la carta de presentación (Landing) a los invitados
@@ -9,7 +10,7 @@ import Landing from './Landing.jsx';
 const RootPage = () => {
     const { isAuthenticated, loadingAuth } = useAuthContext();
 
-    if (loadingAuth) return <div className="loading-screen">Cargando...</div>;
+    if (loadingAuth) return <Loading fullScreen />;
     return isAuthenticated ? <Home /> : <Landing />;
 };
 

@@ -86,8 +86,10 @@ class ProductionSeeder extends Seeder
         $admin = User::firstOrCreate(
             ['email' => $adminEmail],
             [
-                'name'     => env('ADMIN_NAME', 'Admin'),
-                'password' => Hash::make($adminPassword),
+                'name'              => env('ADMIN_NAME', 'Admin'),
+                'password'          => Hash::make($adminPassword),
+                // El admin ya viene verificado: no tiene que confirmar nada.
+                'email_verified_at' => now(),
             ]
         );
 

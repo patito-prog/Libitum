@@ -2,7 +2,8 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\VerifyEmailLibitum;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -13,11 +14,23 @@ use Spatie\Permission\Traits\HasRoles;
  * Modelo de Usuario (sirve para los tres roles: espectador, artista y admin,
  * gestionados con Spatie). Centraliza las relaciones: perfil de artista,
  * seguidores/seguidos, eventos creados, asistencias y likes.
+ *
+ * Implementa MustVerifyEmail: el usuario debe confirmar su correo (pinchando
+ * el enlace que le mandamos) antes de poder iniciar sesión.
  */
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
+
+    /**
+     * Sobreescribimos el envío de la notificación de verificación para usar
+     * nuestra plantilla con la marca Libitum en vez del email genérico de Laravel.
+     */
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new VerifyEmailLibitum());
+    }
 
     /**
      * The attributes that are mass assignable.

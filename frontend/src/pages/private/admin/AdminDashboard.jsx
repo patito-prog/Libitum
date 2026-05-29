@@ -2,6 +2,7 @@ import useAdminDashboard from "../../../hooks/useAdminDashboard.js";
 import AdminTable from "../../../components/admin/AdminTable.jsx";
 import UserRow from "../../../components/admin/UserRow.jsx";
 import EventRow from "../../../components/admin/EventRow.jsx";
+import Loading from "../../../components/common/Loading.jsx";
 import styles from "../../../components/admin/Admin.module.scss";
 
 const AdminDashboard = () => {
@@ -40,7 +41,7 @@ const AdminDashboard = () => {
 
             <div className="content">
                 {loading ? (
-                    <p className={styles.loadingText}>Cargando...</p>
+                    <Loading message="Cargando datos" />
                 ) : activeTab === "users" ? (
                     <>
                         <AdminTable headers={["ID", "Nombre", "Email", "Rol", "Acciones"]}>

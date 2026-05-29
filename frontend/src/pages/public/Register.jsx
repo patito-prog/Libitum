@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import useAuthContext from '../../hooks/useAuthContext.js';
 import useMessageContext from '../../hooks/useMessageContext.js';
+import VerifyNotice from '../../components/auth/VerifyNotice.jsx';
 import { validateRegister } from "../../utils/validations/index.js";
 import styles from './Auth.module.scss';
 
@@ -19,9 +20,11 @@ const Register = () => {
         donation_url: "",
     };
 
-    const nav = useNavigate();
     const [formData, setFormData] = useState(initialData);
     const [loading, setLoading] = useState(false);
+    // Cuando el registro va bien, guardamos el email para pasar a la pantalla
+    // de "revisa tu correo" en vez de redirigir al login.
+    const [registeredEmail, setRegisteredEmail] = useState(null);
 
     const { register } = useAuthContext();
     const { showMessageWithTime } = useMessageContext();
@@ -52,16 +55,27 @@ const Register = () => {
                 payload.donation_url = formData.donation_url;
             }
             await register(payload);
-            showMessageWithTime("¡Cuenta creada con éxito!", "ok");
-            nav('/login');
-        } catch {
-            showMessageWithTime("Error al registrarse.", "error");
+            showMessageWithTime("¡Cuenta creada! Revisa tu correo para confirmarla.", "ok");
+            setRegisteredEmail(formData.email);
+        } catch (err) {
+            showMessageWithTime(err?.message || "Error al registrarse.", "error");
         } finally {
             setLoading(false);
         }
     };
 
     const isArtist = formData.role === 'artist';
+
+    // Registro completado: mostramos el aviso de "revisa tu correo".
+    if (registeredEmail) {
+        return (
+            <div className={styles.authContainer}>
+                <div className={styles.authCard}>
+                    <VerifyNotice email={registeredEmail} title="¡Ya casi estás!" />
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={styles.authContainer}>

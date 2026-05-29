@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import useAuthContext from "./../../hooks/useAuthContext.js";
 import useMessageContext from "../../hooks/useMessageContext.js";
+import VerifyNotice from "../../components/auth/VerifyNotice.jsx";
 import { validateLogin } from "../../utils/validations/auth.js";
 import styles from './Auth.module.scss';
 
@@ -17,6 +18,9 @@ const Login = () => {
 
     const [credentials, setCredentials] = useState(initialCredentials);
     const [loading, setLoading] = useState(false);
+    // Si el back responde que la cuenta no está verificada, guardamos el email
+    // para mostrar el aviso de confirmación en vez del formulario.
+    const [unverifiedEmail, setUnverifiedEmail] = useState(null);
 
     const { logIn } = useAuthContext();
     const { showMessageWithTime } = useMessageContext();
@@ -47,12 +51,29 @@ const Login = () => {
             await logIn(credentials);
             showMessageWithTime("¡Bienvenido/a de nuevo!", "ok");
             nav(from, { replace: true });
-            
-        } catch {
-            showMessageWithTime("Credenciales incorrectas o problema de conexión.", "error");
+
+        } catch (err) {
+            // Caso especial: la cuenta existe pero no ha confirmado el correo.
+            if (err?.body?.needs_verification) {
+                setUnverifiedEmail(err.body.email || credentials.email);
+                showMessageWithTime(err.message, "error");
+            } else {
+                showMessageWithTime("Credenciales incorrectas o problema de conexión.", "error");
+            }
         } finally {
             setLoading(false);
         }
+    }
+
+    // Cuenta sin verificar: mostramos el aviso con opción de reenviar.
+    if (unverifiedEmail) {
+        return (
+            <div className={styles.authContainer}>
+                <div className={styles.authCard}>
+                    <VerifyNotice email={unverifiedEmail} title="Confirma tu correo" />
+                </div>
+            </div>
+        );
     }
 
     return (

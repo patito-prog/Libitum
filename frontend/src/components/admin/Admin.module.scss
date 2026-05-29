@@ -59,37 +59,45 @@
     }
 }
 
+/* Contenedor con scroll horizontal: en móvil la tabla no rompe el layout,
+   se desliza de lado manteniendo su ancho mínimo legible. */
+.tableWrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-md);
+}
+
 .adminTable {
     width: 100%;
+    min-width: 640px; /* fuerza el scroll en pantallas estrechas en vez de aplastar columnas */
     border-collapse: separate;
     border-spacing: 0;
     background: var(--bg-surface);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-radius: var(--radius-lg);
     overflow: hidden;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-md);
 
     thead {
-        background: rgba(0, 0, 0, 0.3);
+        background: var(--color-primary-light);
 
         th {
             text-align: left;
             padding: 1rem 1.25rem;
-            color: var(--text-secondary);
-            font-weight: 600;
+            color: var(--color-primary-deep);
+            font-weight: 700;
             font-size: 0.78rem;
             text-transform: uppercase;
             letter-spacing: 0.08em;
             border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
         }
     }
 
     tbody tr {
         transition: background var(--transition-speed);
 
-        &:hover { background: rgba(255, 255, 255, 0.025); }
+        &:hover { background: rgba(22, 24, 26, 0.025); }
 
         td {
             padding: 0.9rem 1.25rem;
@@ -112,8 +120,8 @@
     text-transform: uppercase;
     letter-spacing: 0.04em;
 
-    &.admin   { background: rgba(232,74,64,0.12); color: #f87171; border: 1px solid rgba(232,74,64,0.25); }
-    &.artist  { background: var(--color-primary-light); color: #5ab8bc; border: 1px solid rgba(33,115,119,0.3); }
+    &.admin   { background: rgba(232,74,64,0.12); color: var(--color-danger-hover); border: 1px solid rgba(232,74,64,0.25); }
+    &.artist  { background: var(--color-primary-light); color: var(--color-primary-deep); border: 1px solid rgba(33,115,119,0.3); }
     &.user,
     &.spectator { background: rgba(22, 24, 26, 0.06); color: var(--text-secondary); border: 1px solid var(--border-color); }
 }
@@ -201,29 +209,29 @@
     outline: none;
     transition: all var(--transition-speed);
 
-    &.admin    { color: #f87171; border-color: rgba(232,74,64,0.4);  background: rgba(232,74,64,0.08); }
-    &.artist   { color: #5ab8bc; border-color: rgba(33,115,119,0.4); background: var(--color-primary-light); }
+    &.admin    { color: var(--color-danger-hover); border-color: rgba(232,74,64,0.4);  background: rgba(232,74,64,0.08); }
+    &.artist   { color: var(--color-primary-deep); border-color: rgba(33,115,119,0.4); background: var(--color-primary-light); }
     &.spectator,
-    &.user     { color: var(--text-secondary); border-color: var(--border-color); background: rgba(255,255,255,0.04); }
+    &.user     { color: var(--text-secondary); border-color: var(--border-color); background: rgba(22,24,26,0.04); }
 
     option { background: var(--bg-surface); color: var(--text-primary); }
 
     &:disabled { opacity: 0.5; cursor: wait; }
 }
 
-// status badges in event table
-.published { background: rgba(34,197,94,0.1);  color: #4ade80; border: 1px solid rgba(34,197,94,0.25); }
-.live      { background: rgba(239,68,68,0.1);  color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
-.finished  { background: rgba(148,163,184,0.1); color: #94a3b8; border: 1px solid rgba(148,163,184,0.25); }
-.cancelled { background: rgba(239,68,68,0.06); color: #f87171; border: 1px solid rgba(239,68,68,0.15); text-decoration: line-through; }
-.draft     { background: rgba(251,191,36,0.08); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+// status badges in event table (colores oscuros para que se lean sobre crema)
+.published { background: rgba(34,197,94,0.12);  color: #15803d; border: 1px solid rgba(34,197,94,0.3); }
+.live      { background: rgba(239,68,68,0.12);  color: var(--color-danger-hover); border: 1px solid rgba(239,68,68,0.3); }
+.finished  { background: rgba(100,116,139,0.12); color: #475569; border: 1px solid rgba(100,116,139,0.3); }
+.cancelled { background: rgba(239,68,68,0.08); color: var(--color-danger-hover); border: 1px solid rgba(239,68,68,0.2); text-decoration: line-through; }
+.draft     { background: rgba(217,151,12,0.12); color: #b45309; border: 1px solid rgba(217,151,12,0.3); }
 
 .buttonAdmin {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
     background: rgba(232, 74, 64, 0.08);
-    color: #f87171;
+    color: var(--color-danger-hover);
     border: 1px solid rgba(232, 74, 64, 0.2);
     padding: 0.4rem 0.85rem;
     border-radius: var(--radius-sm);

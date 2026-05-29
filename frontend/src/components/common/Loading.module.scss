@@ -1,0 +1,33 @@
+/* Loader reutilizable: puntitos animados + mensaje, en versión pantalla
+   completa (carga de páginas/guards) o inline (dentro de una sección). */
+
+.fullScreen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.1rem;
+    min-height: calc(100dvh - 64px);
+    width: 100%;
+    padding: 2rem;
+}
+
+.inline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem;
+    padding: 3rem 1rem;
+    width: 100%;
+}
+
+.message {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin: 0;
+}

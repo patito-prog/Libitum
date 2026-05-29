@@ -27,6 +27,7 @@ const AuthProvider = ({children}) => {
     const pathLogin    = `${API_BASE}/api/login`;
     const pathRegister = `${API_BASE}/api/register`;
     const pathLogOut   = `${API_BASE}/api/logout`;
+    const pathResend   = `${API_BASE}/api/email/resend`;
 
     /**
      * Inicia sesión. Guarda el token; el cambio de `token` dispara el useEffect
@@ -44,12 +45,22 @@ const AuthProvider = ({children}) => {
     };
 
     /**
-     * Registra un usuario nuevo y lo manda al login para que entre.
+     * Registra un usuario nuevo. Ya NO lo loguea ni redirige: el back manda un
+     * correo de verificación y devuelve { needs_verification, email }. Devolvemos
+     * esa respuesta para que el Register muestre la pantalla de "revisa tu correo".
      * @param {Object} userData Datos del formulario de registro
+     * @returns {Promise<Object>} respuesta del back
      */
     const register = async (userData) => {
-        await save(pathRegister, userData);
-        nav("/login");
+        return await save(pathRegister, userData);
+    };
+
+    /**
+     * Reenvía el correo de verificación a una dirección dada.
+     * @param {string} email
+     */
+    const resendVerification = async (email) => {
+        return await save(pathResend, { email });
     };
 
     /**
@@ -133,6 +144,7 @@ const AuthProvider = ({children}) => {
         logIn,
         logOut,
         register,
+        resendVerification,
         hasRole,
         refreshUser
     };

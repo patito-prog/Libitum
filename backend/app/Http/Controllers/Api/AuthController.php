@@ -36,8 +36,22 @@ class AuthController extends Controller
             ], 401);
         }
 
-        // Credenciales correctas: recuperamos el usuario y le emitimos un token Sanctum.
+        // Credenciales correctas: recuperamos el usuario.
         $usuario = Auth::user();
+
+        // Bloqueo por verificación: si no ha confirmado el correo, no le damos
+        // token. El frontend mostrará el aviso y el botón de reenviar.
+        if (! $usuario->hasVerifiedEmail()) {
+            return response()->json([
+                "error"              => true,
+                "message"            => 'Debes confirmar tu correo antes de entrar. Revisa tu bandeja (y la carpeta de spam).',
+                "needs_verification" => true,
+                "email"              => $usuario->email,
+                "code"               => 403,
+            ], 403);
+        }
+
+        // Verificado: le emitimos el token Sanctum.
         $token = $usuario->createToken('auth_token')->plainTextToken;
 
         //Devolvemos el JSON 
@@ -96,16 +110,17 @@ class AuthController extends Controller
 
             return $newUser;
         });
-        // 3. Le generamos el token directamente para que ya esté logueado
-        $token = $user->createToken('auth_token')->plainTextToken;
 
-        // 4. Devolvemos el JSON de éxito
+        // Le mandamos el correo de verificación. NO le damos token: primero
+        // tiene que confirmar el correo pinchando el enlace que le llega.
+        $user->sendEmailVerificationNotification();
+
         return response()->json([
-            "error" => false,
-            "message" => 'Usuario registrado correctamente',
-            "token" => $token,
-            "type_token" => "Bearer",
-            "code" => 201
+            "error"              => false,
+            "message"            => 'Te hemos enviado un correo para confirmar tu cuenta. Revisa tu bandeja de entrada.',
+            "needs_verification" => true,
+            "email"              => $user->email,
+            "code"               => 201,
         ], 201);
     }
 

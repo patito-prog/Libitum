@@ -61,7 +61,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Jefe',
             'email' => 'admin@libitum.com',
             'password' => Hash::make('123456'),
-
+            'email_verified_at' => now(),
         ]);
         $adminUser->assignRole('admin');
 
@@ -70,6 +70,7 @@ class DatabaseSeeder extends Seeder
             'surname' => 'Wolfgang',
             'email' => 'mozart@libitum.com',
             'password' => Hash::make('123456'),
+            'email_verified_at' => now(),
         ]);
         $artistUser->assignRole('artist');
         ArtistProfile::create([
