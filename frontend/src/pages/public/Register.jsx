@@ -18,6 +18,7 @@ const Register = () => {
         confirmPassword: "",
         role: "user",
         donation_url: "",
+        bizum_phone: "",
     };
 
     const [formData, setFormData] = useState(initialData);
@@ -51,8 +52,9 @@ const Register = () => {
                 password: formData.password,
                 role: formData.role,
             };
-            if (formData.role === 'artist' && formData.donation_url) {
-                payload.donation_url = formData.donation_url;
+            if (formData.role === 'artist') {
+                if (formData.donation_url) payload.donation_url = formData.donation_url;
+                if (formData.bizum_phone) payload.bizum_phone = formData.bizum_phone;
             }
             await register(payload);
             showMessageWithTime("¡Cuenta creada! Revisa tu correo para confirmarla.", "ok");
@@ -133,13 +135,14 @@ const Register = () => {
                             <div className={styles.donationNotice}>
                                 <span className={styles.noticeIcon}>💰</span>
                                 <div>
-                                    <strong>¡No te olvides de esto!</strong>
+                                    <strong>Cómo recibir el apoyo de tus fans</strong>
                                     <p>
-                                        Tus fans llegarán a tu perfil escaneando tu QR. Si no tienes un enlace de donación,
-                                        no podrán apoyarte económicamente. Puedes añadirlo ahora o más tarde en tu perfil.
+                                        Tus fans llegarán a tu perfil escaneando tu QR. Aquí decides cómo pueden
+                                        apoyarte. Puedes rellenar lo que quieras ahora o más tarde desde tu perfil.
                                     </p>
                                 </div>
                             </div>
+
                             <div className={styles.inputGroup}>
                                 <label htmlFor="donation_url">
                                     Enlace de donación <span className={styles.optional}>(opcional)</span>
@@ -149,12 +152,36 @@ const Register = () => {
                                     id="donation_url"
                                     name="donation_url"
                                     className={`${styles.input} ${styles.donationInput}`}
-                                    placeholder="https://buymeacoffee.com/tu_usuario"
+                                    placeholder="https://ko-fi.com/tu_usuario"
                                     value={formData.donation_url}
                                     onChange={updateData}
                                 />
+                                <p className={styles.donationTip}>
+                                    💡 Recomendado: <strong>Ko-fi</strong> (conectando Stripe). Quien te dona paga con
+                                    tarjeta <strong>sin crear cuenta</strong> y <strong>sin comisiones</strong>. Con
+                                    PayPal, ojo: suele cobrar comisión y a veces obliga al donante a registrarse.
+                                </p>
                                 <p className={styles.donationHint}>
                                     Plataformas aceptadas: Ko-fi · Buy Me a Coffee · PayPal · Patreon · GoFundMe · Twitch
+                                </p>
+                            </div>
+
+                            <div className={styles.inputGroup}>
+                                <label htmlFor="bizum_phone">
+                                    💜 Bizum <span className={styles.optional}>(opcional)</span>
+                                </label>
+                                <input
+                                    type="tel"
+                                    id="bizum_phone"
+                                    name="bizum_phone"
+                                    className={`${styles.input} ${styles.donationInput}`}
+                                    placeholder="600 00 00 00"
+                                    value={formData.bizum_phone}
+                                    onChange={updateData}
+                                />
+                                <p className={styles.donationTip}>
+                                    Lo más directo en España y <strong>sin comisiones</strong>. ⚠️ Tu número será
+                                    visible en tu perfil; lo añades bajo tu responsabilidad.
                                 </p>
                             </div>
                         </div>
