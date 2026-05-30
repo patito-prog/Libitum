@@ -40,11 +40,11 @@ class Event extends Model
 
     /**
      * Estado efectivo calculado a partir de la fecha real del evento.
-     * draft/cancelled/finished nunca se sobreescriben (decisión manual del artista).
-     * published/live se calculan dinámicamente:
-     *   - evento termina hace >4h  → finished
-     *   - evento en ventana [-4h, +1h] → live
-     *   - evento en el futuro       → published
+     * draft y cancelled NO se tocan (son decisiones manuales del artista).
+     * El resto se calcula con la fecha de inicio y la duración:
+     *   - ya pasó el final (inicio + duración) → finished
+     *   - estamos entre el inicio y el final    → live
+     *   - aún no ha empezado                     → published
      */
     public function getEffectiveStatusNameAttribute(): string
     {
