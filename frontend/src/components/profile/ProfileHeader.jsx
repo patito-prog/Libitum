@@ -59,7 +59,7 @@ const ProfileHeader = ({
                 {isOwnProfile
                     ? <>
                         <button className={styles.editBtn} onClick={onEdit}>✏️ Editar perfil</button>
-                        <button className={styles.securityBtn} onClick={onSecurity}>🔒 Contraseña</button>
+                        <button className={styles.editBtn} onClick={onSecurity}>🔒 Contraseña</button>
                     </>
                     : isArtist && (
                         <button
