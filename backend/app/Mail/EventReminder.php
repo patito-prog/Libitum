@@ -9,6 +9,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Carbon;
 
 class EventReminder extends Mailable
 {
@@ -21,19 +22,32 @@ class EventReminder extends Mailable
         public User  $user,
     ) {}
 
+    /**
+     * Texto de cuándo es el evento. Como el batch avisa de los eventos de las
+     * PRÓXIMAS 24 HORAS, según la hora a la que se lance puede ser "hoy" o
+     * "mañana"; lo calculamos de verdad en vez de poner "mañana" siempre.
+     */
+    private function cuando(): string
+    {
+        $date = Carbon::parse($this->event->event_date);
+        if ($date->isToday())    return 'hoy';
+        if ($date->isTomorrow()) return 'mañana';
+        return $date->locale('es')->isoFormat('dddd D [de] MMMM');
+    }
+
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Recordatorio: \"{$this->event->title}\" es mañana 🎶",
+            subject: "Recordatorio: \"{$this->event->title}\" es {$this->cuando()} 🎶",
         );
     }
 
     public function content(): Content
     {
-        // 'markdown' indica que usamos la plantilla resources/views/emails/event-reminder.blade.php
-        // con el sistema de componentes de email de Laravel (genera HTML bonito automáticamente).
+        // Plantilla HTML propia (emails.event-reminder) con la marca Libitum.
         return new Content(
-            markdown: 'emails.event-reminder',
+            view: 'emails.event-reminder',
+            with: ['cuando' => $this->cuando()],
         );
     }
 }

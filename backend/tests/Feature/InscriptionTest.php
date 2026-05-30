@@ -131,4 +131,48 @@ class InscriptionTest extends TestCase
         $response->assertStatus(409);
         $response->assertJsonPath('message', 'Este evento ha alcanzado su aforo máximo.');
     }
+
+    /**
+     * Al ver el detalle de un evento estando apuntado, el flag signed_up debe
+     * venir en true. La ruta es pública, pero si llega el token resolvemos al
+     * usuario para saberlo. (Antes salía siempre false y al pulsar intentaba
+     * apuntarse de nuevo).
+     */
+    public function test_event_detail_shows_signed_up_true_for_inscribed_user(): void
+    {
+        $spectator   = $this->makeSpectator();
+        $artist      = $this->makeArtist();
+        $publishedId = Status::where('name', 'published')->first()->id;
+
+        $event = Event::factory()->create([
+            'user_id'   => $artist->id,
+            'status_id' => $publishedId,
+        ]);
+
+        // Se apunta.
+        $spectator->events()->attach($event->id, ['remind_me' => true]);
+
+        // Ve el evento autenticado (la ruta es pública pero mandamos token).
+        $response = $this->actingAs($spectator, 'sanctum')
+            ->getJson("/api/events/{$event->id}");
+
+        $response->assertOk();
+        $response->assertJsonPath('event.signed_up', true);
+    }
+
+    /** Un invitado (sin token) ve signed_up en false, sin errores. */
+    public function test_event_detail_signed_up_false_for_guest(): void
+    {
+        $artist      = $this->makeArtist();
+        $publishedId = Status::where('name', 'published')->first()->id;
+        $event = Event::factory()->create([
+            'user_id'   => $artist->id,
+            'status_id' => $publishedId,
+        ]);
+
+        $response = $this->getJson("/api/events/{$event->id}");
+
+        $response->assertOk();
+        $response->assertJsonPath('event.signed_up', false);
+    }
 }

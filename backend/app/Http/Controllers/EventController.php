@@ -50,9 +50,13 @@ class EventController extends Controller
      *
      * @param Event $event Inyectado por route-model binding
      */
-    public function show(Event $event)
+    public function show(Request $request, Event $event)
     {
-        $userId = Auth::id();
+        // Esta ruta es pública (cualquiera puede ver un evento), pero si la
+        // petición trae token resolvemos al usuario con el guard de Sanctum para
+        // saber si YA está apuntado o le ha dado like. Sin esto, al verlo logueado
+        // siempre salía "no apuntado" y al pulsar intentaba apuntarse de nuevo.
+        $userId = $request->user('sanctum')?->id;
 
         $event->load('categories', 'status', 'artist');
         $event->loadCount('attendees'); // nº de inscritos, para mostrar plazas

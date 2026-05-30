@@ -2,11 +2,11 @@
 
 @section('content')
     <span style="display:inline-block; background-color:#ff8a5b; color:#16181a; font-size:12px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; padding:6px 12px; border-radius:999px;">
-        Mañana · Recordatorio
+        {{ ucfirst($cuando) }} · Recordatorio
     </span>
 
     <h1 class="display" style="margin:16px 0 8px; font-family:'Syne','Helvetica Neue',Arial,sans-serif; font-size:36px; line-height:1.05; font-weight:800; letter-spacing:-0.03em; color:#16181a;">
-        ¡Tu evento es<br>mañana! 🎶
+        ¡Tu evento es<br>{{ $cuando }}! 🎶
     </h1>
 
     <p style="margin:14px 0 0; font-size:16px; line-height:1.6; color:#3a3d42;">

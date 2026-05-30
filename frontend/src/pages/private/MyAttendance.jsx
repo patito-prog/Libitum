@@ -47,9 +47,7 @@ const AttendanceCard = ({ event, onRemindToggle, onLeave, onExpand }) => {
                     </div>
                     <div className={styles.locationRow}>
                         {location && <p className={styles.location}>📍 {location}</p>}
-                        <ShareButton eventId={id} title={title} className={styles.mapsBtn}>
-                            Compartir ↗
-                        </ShareButton>
+                        <ShareButton eventId={id} title={title} className={styles.shareBtn}>🔗</ShareButton>
                     </div>
                     {event_date && <p className={styles.date}>🗓 {formatDate(event_date)}</p>}
                 </div>

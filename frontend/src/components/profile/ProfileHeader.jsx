@@ -9,7 +9,7 @@ import styles from '../../pages/public/UserProfile.module.scss';
 const ProfileHeader = ({
     profile, isOwnProfile, isArtist,
     isFollowing, followLoading, artistProfile,
-    onFollow, onEdit, onOpenModal,
+    onFollow, onEdit, onSecurity, onOpenModal,
 }) => (
     <div className={styles.header}>
         <div className={styles.avatarWrapper}>
@@ -57,7 +57,10 @@ const ProfileHeader = ({
 
             <div className={styles.actions}>
                 {isOwnProfile
-                    ? <button className={styles.editBtn} onClick={onEdit}>✏️ Editar perfil</button>
+                    ? <>
+                        <button className={styles.editBtn} onClick={onEdit}>✏️ Editar perfil</button>
+                        <button className={styles.securityBtn} onClick={onSecurity}>🔒 Contraseña</button>
+                    </>
                     : isArtist && (
                         <button
                             className={`${styles.followBtn} ${isFollowing ? styles.following : ''}`}

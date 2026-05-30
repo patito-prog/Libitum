@@ -26,7 +26,7 @@ const EMPTY_FORM = {
  */
 const ArtistProfile = () => {
     const { id } = useParams();
-    const { getData, save, deleteData, patch, loading } = useAPI();
+    const { getData, save, deleteData, patch, uploadFile, loading } = useAPI();
     const { user, isAuthenticated } = useAuthContext();
     const { showMessageWithTime } = useMessageContext();
     const navigate = useNavigate();
@@ -38,6 +38,8 @@ const ArtistProfile = () => {
     const [mobilePreview, setMobilePreview] = useState(false);
     const [profileForm, setProfileForm]     = useState(EMPTY_FORM);
     const [saveLoading, setSaveLoading]     = useState(false);
+    const [avatarPreview, setAvatarPreview]     = useState(null);
+    const [avatarUploading, setAvatarUploading] = useState(false);
 
     useEffect(() => {
         const fetchArtist = async () => {
@@ -109,8 +111,27 @@ const ArtistProfile = () => {
         }
     };
 
+    // Sube la foto de perfil del artista (mismo endpoint que el perfil social).
+    const handleAvatarFile = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setAvatarPreview(URL.createObjectURL(file));
+        setAvatarUploading(true);
+        try {
+            const fd = new FormData();
+            fd.append('avatar', file);
+            const res = await uploadFile(`${API_BASE}/api/profile/avatar`, fd);
+            setArtist(prev => ({ ...prev, avatar_url: res.data.avatar_url }));
+        } catch {
+            showMessageWithTime('Error al subir la imagen. Comprueba el formato y tamaño.', 'error');
+            setAvatarPreview(null);
+        } finally {
+            setAvatarUploading(false);
+        }
+    };
+
     const handleToggleEdit = () => { setEditMode(v => !v); setMobilePreview(false); };
-    const handleCancel     = () => { setEditMode(false); setMobilePreview(false); };
+    const handleCancel     = () => { setEditMode(false); setMobilePreview(false); setAvatarPreview(null); };
 
     if (loading && !artist) return <Loader />;
     if (!artist) return null;
@@ -122,7 +143,7 @@ const ArtistProfile = () => {
         <div className={styles.page}>
 
             <div className={styles.heroBanner}>
-                <BackButton />
+                <BackButton light />
                 <span className={styles.bannerGhost} aria-hidden="true">
                     {(firstName || 'ARTISTA').toUpperCase()}
                 </span>
@@ -146,6 +167,9 @@ const ArtistProfile = () => {
                     onSave={handleSaveProfile}
                     saveLoading={saveLoading}
                     onCancel={handleCancel}
+                    avatarPreview={avatarPreview}
+                    avatarUploading={avatarUploading}
+                    onAvatarFile={handleAvatarFile}
                     mobilePreview={mobilePreview}
                     onTogglePreview={() => setMobilePreview(v => !v)}
                 />

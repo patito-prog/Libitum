@@ -206,18 +206,9 @@ const UserProfile = () => {
                 artistProfile={artistProfile}
                 onFollow={handleFollow}
                 onEdit={openEdit}
+                onSecurity={() => { setEditMode(false); setAvatarPreview(null); setSecurityMode(true); }}
                 onOpenModal={openModal}
             />
-
-            {/* Acceso al apartado de seguridad (solo en tu propio perfil y cuando
-                no estás ya editando algo). */}
-            {isOwnProfile && !editMode && !securityMode && (
-                <div className={styles.securityAccess}>
-                    <button className={styles.securityBtn} onClick={() => setSecurityMode(true)}>
-                        🔒 Cambiar contraseña
-                    </button>
-                </div>
-            )}
 
             {editMode && (
                 <ProfileForms

@@ -809,3 +809,70 @@
         cursor: not-allowed;
     }
 }
+
+/* ── Edición de la foto de perfil del artista ── */
+.avatarEditRow {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    margin-bottom: 1.5rem;
+}
+
+.avatarEditPreview {
+    position: relative;
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: var(--color-primary-light);
+    color: var(--color-primary-deep);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 2rem;
+    border: 2px solid var(--border-color);
+
+    img { width: 100%; height: 100%; object-fit: cover; }
+}
+
+.avatarUploadingOverlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(22, 24, 26, 0.5);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+.avatarPickBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--color-primary-light);
+    color: var(--color-primary-deep);
+    border: 1px solid rgba(26, 125, 130, 0.3);
+    border-radius: var(--radius-md);
+    padding: 0.55rem 1.1rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background var(--transition-speed);
+
+    &:hover { background: rgba(26, 125, 130, 0.18); }
+}
+
+.avatarPickHint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin: 0.4rem 0 0;
+}
+
+.fileInputHidden { display: none; }

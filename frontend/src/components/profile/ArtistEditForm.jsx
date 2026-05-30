@@ -15,6 +15,7 @@ const SOCIAL_LINKS = [
  */
 const ArtistEditForm = ({
     artist, profileForm, onChange, onSave, saveLoading, onCancel,
+    avatarPreview, avatarUploading, onAvatarFile,
     mobilePreview, onTogglePreview,
 }) => {
     const firstName = artist.name?.split(' ')[0] ?? artist.name;
@@ -23,6 +24,24 @@ const ArtistEditForm = ({
         <>
             <form className={styles.editForm} onSubmit={onSave}>
                 <h2 className={styles.editTitle}>Editar perfil</h2>
+
+                {/* Foto de perfil */}
+                <div className={styles.avatarEditRow}>
+                    <div className={styles.avatarEditPreview}>
+                        {(avatarPreview || artist.avatar_url)
+                            ? <img src={avatarPreview || artist.avatar_url} alt="Foto de perfil" />
+                            : <span>{artist.name?.charAt(0).toUpperCase()}</span>}
+                        {avatarUploading && <div className={styles.avatarUploadingOverlay}>↑</div>}
+                    </div>
+                    <div>
+                        <label className={styles.avatarPickBtn}>
+                            📷 Cambiar foto
+                            <input type="file" accept="image/jpeg,image/png,image/webp"
+                                onChange={onAvatarFile} className={styles.fileInputHidden} />
+                        </label>
+                        <p className={styles.avatarPickHint}>JPG, PNG o WebP · Máx. 2 MB</p>
+                    </div>
+                </div>
 
                 <div className={styles.formField}>
                     <label htmlFor="bio">Biografía</label>

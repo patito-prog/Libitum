@@ -25,6 +25,19 @@
     }
 }
 
+/* Variante clara: para fondos oscuros (banner del artista, etc.) */
+.light {
+    border-color: rgba(255, 255, 255, 0.9);
+    color: #fff;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(4px);
+
+    &:hover {
+        background: #fff;
+        color: var(--color-primary);
+    }
+}
+
 /* La flecha se desliza al hover */
 .arrow {
     display: inline-block;

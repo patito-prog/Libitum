@@ -66,9 +66,7 @@ const MiniEvent = ({ data, onClick, onLike }) => {
 
                 <div className={styles.locationRow}>
                     {location && <span className={styles.location}>📍 {location}</span>}
-                    <ShareButton eventId={id} title={title} className={styles.mapsBtn}>
-                        Compartir ↗
-                    </ShareButton>
+                    <ShareButton eventId={id} title={title} className={styles.shareBtn}>🔗</ShareButton>
                 </div>
 
                 <div className={styles.footer}>
