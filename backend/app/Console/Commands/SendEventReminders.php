@@ -32,8 +32,11 @@ class SendEventReminders extends Command
         // al menos un asistente con remind_me = true.
         // Con el with() cargamos ya esos asistentes filtrados para no
         // hacer más queries dentro del bucle (evitamos el problema N+1).
+        // En el whereHas referenciamos la columna de la tabla pivote directamente
+        // (event_user.remind_me): dentro del whereHas, wherePivot() no genera bien
+        // el SQL. En el with() sí podemos usar wherePivot porque es la relación.
         $events = Event::whereBetween('event_date', [$from, $to])
-            ->whereHas('attendees', fn($q) => $q->wherePivot('remind_me', true))
+            ->whereHas('attendees', fn($q) => $q->where('event_user.remind_me', true))
             ->with(['attendees' => fn($q) => $q->wherePivot('remind_me', true)])
             ->get();
 

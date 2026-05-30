@@ -1,0 +1,135 @@
+.page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 4vw, 2rem) 4rem;
+}
+
+.hero { margin-bottom: 2.5rem; }
+
+.title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    color: var(--text-primary);
+    margin: 0 0 0.6rem;
+    text-transform: uppercase;
+}
+
+.tagline {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.sections {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.section {
+    h2 {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: var(--color-primary);
+        margin: 0 0 0.7rem;
+    }
+    p { font-size: 0.96rem; line-height: 1.7; color: var(--text-secondary); margin: 0 0 0.6rem; }
+    strong { color: var(--text-primary); }
+}
+
+/* Sección destacada (la del mínimo de 1€) */
+.highlight {
+    background: var(--color-accent-soft, rgba(255, 138, 91, 0.12));
+    border: 1px solid rgba(255, 138, 91, 0.4);
+    border-radius: var(--radius-lg);
+    padding: clamp(1.25rem, 3vw, 1.75rem);
+
+    h2 { color: var(--color-accent-hover, #ff7440); }
+}
+
+.exampleBox {
+    background: var(--bg-surface);
+    border: 1px dashed rgba(255, 138, 91, 0.5);
+    border-radius: var(--radius-md);
+    padding: 0.9rem 1.1rem;
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: var(--text-primary);
+    margin: 0.4rem 0 0.8rem;
+}
+
+.platformList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+
+    li {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 0.9rem 1.1rem;
+
+        & > strong { font-size: 1.02rem; color: var(--text-primary); }
+        p { margin: 0.3rem 0 0; font-size: 0.9rem; }
+    }
+}
+
+.tag {
+    display: inline-block;
+    margin-left: 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.15rem 0.55rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-primary-light);
+    color: var(--color-primary-deep);
+    border: 1px solid rgba(26, 125, 130, 0.3);
+    vertical-align: middle;
+}
+
+.tagPurple {
+    background: rgba(138, 63, 252, 0.12);
+    color: #6b21d6;
+    border-color: rgba(138, 63, 252, 0.35);
+}
+
+.tips {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+
+    li {
+        position: relative;
+        padding-left: 1.4rem;
+        font-size: 0.96rem;
+        line-height: 1.6;
+        color: var(--text-secondary);
+
+        &::before {
+            content: '✦';
+            position: absolute;
+            left: 0;
+            color: var(--color-primary);
+        }
+        strong { color: var(--text-primary); }
+    }
+}
+
+.footerNote {
+    font-size: 0.92rem;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-top: 1rem;
+}

@@ -42,6 +42,7 @@ const EventProvider = ({ children }) => {
         event_date: '',
         duration_hours: null,
         price: 0,
+        is_donation: false,
         cover_image: null,
         max_capacity: null,
         status_id: 1,
@@ -70,8 +71,9 @@ const EventProvider = ({ children }) => {
      * @param {Event} e Evento de cambio del input
      */
     const changeStatusNewEvent = (e) => {
-        const { name, value, type, files } = e.target;
+        const { name, value, type, files, checked } = e.target;
         let parsed = type === 'file' ? files[0] : value;
+        if (type === 'checkbox')        parsed = checked;
         if (name === 'categories')     parsed = Array.isArray(value) ? value : [parseInt(value, 10)];
         if (name === 'duration_hours') parsed = value === '' ? null : parseInt(value, 10);
         if (name === 'status_id')      parsed = parseInt(value, 10);

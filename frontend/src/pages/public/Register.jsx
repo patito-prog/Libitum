@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import useAuthContext from '../../hooks/useAuthContext.js';
 import useMessageContext from '../../hooks/useMessageContext.js';
 import VerifyNotice from '../../components/auth/VerifyNotice.jsx';
+import PasswordInput from '../../components/common/PasswordInput.jsx';
 import { validateRegister } from "../../utils/validations/index.js";
 import styles from './Auth.module.scss';
 
@@ -117,14 +118,14 @@ const Register = () => {
 
                     <div className={styles.inputGroup}>
                         <label htmlFor="password">Contraseña</label>
-                        <input type="password" id="password" name="password" className={styles.input}
-                            placeholder="Mínimo 6 caracteres"
+                        <PasswordInput id="password" name="password" className={styles.input}
+                            placeholder="Mínimo 8 caracteres"
                             value={formData.password} onChange={updateData} autoComplete="new-password" />
                     </div>
 
                     <div className={styles.inputGroup}>
                         <label htmlFor="confirmPassword">Confirmar contraseña</label>
-                        <input type="password" id="confirmPassword" name="confirmPassword" className={styles.input}
+                        <PasswordInput id="confirmPassword" name="confirmPassword" className={styles.input}
                             placeholder="Repite tu contraseña"
                             value={formData.confirmPassword} onChange={updateData} autoComplete="new-password" />
                     </div>

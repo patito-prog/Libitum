@@ -18,7 +18,10 @@ const Footer = () => {
 
                 <nav className={styles.nav}>
                     <Link to="/about" className={styles.navLink}>Sobre nosotros</Link>
+                    <Link to="/pagos" className={styles.navLink}>Guía de pagos</Link>
                     <Link to="/contact" className={styles.navLink}>Contacto</Link>
+                    <Link to="/privacidad" className={styles.navLink}>Privacidad</Link>
+                    <Link to="/terminos" className={styles.navLink}>Términos</Link>
                     {/* Destello: apoyar el proyecto (lleva a la sección de Contacto) */}
                     <Link to="/contact" className={styles.support}>
                         <span className={styles.spark} aria-hidden="true">✨</span>

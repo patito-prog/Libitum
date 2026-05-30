@@ -3,6 +3,7 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import useAuthContext from "./../../hooks/useAuthContext.js";
 import useMessageContext from "../../hooks/useMessageContext.js";
 import VerifyNotice from "../../components/auth/VerifyNotice.jsx";
+import PasswordInput from "../../components/common/PasswordInput.jsx";
 import { validateLogin } from "../../utils/validations/auth.js";
 import styles from './Auth.module.scss';
 
@@ -100,15 +101,14 @@ const Login = () => {
 
                     <div className={styles.inputGroup}>
                         <label htmlFor="password">Contraseña</label>
-                        <input 
-                            type="password" 
-                            id="password" 
-                            name="password" 
-                            className={styles.input} 
-                            placeholder="••••••••" 
+                        <PasswordInput
+                            id="password"
+                            name="password"
+                            className={styles.input}
+                            placeholder="••••••••"
                             autoComplete="current-password"
-                            value={credentials.password} 
-                            onChange={updateData} 
+                            value={credentials.password}
+                            onChange={updateData}
                         />
                     </div>
 

@@ -93,15 +93,30 @@ const AddEvent = () => {
                     </div>
 
                     <div className={styles.rightCol}>
-                        <FloatingInput
-                            id="price"
-                            name="price"
-                            label="Precio Entrada (€)"
-                            type="number"
-                            step="0.01"
-                            defaultValue={event.price || ''}
-                            onChange={changeStatusNewEvent}
-                        />
+                        <label className={styles.donationToggle}>
+                            <input
+                                type="checkbox"
+                                name="is_donation"
+                                checked={!!event.is_donation}
+                                onChange={changeStatusNewEvent}
+                            />
+                            <span>
+                                💛 Donación voluntaria
+                                <small>Entrada gratis · el público colabora si quiere (pasar la gorra)</small>
+                            </span>
+                        </label>
+
+                        {!event.is_donation && (
+                            <FloatingInput
+                                id="price"
+                                name="price"
+                                label="Precio Entrada (€)"
+                                type="number"
+                                step="0.01"
+                                defaultValue={event.price || ''}
+                                onChange={changeStatusNewEvent}
+                            />
+                        )}
                         <FloatingInput
                             id="event_date"
                             name="event_date"

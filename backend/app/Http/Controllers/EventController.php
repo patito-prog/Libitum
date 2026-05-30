@@ -80,6 +80,9 @@ class EventController extends Controller
     {
         $data = $request->validated();
 
+        // Donación voluntaria: entrada gratis, así que el precio fijo no aplica.
+        $isDonation = !empty($data['is_donation']);
+
         $event = Event::create([
             'user_id' => Auth::id(),
             'title' => $data['title'],
@@ -89,7 +92,8 @@ class EventController extends Controller
             'latitude' => $data['latitude'] ?? null,
             'longitude' => $data['longitude'] ?? null,
             'event_date' => $data['event_date'],
-            'price' => $data['price'] ?? 0.00,
+            'price' => $isDonation ? 0.00 : ($data['price'] ?? 0.00),
+            'is_donation'    => $isDonation,
             'status_id'      => $data['status_id']      ?? 2,
             'max_capacity'   => $data['max_capacity']   ?? null,
             'duration_hours' => $data['duration_hours'] ?? null,
@@ -117,6 +121,8 @@ class EventController extends Controller
     {
         $data = $request->validated();
 
+        $isDonation = !empty($data['is_donation']);
+
         $event->update([
             'title' => $data['title'],
             'slug' => Str::slug($data['title'] . '-' . uniqid()),
@@ -125,7 +131,8 @@ class EventController extends Controller
             'latitude' => $data['latitude'] ?? null,
             'longitude' => $data['longitude'] ?? null,
             'event_date' => $data['event_date'],
-            'price' => $data['price'] ?? 0.00,
+            'price' => $isDonation ? 0.00 : ($data['price'] ?? 0.00),
+            'is_donation'    => $isDonation,
             'status_id'      => $data['status_id'],
             'max_capacity'   => $data['max_capacity']   ?? null,
             'duration_hours' => $data['duration_hours'] ?? null,

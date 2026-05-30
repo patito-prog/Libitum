@@ -1,8 +1,8 @@
 import styles from './MiniEvent.module.scss';
 import appStyles from '../App.module.scss';
 import EventStatusBadge from './common/EventStatusBadge.jsx';
+import ShareButton from './common/ShareButton.jsx';
 import useEventContext from "../hooks/useEventContext.js";
-import { mapsUrl } from '../config/maps.js';
 
 /** Descompone la fecha ISO en día / mes corto / hora para el resguardo. */
 const splitDate = (iso) => {
@@ -25,7 +25,7 @@ const splitDate = (iso) => {
  * @param {Function} [props.onLike]  Handler del like (si no, usa el del contexto)
  */
 const MiniEvent = ({ data, onClick, onLike }) => {
-    const { id, title, location, event_date, liked, latitude, longitude, artist } = data;
+    const { id, title, location, event_date, liked, artist } = data;
     const { day, month, time } = splitDate(event_date);
 
     const { toggleLike } = useEventContext();
@@ -65,19 +65,10 @@ const MiniEvent = ({ data, onClick, onLike }) => {
                 <h3 className={styles.title}>{title}</h3>
 
                 <div className={styles.locationRow}>
-                    <span className={styles.location}>📍 {location}</span>
-                    {location && (
-                        <a
-                            href={mapsUrl(latitude, longitude, location)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={styles.mapsBtn}
-                            onClick={e => e.stopPropagation()}
-                            title="Cómo llegar"
-                        >
-                            Cómo llegar ↗
-                        </a>
-                    )}
+                    {location && <span className={styles.location}>📍 {location}</span>}
+                    <ShareButton eventId={id} title={title} className={styles.mapsBtn}>
+                        Compartir ↗
+                    </ShareButton>
                 </div>
 
                 <div className={styles.footer}>

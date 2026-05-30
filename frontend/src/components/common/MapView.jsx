@@ -27,9 +27,13 @@ const markerDefault = L.icon({
  * la página. Al cambiar las coordenadas, remontamos el mapa con `key` para
  * que se recentre.
  *
- * @param {{ lat:number, lng:number, zoom?:number, className?:string }} props
+ * Con `interactive={false}` el mapa queda como una imagen fija (no se arrastra
+ * ni hace zoom): ideal para el feed, donde tocar el mapa molestaba al hacer
+ * scroll (sobre todo en móvil).
+ *
+ * @param {{ lat:number, lng:number, zoom?:number, className?:string, interactive?:boolean }} props
  */
-const MapView = ({ lat, lng, zoom = 15, className }) => {
+const MapView = ({ lat, lng, zoom = 15, className, interactive = true }) => {
     if (lat == null || lng == null) return null;
 
     return (
@@ -38,6 +42,12 @@ const MapView = ({ lat, lng, zoom = 15, className }) => {
             center={[lat, lng]}
             zoom={zoom}
             scrollWheelZoom={false}
+            dragging={interactive}
+            touchZoom={interactive}
+            doubleClickZoom={interactive}
+            boxZoom={interactive}
+            keyboard={interactive}
+            zoomControl={interactive}
             className={className}
         >
             <TileLayer

@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import BizumCard from './BizumCard.jsx';
 import styles from '../../pages/public/ArtistProfile.module.scss';
 
@@ -25,7 +26,10 @@ const ArtistPublicView = ({ profile, firstName }) => (
                 >
                     💛 Apoyar a {firstName}
                 </a>
-                <p className={styles.donateDisclaimer}>Sin comisiones · Pago seguro</p>
+                <p className={styles.donateDisclaimer}>
+                    💡 Dona desde <strong>1&nbsp;€</strong>: en donaciones pequeñas la comisión se lo come casi todo.{' '}
+                    <Link to="/pagos" className={styles.donateInfoLink}>Por qué</Link>
+                </p>
             </div>
         )}
 

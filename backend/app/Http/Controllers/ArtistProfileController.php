@@ -99,7 +99,7 @@ class ArtistProfileController extends Controller
         $artists = User::role('artist')
             ->with('artistProfile')
             ->withCount('followers')
-            ->when($q !== '', fn($query) => $query->where('name', 'like', "%{$q}%"))
+            ->when($q !== '', fn($query) => $query->where('name', 'ilike', "%{$q}%"))
             ->orderByDesc('followers_count')
             ->orderBy('name')
             ->paginate(12)

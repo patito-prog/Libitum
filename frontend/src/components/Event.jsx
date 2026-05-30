@@ -5,6 +5,8 @@ import { formatDate, getStatusName } from '../utils/validations';
 import EventStatusBadge from './common/EventStatusBadge.jsx';
 import Button from './common/Button.jsx';
 import MapView from './common/MapView.jsx';
+import FitText from './common/FitText.jsx';
+import ShareButton from './common/ShareButton.jsx';
 import useEventContext from '../hooks/useEventContext.js';
 import { mapsUrl } from '../config/maps.js';
 
@@ -39,7 +41,7 @@ const splitDate = (iso) => {
  * @param {boolean}  [props.compact=false]  Versión reducida para el feed (mapa pequeño, descripción recortada)
  */
 const Event = ({ data, onBack, onLike, onInscribe, editable = false, compact = false }) => {
-    const { id, title, description, location, event_date, price, cover_image, max_capacity, latitude, longitude, liked, artist, signed_up } = data;
+    const { id, title, description, location, event_date, price, is_donation, cover_image, max_capacity, latitude, longitude, liked, artist, signed_up } = data;
     const statusName = getStatusName(data);
     const coords = latitude && longitude ? { lat: Number(latitude), lng: Number(longitude) } : null;
     const dateParts = splitDate(event_date);
@@ -86,7 +88,7 @@ const Event = ({ data, onBack, onLike, onInscribe, editable = false, compact = f
                     </Link>
                 )}
                 <div className={styles.titleRow}>
-                    <h2 className={styles.title}>{title}</h2>
+                    <h2 className={styles.title}><FitText min={1.3} maxLines={2}>{title}</FitText></h2>
                     <div className={styles.titleActions}>
                         <button
                             className={styles.likeBtn}
@@ -95,6 +97,7 @@ const Event = ({ data, onBack, onLike, onInscribe, editable = false, compact = f
                         >
                             {liked ? '❤️' : '🤍'}
                         </button>
+                        <ShareButton eventId={id} title={title} className={styles.likeBtn}>🔗</ShareButton>
                         <EventStatusBadge event={data} />
                     </div>
                 </div>
@@ -118,7 +121,11 @@ const Event = ({ data, onBack, onLike, onInscribe, editable = false, compact = f
                         </a>
                     )}
                     {event_date  && <span>🗓 {formatDate(event_date)}</span>}
-                    {price > 0   && <span>💶 {Number(price).toFixed(2)} €</span>}
+                    {is_donation
+                        ? <span>💛 Donación voluntaria</span>
+                        : price > 0
+                            ? <span>💶 {Number(price).toFixed(2)} €</span>
+                            : <span>🎟️ Entrada gratuita</span>}
                     {max_capacity > 0 && (
                         <span>
                             👥 {data.attendees_count ?? 0}/{max_capacity} plazas
@@ -133,7 +140,7 @@ const Event = ({ data, onBack, onLike, onInscribe, editable = false, compact = f
                 {coords && (
                     compact ? (
                         <div className={styles.compactMap}>
-                            <MapView lat={coords.lat} lng={coords.lng} zoom={14} className={styles.map} />
+                            <MapView lat={coords.lat} lng={coords.lng} zoom={14} className={styles.map} interactive={false} />
                             <a
                                 href={mapsUrl(latitude, longitude, location)}
                                 target="_blank"

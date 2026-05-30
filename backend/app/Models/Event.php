@@ -23,12 +23,13 @@ class Event extends Model
     protected $fillable = [
         'user_id', 'title', 'slug', 'description',
         'location', 'latitude', 'longitude',
-        'event_date', 'duration_hours', 'price', 'cover_image', 'max_capacity', 'status_id',
+        'event_date', 'duration_hours', 'price', 'is_donation', 'cover_image', 'max_capacity', 'status_id',
     ];
 
     protected $casts = [
         'event_date'     => 'datetime',
         'price'          => 'decimal:2',
+        'is_donation'    => 'boolean',
         'latitude'       => 'float',
         'longitude'      => 'float',
         'duration_hours' => 'integer',

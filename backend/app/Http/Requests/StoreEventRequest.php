@@ -35,6 +35,7 @@ class StoreEventRequest extends FormRequest
             'longitude' => 'nullable|numeric|between:-180,180',
             'event_date' => 'required|date',
             'price' => 'nullable|numeric|min:0',
+            'is_donation' => 'nullable|boolean',
             'status_id' => 'nullable|integer',
             // categories debe ser un array de ids que existan en la tabla categories.
             'categories' => 'nullable|array',

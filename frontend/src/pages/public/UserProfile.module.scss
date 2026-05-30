@@ -825,3 +825,28 @@
 
     &:hover { border-color: var(--text-secondary); color: var(--text-primary); }
 }
+
+/* Acceso al apartado de seguridad (cambiar contraseña) */
+.securityAccess {
+    margin: 1.25rem 0;
+    display: flex;
+    justify-content: center;
+}
+
+.securityBtn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 0.6rem 1.3rem;
+    cursor: pointer;
+    transition: border-color var(--transition-speed), color var(--transition-speed), background var(--transition-speed);
+
+    &:hover {
+        border-color: var(--color-primary);
+        color: var(--color-primary);
+        background: var(--color-primary-light);
+    }
+}

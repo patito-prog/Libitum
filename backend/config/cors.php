@@ -4,9 +4,8 @@
  * Configuración de CORS.
  *
  * Usamos autenticación por TOKEN (Sanctum Bearer en localStorage), no por
- * cookies, así que NO necesitamos credenciales en CORS y podemos permitir
- * cualquier origen para las rutas de API. El front (Vercel) y el back (Railway)
- * viven en dominios distintos, por eso esto tiene que estar bien.
+ * cookies. Aun así restringimos los orígenes permitidos a nuestro frontend
+ * (Vercel) y al desarrollo local, en vez de abrir a cualquiera.
  */
 
 return [
@@ -15,11 +14,15 @@ return [
 
     'allowed_methods' => ['*'],
 
-    // Token-based: permitimos cualquier origen. Si algún día se pasa a auth por
-    // cookie, habría que listar aquí los dominios concretos y poner credentials a true.
-    'allowed_origins' => ['*'],
+    // Solo nuestro frontend (de FRONTEND_URL) y el desarrollo local.
+    'allowed_origins' => array_values(array_filter([
+        env('FRONTEND_URL'),
+        'http://localhost:5173',
+        'http://localhost:5174',
+    ])),
 
-    'allowed_origins_patterns' => [],
+    // Despliegues "preview" de Vercel (subdominios *.vercel.app).
+    'allowed_origins_patterns' => ['#^https://[a-z0-9-]+\.vercel\.app$#'],
 
     'allowed_headers' => ['*'],
 

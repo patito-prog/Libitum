@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import styles from '../../pages/public/ArtistProfile.module.scss';
 
 const SOCIAL_LINKS = [
@@ -58,6 +59,7 @@ const ArtistEditForm = ({
                         className={`${styles.input} ${styles.donationEditInput}`} />
                     <p className={styles.donationEditTip}>
                         💡 Recomendado: <strong>Ko-fi</strong> (conectando Stripe) — quien te dona paga con tarjeta <strong>sin crear cuenta</strong> y sin comisiones. Evita usar solo PayPal, porque a veces obliga al donante a registrarse.
+                        <br />📖 <Link to="/pagos" target="_blank" rel="noopener noreferrer">Lee la guía de pagos</Link> para ganar más.
                     </p>
                     <p className={styles.donationEditPlatforms}>
                         Plataformas aceptadas: Ko-fi · Buy Me a Coffee · PayPal · Patreon · GoFundMe · Twitch

@@ -257,10 +257,18 @@
 }
 
 .donateDisclaimer {
-    font-size: 0.75rem;
-    color: var(--text-muted);
+    font-size: 0.78rem;
+    color: var(--text-secondary);
     margin: 0;
     letter-spacing: 0.02em;
+    line-height: 1.5;
+    max-width: 34ch;
+}
+
+.donateInfoLink {
+    color: var(--color-primary);
+    font-weight: 700;
+    white-space: nowrap;
 }
 
 /* ── CAMPO DONACIÓN EN EDICIÓN ── */

@@ -14,8 +14,9 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\UserProfileController;
 
 // --- RUTA PÚBLICA (No necesita token, porque venimos a pedirlo) ---
-Route::post('/login', [AuthController::class, 'verify']);
-Route::post('/register', [AuthController::class, 'register']);
+// throttle anti-fuerza-bruta: máx. 6 intentos de login y 6 registros por minuto/IP.
+Route::post('/login', [AuthController::class, 'verify'])->middleware('throttle:6,1');
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:6,1');
 
 // --- VERIFICACIÓN DE CORREO ---
 // El enlace del email cae aquí (firmado): verifica y redirige al frontend.

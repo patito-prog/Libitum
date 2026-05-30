@@ -8,6 +8,7 @@ import BackButton from "../../components/common/BackButton.jsx";
 import UserListModal from "../../components/common/UserListModal.jsx";
 import ProfileHeader from "../../components/profile/ProfileHeader.jsx";
 import ProfileForms from "../../components/profile/ProfileForms.jsx";
+import PasswordForm from "../../components/profile/PasswordForm.jsx";
 import ProfileEventsGrid from "../../components/profile/ProfileEventsGrid.jsx";
 import API_BASE from "../../config/api.js";
 import styles from "./UserProfile.module.scss";
@@ -42,6 +43,7 @@ const UserProfile = () => {
     const [isFollowing, setIsFollowing]         = useState(false);
     const [followLoading, setFollowLoading]     = useState(false);
     const [editMode, setEditMode]               = useState(false);
+    const [securityMode, setSecurityMode]       = useState(false); // apartado de cambiar contraseña
     const [formData, setFormData]               = useState(EMPTY_FORM);
     const [saveLoading, setSaveLoading]         = useState(false);
     const [avatarPreview, setAvatarPreview]     = useState(null);
@@ -101,6 +103,7 @@ const UserProfile = () => {
     };
 
     const openEdit = () => {
+        setSecurityMode(false);
         const ap = profile.artist_profile;
         setFormData({
             name: profile.name ?? '', email: profile.email ?? '', city: profile.city ?? '',
@@ -174,6 +177,7 @@ const UserProfile = () => {
             await patch(`${API_BASE}/api/profile/password`, pwForm);
             showMessageWithTime('Contraseña actualizada correctamente.', 'success');
             setPwForm({ current_password: '', password: '', password_confirmation: '' });
+            setSecurityMode(false);
         } catch (err) {
             showMessageWithTime(err.message || 'Error al cambiar la contraseña.', 'error');
         } finally {
@@ -205,6 +209,16 @@ const UserProfile = () => {
                 onOpenModal={openModal}
             />
 
+            {/* Acceso al apartado de seguridad (solo en tu propio perfil y cuando
+                no estás ya editando algo). */}
+            {isOwnProfile && !editMode && !securityMode && (
+                <div className={styles.securityAccess}>
+                    <button className={styles.securityBtn} onClick={() => setSecurityMode(true)}>
+                        🔒 Cambiar contraseña
+                    </button>
+                </div>
+            )}
+
             {editMode && (
                 <ProfileForms
                     formData={formData}
@@ -217,10 +231,19 @@ const UserProfile = () => {
                     avatarPreview={avatarPreview}
                     avatarUploading={avatarUploading}
                     onAvatarFile={handleAvatarFile}
+                />
+            )}
+
+            {securityMode && (
+                <PasswordForm
                     pwForm={pwForm}
                     onPwChange={e => setPwForm(prev => ({ ...prev, [e.target.name]: e.target.value }))}
                     onPwSave={handlePwSave}
                     pwLoading={pwLoading}
+                    onCancel={() => {
+                        setSecurityMode(false);
+                        setPwForm({ current_password: '', password: '', password_confirmation: '' });
+                    }}
                 />
             )}
 

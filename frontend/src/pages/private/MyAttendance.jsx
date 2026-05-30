@@ -8,8 +8,8 @@ import styles from './MyAttendance.module.scss';
 import appStyles from '../../App.module.scss';
 import { formatDate, getStatusName } from '../../utils/validations';
 import EventStatusBadge from '../../components/common/EventStatusBadge.jsx';
+import ShareButton from '../../components/common/ShareButton.jsx';
 import API_BASE from '../../config/api.js';
-import { mapsUrl } from '../../config/maps.js';
 
 const API = `${API_BASE}/api`;
 
@@ -28,7 +28,7 @@ const splitDate = (iso) => {
  * darse de baja). Al pulsar el cuerpo dispara onExpand (abre el detalle).
  */
 const AttendanceCard = ({ event, onRemindToggle, onLeave, onExpand }) => {
-    const { id, title, location, event_date, pivot, latitude, longitude } = event;
+    const { id, title, location, event_date, pivot } = event;
     const remindMe = pivot?.remind_me ?? false;
     const { day, month } = splitDate(event_date);
 
@@ -45,20 +45,12 @@ const AttendanceCard = ({ event, onRemindToggle, onLeave, onExpand }) => {
                         <p className={styles.title}>{title}</p>
                         <EventStatusBadge event={event} />
                     </div>
-                    {location && (
-                        <div className={styles.locationRow}>
-                            <p className={styles.location}>📍 {location}</p>
-                            <a
-                                href={mapsUrl(latitude, longitude, location)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={styles.mapsBtn}
-                                onClick={e => e.stopPropagation()}
-                            >
-                                Cómo llegar ↗
-                            </a>
-                        </div>
-                    )}
+                    <div className={styles.locationRow}>
+                        {location && <p className={styles.location}>📍 {location}</p>}
+                        <ShareButton eventId={id} title={title} className={styles.mapsBtn}>
+                            Compartir ↗
+                        </ShareButton>
+                    </div>
                     {event_date && <p className={styles.date}>🗓 {formatDate(event_date)}</p>}
                 </div>
             </div>

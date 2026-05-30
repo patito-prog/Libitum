@@ -19,6 +19,9 @@ const Login         = lazy(() => import('../pages/public/Login.jsx'));
 const Register      = lazy(() => import('../pages/public/Register.jsx'));
 const Error         = lazy(() => import('../pages/public/Error.jsx'));
 const EmailVerified = lazy(() => import('../pages/public/EmailVerified.jsx'));
+const PaymentsInfo  = lazy(() => import('../pages/public/PaymentsInfo.jsx'));
+const PrivacyPolicy = lazy(() => import('../pages/public/PrivacyPolicy.jsx'));
+const Terms         = lazy(() => import('../pages/public/Terms.jsx'));
 const ArtistProfile = lazy(() => import('../pages/public/ArtistProfile.jsx'));
 const Artists       = lazy(() => import('../pages/public/Artists.jsx'));
 const UserProfile   = lazy(() => import('../pages/public/UserProfile.jsx'));
@@ -41,6 +44,11 @@ const Router = () => {
                 <Route path="/contact" element={<Contact />} />
                 {/* Resultado de la verificación de correo (el back redirige aquí) */}
                 <Route path="/email-verificado" element={<EmailVerified />} />
+                {/* Guía de pagos y donaciones */}
+                <Route path="/pagos" element={<PaymentsInfo />} />
+                {/* Legales */}
+                <Route path="/privacidad" element={<PrivacyPolicy />} />
+                <Route path="/terminos" element={<Terms />} />
 
                 <Route element={<PublicRoute/>}>
                     <Route path="/login" element={<Login />} />

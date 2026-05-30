@@ -37,8 +37,8 @@ export const validateRegister = (formData) => {
         return "El formato del email no es válido.";
     }
 
-    if (formData.password.length < 6) {
-        return "La contraseña debe tener al menos 6 caracteres.";
+    if (formData.password.length < 8) {
+        return "La contraseña debe tener al menos 8 caracteres.";
     }
 
     if (formData.password !== formData.confirmPassword) {

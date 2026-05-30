@@ -41,6 +41,7 @@ class UpdateEventRequest extends FormRequest
             'longitude' => 'nullable|numeric|between:-180,180',
             'event_date' => 'required|date',
             'price' => 'nullable|numeric|min:0',
+            'is_donation' => 'nullable|boolean',
             'status_id' => 'required|exists:statuses,id',
             // Validamos que llegue un array de categorías y que los IDs existan
             'categories' => 'nullable|array',
