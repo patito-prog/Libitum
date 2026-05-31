@@ -1,6 +1,7 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 import useAuthContext from '../../hooks/useAuthContext.js';
+import InstallButton from '../common/InstallButton.jsx';
 import { ROLE_LABELS } from '../../utils/validations';
 import styles from './Header.module.scss';
 
@@ -174,6 +175,9 @@ const Header = () => {
                     </div>
                 )}
             </div>
+
+            {/* Botón "Instalar app" (aparece solo si la PWA se puede instalar) */}
+            <InstallButton />
 
             {/* Botón hamburguesa (solo móvil) */}
             <button
