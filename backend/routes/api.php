@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EmailVerificationController;
+use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\FollowerController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\EventController;
@@ -25,6 +26,12 @@ Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 've
     ->name('api.verification.verify');
 // Reenviar el correo de verificación (público, con throttle).
 Route::post('/email/resend', [EmailVerificationController::class, 'resend'])
+    ->middleware('throttle:6,1');
+
+// --- RECUPERAR CONTRASEÑA (olvidé mi contraseña) ---
+Route::post('/forgot-password', [PasswordResetController::class, 'forgot'])
+    ->middleware('throttle:6,1');
+Route::post('/reset-password', [PasswordResetController::class, 'reset'])
     ->middleware('throttle:6,1');
 
 Route::get('/events/search', [EventController::class, 'search']); // Búsqueda pública de eventos.

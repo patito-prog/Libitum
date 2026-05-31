@@ -59,6 +59,29 @@ class RemindersTest extends TestCase
         Mail::assertNotSent(EventReminder::class, fn($mail) => $mail->hasTo($noReminder->email));
     }
 
+    /** Un evento dentro de ~36h (más de 24h, menos de 48h) SÍ entra en la ventana. */
+    public function test_reminder_sent_for_event_within_48h(): void
+    {
+        Mail::fake();
+
+        $artist = User::factory()->create(['email_verified_at' => now()]);
+        $artist->assignRole('artist');
+        ArtistProfile::create(['user_id' => $artist->id]);
+
+        $event = Event::factory()->create([
+            'user_id'    => $artist->id,
+            'event_date' => now()->addHours(36),
+            'status_id'  => Status::where('name', 'published')->first()->id,
+        ]);
+
+        $user = User::factory()->create(['email_verified_at' => now()]);
+        $user->events()->attach($event->id, ['remind_me' => true]);
+
+        $this->artisan('reminders:send')->assertSuccessful();
+
+        Mail::assertSent(EventReminder::class, fn($mail) => $mail->hasTo($user->email));
+    }
+
     public function test_no_reminders_for_events_outside_the_window(): void
     {
         Mail::fake();

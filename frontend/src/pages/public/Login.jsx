@@ -112,8 +112,12 @@ const Login = () => {
                         />
                     </div>
 
-                    <button 
-                        type="submit" 
+                    <p className={styles.forgotLink}>
+                        <Link to="/recuperar-contrasena">¿Olvidaste tu contraseña?</Link>
+                    </p>
+
+                    <button
+                        type="submit"
                         className={styles.submitBtn}
                         disabled={loading}
                     >

@@ -22,6 +22,8 @@ const EmailVerified = lazy(() => import('../pages/public/EmailVerified.jsx'));
 const PaymentsInfo  = lazy(() => import('../pages/public/PaymentsInfo.jsx'));
 const PrivacyPolicy = lazy(() => import('../pages/public/PrivacyPolicy.jsx'));
 const Terms         = lazy(() => import('../pages/public/Terms.jsx'));
+const ForgotPassword = lazy(() => import('../pages/public/ForgotPassword.jsx'));
+const ResetPassword  = lazy(() => import('../pages/public/ResetPassword.jsx'));
 const ArtistProfile = lazy(() => import('../pages/public/ArtistProfile.jsx'));
 const Artists       = lazy(() => import('../pages/public/Artists.jsx'));
 const UserProfile   = lazy(() => import('../pages/public/UserProfile.jsx'));
@@ -53,6 +55,8 @@ const Router = () => {
                 <Route element={<PublicRoute/>}>
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
+                    <Route path="/recuperar-contrasena" element={<ForgotPassword />} />
+                    <Route path="/restablecer-contrasena" element={<ResetPassword />} />
                 </Route>
 
                 {/* Landing QR/donación del artista — acceso libre */}

@@ -50,7 +50,42 @@ Puntos de seguridad clave:
 
 ---
 
-## 3. Roles y permisos (Spatie)
+## 3. Recuperar contraseña por correo ("olvidé mi contraseña")
+
+Si un usuario no recuerda su contraseña, puede pedir un enlace para crear una nueva, **sin necesidad de saber la antigua**. La seguridad la da un **token secreto** que solo llega a su correo.
+
+```mermaid
+sequenceDiagram
+    participant U as Usuario
+    participant F as Frontend
+    participant A as API
+    participant M as Email (Brevo)
+
+    U->>F: "¿Olvidaste tu contraseña?" + email
+    F->>A: POST /api/forgot-password
+    A->>A: Genera token y lo guarda (password_reset_tokens)
+    A->>M: Envía correo con enlace al frontend
+    A-->>F: "Si existe, te hemos enviado el enlace"
+    U->>M: Abre el correo, pulsa el enlace
+    M->>F: /restablecer-contrasena?token=...&email=...
+    U->>F: Escribe la nueva contraseña
+    F->>A: POST /api/reset-password (token + nueva clave)
+    A->>A: Valida el token → cambia la contraseña + revoca sesiones
+    A-->>U: "Contraseña actualizada"
+```
+
+Puntos de seguridad:
+- Uso el **"Password Broker" de Laravel**, que genera y valida el token contra la tabla `password_reset_tokens`, con **caducidad**.
+- Al pedir el enlace, respondo **siempre igual** aunque el correo no exista → no revelo qué correos están registrados.
+- El enlace del correo apunta al **frontend** (no al backend), porque la app es un SPA.
+- Al cambiar la contraseña, **revoco todas las sesiones anteriores** (`tokens()->delete()`) por seguridad.
+- Ambos endpoints (`/forgot-password`, `/reset-password`) llevan **throttle** y la nueva contraseña exige **mínimo 8 caracteres**.
+
+> Diferencia con el "cambiar contraseña" del perfil: aquel **sí** pide la contraseña actual (el usuario la sabe); este **no**, porque precisamente la ha olvidado — por eso la seguridad recae en el token del enlace.
+
+---
+
+## 4. Roles y permisos (Spatie)
 
 Tres roles, gestionados con `spatie/laravel-permission`:
 
@@ -68,7 +103,7 @@ Además, el rol se asigna de forma **segura en el registro**: aunque alguien man
 
 ---
 
-## 4. Protección contra ataques
+## 5. Protección contra ataques
 
 | Medida | Cómo | Para qué |
 |---|---|---|
@@ -82,7 +117,7 @@ Además, el rol se asigna de forma **segura en el registro**: aunque alguien man
 
 ---
 
-## 5. Protección específica del dominio
+## 6. Protección específica del dominio
 
 Dos medidas pensadas para **proteger a los usuarios entre sí**:
 
@@ -91,7 +126,7 @@ Dos medidas pensadas para **proteger a los usuarios entre sí**:
 
 ---
 
-## 6. Privacidad y RGPD
+## 7. Privacidad y RGPD
 
 Al usarse con datos personales reales (en España), incluyo:
 
@@ -102,7 +137,7 @@ Al usarse con datos personales reales (en España), incluyo:
 
 ---
 
-## 7. Resumen de la "capa de seguridad"
+## 8. Resumen de la "capa de seguridad"
 
 ```mermaid
 flowchart TD

@@ -267,3 +267,12 @@
         box-shadow: 0 0 0 1px var(--color-primary);
     }
 }
+
+/* Enlace "¿Olvidaste tu contraseña?" en el login */
+.forgotLink {
+    text-align: right;
+    margin: -0.25rem 0 0.25rem;
+    font-size: 0.85rem;
+
+    a { color: var(--color-primary); font-weight: 600; }
+}

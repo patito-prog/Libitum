@@ -22,11 +22,13 @@ class SendEventReminders extends Command
     /** Lógica del comando: busca eventos próximos con recordatorio y envía los emails. */
     public function handle(): void
     {
-        // Ventana de tiempo: desde ahora hasta dentro de 24 horas.
-        // Así, si el scheduler lo lanza cada día a las 9:00,
-        // siempre cubre exactamente los eventos del día siguiente.
+        // Ventana de tiempo: desde ahora hasta dentro de 48 horas.
+        // Como el comando se lanza una vez al día, una ventana de 48h hace que
+        // cada evento entre en DOS ejecuciones seguidas: la del día anterior y
+        // la del mismo día. Así el asistente recibe dos avisos (un día antes y
+        // el día del evento), con tiempo de sobra para prepararse.
         $from = now();
-        $to   = now()->addDay();
+        $to   = now()->addDays(2);
 
         // Una sola query: eventos en esa ventana de tiempo que tengan
         // al menos un asistente con remind_me = true.

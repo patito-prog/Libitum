@@ -293,12 +293,15 @@
 .mobileMenu {
     position: fixed;
     top: 64px;
-    left: 0;
-    right: 0;
+    /* Anclado a la derecha en vez de ocupar todo el ancho (estética) */
+    right: 0.6rem;
+    left: auto;
+    width: clamp(220px, 72vw, 300px);
     background: var(--bg-surface);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
     padding: 0.75rem 1rem 1rem;
     z-index: 199;
     display: flex;

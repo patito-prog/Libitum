@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Notifications\VerifyEmailLibitum;
+use App\Notifications\ResetPasswordLibitum;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -30,6 +31,15 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendEmailVerificationNotification(): void
     {
         $this->notify(new VerifyEmailLibitum());
+    }
+
+    /**
+     * Igual que arriba, pero para el correo de "restablecer contraseña": usamos
+     * nuestra plantilla y un enlace que apunta al frontend (no al backend).
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPasswordLibitum($token));
     }
 
     /**
