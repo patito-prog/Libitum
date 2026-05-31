@@ -51,9 +51,9 @@ class SendEventReminders extends Command
 
         foreach ($events as $event) {
             foreach ($event->attendees as $user) {
-                // Mail::to()->send() usa el driver configurado en .env.
+                // Mail::to()->send() usa el driver configurado en las variables de entorno.
                 // En desarrollo (MAIL_MAILER=log) escribe el email en storage/logs/laravel.log.
-                // En producción apuntaría a SMTP real (SendGrid, Mailgun, etc.).
+                // En producción usa Brevo (API HTTP) para enviarlo de verdad.
                 Mail::to($user->email)->send(new EventReminder($event, $user));
                 $sent++;
             }
