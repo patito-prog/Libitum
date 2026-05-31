@@ -57,6 +57,7 @@ Cada controlador agrupa la lógica de un recurso. Estos son los que **usa la API
 |---|---|---|
 | **Api\AuthController** | Autenticación | `register`, `verify` (login), `logout` |
 | **Api\EmailVerificationController** | Verificación de correo | `verify` (enlace del email), `resend` |
+| **Api\PasswordResetController** | Recuperar contraseña | `forgot` (envía enlace), `reset` (cambia con token) |
 | **EventController** | Todo lo de eventos | `index`, `show`, `store`, `update`, `destroy`, `search`, `inscription`, `signedUp`, `remindMe`, `destroySignedUp`, `categories`, `status`, `uploadCover`, `favorites`, `allEventsForAdmin`, `destroyByAdmin` |
 | **FeedController** | El feed "Para Ti" | `index` |
 | **ArtistProfileController** | Perfil público de artista | `index` (listado), `show`, `update`, `statistics` |

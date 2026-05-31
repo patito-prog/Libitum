@@ -207,6 +207,7 @@ Las migraciones son el **historial versionado de la estructura** de la base de d
 Además de las tablas "de negocio", hay tablas que aporta el framework:
 
 - **`personal_access_tokens`** (Sanctum): guarda los tokens de sesión. Cuando un usuario hace login, aquí se crea su token Bearer.
+- **`password_reset_tokens`**: guarda el token temporal del flujo "olvidé mi contraseña" (ver Informe 3).
 - **`roles`, `permissions`, `model_has_roles`, `role_has_permissions`…** (Spatie): gestionan los tres roles (admin, artist, spectator) y sus permisos.
 - **`cache`, `jobs`**: caché y cola de trabajos internas de Laravel.
 

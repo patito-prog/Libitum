@@ -48,7 +48,7 @@ const ForgotPassword = () => {
     return (
         <div className={styles.authContainer}>
             <div className={styles.authCard}>
-                <h1 className={styles.title}>¿Olvidaste tu contraseña?</h1>
+                <h1 className={`${styles.title} ${styles.titleCompact}`}>¿Olvidaste tu contraseña?</h1>
                 <p className={styles.subtitle}>Escribe tu correo y te enviaremos un enlace para crear una nueva.</p>
 
                 <form className={styles.form} onSubmit={submit}>

@@ -293,10 +293,10 @@
 .mobileMenu {
     position: fixed;
     top: 64px;
-    /* Anclado a la derecha en vez de ocupar todo el ancho (estética) */
+    /* Anclado a la derecha como un panel estrecho (no ocupa todo el ancho) */
     right: 0.6rem;
     left: auto;
-    width: clamp(220px, 72vw, 300px);
+    width: min(230px, 78vw);
     background: var(--bg-surface);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
