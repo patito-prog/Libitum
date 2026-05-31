@@ -1,0 +1,2046 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Libitum — Documentación técnica</title>
+<script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  @page { size: A4; margin: 18mm 15mm; }
+  body { font-family: Inter, Arial, sans-serif; color:#16181a; line-height:1.55; max-width: 880px; margin:0 auto; padding:2rem; }
+  h1,h2,h3,h4 { font-family: Syne, Arial, sans-serif; color:#14595d; line-height:1.2; }
+  h1 { color:#1a7d82; border-bottom:3px solid #1a7d82; padding-bottom:.3rem; }
+  h2 { border-bottom:1px solid #e5ddd0; padding-bottom:.2rem; }
+  .cover { text-align:center; padding:28vh 0 0; page-break-after:always; }
+  .cover h1 { font-size:4rem; border:none; }
+  .cover .sub { font-size:1.3rem; color:#16181a; margin-top:.5rem; }
+  .cover .meta { color:#7a7d84; margin-top:2rem; }
+  .report { page-break-before:always; }
+  pre { background:#f4efe3; padding:1rem; border-radius:8px; overflow:auto; font-size:.85rem; }
+  code { background:#f4efe3; padding:.1em .3em; border-radius:4px; font-size:.9em; }
+  pre code { background:none; padding:0; }
+  table { border-collapse:collapse; width:100%; margin:1rem 0; font-size:.92rem; }
+  th,td { border:1px solid #ddd; padding:.45rem .65rem; text-align:left; vertical-align:top; }
+  th { background:#1a7d82; color:#fff; }
+  tr:nth-child(even){ background:#faf7f1; }
+  blockquote { border-left:4px solid #ff8a5b; margin:1rem 0; padding:.4rem 1rem; background:#fff7f2; color:#3a3d42; }
+  .mermaid { text-align:center; margin:1.5rem 0; }
+  a { color:#1a7d82; }
+  hr { border:none; border-top:1px solid #e5ddd0; margin:2rem 0; }
+  @media print { body{max-width:none;padding:0;} a{color:#16181a;text-decoration:none;} pre{white-space:pre-wrap;} }
+</style>
+</head>
+<body>
+<div class="cover">
+  <h1>LIBITUM</h1>
+  <div class="sub">Documentación técnica del proyecto</div>
+  <div class="meta">15 informes &middot; Desarrollo de Aplicaciones Web</div>
+</div>
+
+<script type="text/markdown" class="report-src">
+# Informe 0 — Visión general y arquitectura
+
+> Este es el primer informe de la serie. Sirve de mapa: explica **qué es Libitum**, **con qué está hecho** y **cómo encajan todas las piezas**. Los demás informes entran en detalle en cada parte; conviene leer este primero.
+
+---
+
+## 1. ¿Qué es Libitum?
+
+Libitum es una **plataforma para artistas de calle y música en vivo** que conecta a los artistas con su público. Un artista crea su perfil, publica sus eventos y comparte su página mediante un **QR**; el público descubre eventos, sigue a sus artistas favoritos, se apunta a eventos, recibe recordatorios y puede **apoyar económicamente** al artista (PayPal, Ko-fi, Bizum…).
+
+Una idea clave de diseño: **Libitum no toca el dinero**. Las donaciones van directamente del donante al artista a través de plataformas externas. Eso nos quita toda la complejidad legal y técnica de ser una pasarela de pago.
+
+---
+
+## 2. Stack tecnológico
+
+| Capa | Tecnología | Por qué |
+|---|---|---|
+| **Frontend** | React 19 + Vite | SPA rápida y moderna; Vite da un desarrollo ágil y un build optimizado. |
+| **Estilos** | CSS Modules (SCSS) | Estilos encapsulados por componente, sin colisiones de nombres. |
+| **Enrutado** | React Router 7 | Navegación SPA con carga diferida (lazy) por ruta. |
+| **Mapas** | Leaflet + react-leaflet + OpenStreetMap/Nominatim | Mapas y autocompletado de direcciones **gratis y sin clave de API**. |
+| **QR** | qrcode.react | Genera el QR del artista en el cliente. |
+| **Backend** | Laravel 12 (API-only) | Framework PHP robusto; lo usamos solo como API REST. |
+| **Autenticación** | Laravel Sanctum (tokens) | Tokens Bearer para una SPA en dominio distinto al backend. |
+| **Roles/permisos** | spatie/laravel-permission | Gestiona los tres roles (espectador, artista, admin). |
+| **Email** | Brevo (API HTTP) | Envío de correos por API (verificación, recordatorios) sin depender de SMTP. |
+| **Base de datos** | PostgreSQL (Neon) | Relacional, fiable; Neon ofrece Postgres gestionado con capa gratis. |
+| **Hosting back** | Railway | Despliega el backend Laravel y la base de datos de forma sencilla. |
+| **Hosting front** | Vercel | CDN global para la SPA; despliegue automático desde Git. |
+
+> Nota: `axios` aparece en las dependencias pero **no se usa**; toda la comunicación con la API va con `fetch` encapsulado en el hook `useAPI`.
+
+---
+
+## 3. Arquitectura general
+
+Libitum es una **arquitectura desacoplada**: un frontend (SPA) y un backend (API REST) que viven en dominios distintos y se comunican por HTTP con JSON.
+
+```mermaid
+graph LR
+    U[Usuario / Navegador]
+
+    subgraph Vercel
+        F[Frontend SPA<br/>React + Vite]
+    end
+
+    subgraph Railway
+        A[Backend API<br/>Laravel 12]
+        C[Cron diario<br/>reminders:send]
+    end
+
+    N[(PostgreSQL<br/>Neon)]
+    B[Brevo<br/>emails]
+    O[OpenStreetMap<br/>+ Nominatim]
+
+    U -->|HTTPS| F
+    F -->|REST /api/*<br/>Bearer token| A
+    F -->|tiles + geocoding| O
+    A -->|SQL| N
+    A -->|API HTTP| B
+    C --> N
+    C --> B
+```
+
+- El **frontend** (Vercel) sirve la web; es estático y escala "infinito" (CDN).
+- El **backend** (Railway) expone la API en `/api/*` y es el único que habla con la base de datos.
+- La **base de datos** (Neon) solo es accesible desde el backend.
+- **Brevo** envía los correos (verificación de cuenta y recordatorios).
+- **OpenStreetMap/Nominatim** los consulta el navegador directamente (mapas y búsqueda de direcciones).
+- Un **cron diario** ejecuta el comando de recordatorios.
+
+---
+
+## 4. Cómo viaja una petición (ejemplo: seguir a un artista)
+
+```mermaid
+sequenceDiagram
+    participant U as Usuario
+    participant F as Frontend (React)
+    participant A as API (Laravel)
+    participant DB as PostgreSQL
+
+    U->>F: Pulsa "Seguir"
+    F->>A: POST /api/artist/5/follow<br/>(Authorization: Bearer token)
+    A->>A: Middleware: CORS → throttle → auth:sanctum
+    A->>DB: INSERT en tabla follows
+    DB-->>A: OK
+    A-->>F: JSON { error: false }
+    F-->>U: UI actualizada al instante
+```
+
+El patrón es siempre el mismo: el componente llama al hook **`useAPI`**, que añade el **token Bearer** y las cabeceras, hace `fetch`, y devuelve el JSON ya parseado (o lanza un error con mensaje en español). El backend valida, ejecuta la lógica y responde JSON.
+
+---
+
+## 5. Estructura del repositorio
+
+El repositorio tiene dos proyectos independientes: `backend/` y `frontend/`.
+
+### Backend (Laravel)
+
+```
+backend/
+├── app/
+│   ├── Console/Commands/   → comandos (batch de recordatorios)
+│   ├── Http/
+│   │   ├── Controllers/    → la lógica de la API por recurso
+│   │   ├── Middleware/     → roles (admin, artista)
+│   │   └── Requests/       → validación de formularios
+│   ├── Mail/               → correos (recordatorio de evento)
+│   ├── Models/             → Eloquent: User, Event, ArtistProfile, Category, Status
+│   ├── Notifications/      → notificación de verificación de correo
+│   └── Providers/          → arranque de servicios (transporte Brevo, https…)
+├── config/                 → configuración (cors, mail, database…)
+├── database/
+│   ├── migrations/         → estructura de la base de datos
+│   ├── seeders/            → datos iniciales (roles, estados, categorías…)
+│   └── factories/          → generadores de datos para los tests
+├── routes/
+│   ├── api.php             → todas las rutas de la API
+│   └── console.php         → programación del cron
+└── tests/Feature/          → 37 tests automáticos
+```
+
+### Frontend (React)
+
+```
+frontend/src/
+├── pages/        → una carpeta por "pantalla" (públicas y privadas)
+├── components/   → piezas reutilizables (Event, MapView, PasswordInput…)
+├── context/      → estado global (Auth, Eventos, Mensajes)
+├── hooks/        → lógica reutilizable (useAPI, useAuthContext…)
+├── routes/       → enrutado + guards (rutas protegidas por rol)
+├── config/       → configuración (URL de la API, enlaces de mapas)
+└── utils/        → utilidades (validaciones, geocoding…)
+```
+
+---
+
+## 6. Decisiones de arquitectura clave (y por qué)
+
+1. **Backend API-only + SPA separada.** El backend no pinta HTML, solo devuelve JSON. Esto permite que el frontend y el backend evolucionen por separado y se desplieguen en sitios distintos (Vercel y Railway).
+
+2. **Autenticación por token (no por cookie).** Como el frontend (Vercel) y el backend (Railway) están en dominios diferentes, usar cookies de sesión sería problemático. Con **tokens Sanctum** guardados en el navegador y enviados como `Authorization: Bearer`, evitamos los líos de CORS con credenciales.
+
+3. **Roles con Spatie.** Los tres tipos de usuario (espectador, artista, admin) se gestionan con permisos y middleware, en vez de con `if` repartidos por el código.
+
+4. **Estado del evento automático.** En vez de que el artista marque "en directo" o "terminado" a mano, el estado se **calcula a partir de la fecha y la duración**. El artista solo elige borrador o publicado.
+
+5. **No procesamos pagos.** Las donaciones van por plataformas externas. Mantiene el proyecto simple y sin responsabilidades legales de pasarela de pago.
+
+6. **Mapas gratuitos (OpenStreetMap).** Migramos de Google Maps a OpenStreetMap para no depender de una tarjeta de crédito ni de una clave de API con posibles cobros.
+
+---
+
+## 7. Cifras del proyecto
+
+| Métrica | Cantidad |
+|---|---|
+| Modelos de datos | 5 |
+| Migraciones | 16 |
+| Controladores de la API | ~22 |
+| Páginas (frontend) | ~24 |
+| Componentes reutilizables | ~43 |
+| Tests automáticos | **37** (90 aserciones) |
+
+---
+
+## 8. Índice de la serie de informes
+
+| Nº | Informe | Contenido |
+|---|---|---|
+| 0 | **Visión general y arquitectura** | *(este documento)* |
+| 1 | Base de datos y modelo de datos | Tablas, relaciones, migraciones, seeders |
+| 2 | Backend | Controladores, modelos, rutas, lógica |
+| 3 | Seguridad y autenticación | Tokens, verificación, roles, rate-limit, CORS, RGPD |
+| 4 | Frontend | Páginas, componentes, contextos, hooks |
+| 5 | Configuración y librerías externas | Dependencias y configuración |
+| 6 | Batch / tareas programadas | El comando de recordatorios y el cron |
+| 7 | Tests | La batería de 37 tests |
+| 8 | Despliegue | Railway, Vercel, Neon, Brevo |
+| 9 | Problemas encontrados y soluciones | Bugs y decisiones técnicas |
+| 10 | Decisiones de funcionalidad | Cambios de rumbo y cómo se aplicaron |
+| 11 | Diseño y experiencia de usuario | Decisiones de UX y el porqué |
+| 12 | Situación real y mejoras previstas | Estado actual y hoja de ruta |
+| 13 | Monetización | Enfoque empresarial |
+| 14 | Impacto en los artistas y pagos | Planteamiento de las donaciones |
+```
+
+</script>
+
+<script type="text/markdown" class="report-src">
+# Informe 1 — Base de datos y modelo de datos
+
+> Este informe explica **cómo guardo la información**: qué tablas hay, cómo se relacionan, qué hace cada migración y qué datos iniciales meten los seeders. Es la base sobre la que se apoya todo el backend (Informe 2).
+
+La base de datos es **PostgreSQL** (en producción, alojada en Neon). Todo el acceso se hace con el ORM **Eloquent** de Laravel: cada tabla importante tiene un modelo que la representa y define sus relaciones.
+
+---
+
+## 1. Diagrama entidad-relación
+
+```mermaid
+erDiagram
+    USERS ||--o| ARTIST_PROFILES : "tiene (si es artista)"
+    USERS ||--o{ EVENTS : "crea"
+    EVENTS }o--|| STATUSES : "tiene estado"
+    EVENTS }o--o{ CATEGORIES : "category_event"
+    USERS }o--o{ EVENTS : "asiste · event_user (remind_me)"
+    USERS }o--o{ EVENTS : "like · likes"
+    USERS }o--o{ USERS : "sigue · follows"
+
+    USERS {
+        bigint id PK
+        string name
+        string email UK
+        timestamp email_verified_at
+        string password
+        string avatar_url
+        string city
+    }
+    ARTIST_PROFILES {
+        bigint id PK
+        bigint user_id FK
+        text bio
+        string spotify_url
+        string instagram_url
+        string youtube_url
+        string tiktok_url
+        string donation_url
+        string bizum_phone
+    }
+    EVENTS {
+        bigint id PK
+        bigint user_id FK
+        string title
+        string slug UK
+        text description
+        string location
+        decimal latitude
+        decimal longitude
+        datetime event_date
+        smallint duration_hours
+        decimal price
+        boolean is_donation
+        string cover_image
+        int max_capacity
+        bigint status_id FK
+    }
+    CATEGORIES {
+        bigint id PK
+        string name
+        string slug UK
+        string icon
+        string color
+    }
+    STATUSES {
+        bigint id PK
+        string name UK
+        string color
+    }
+```
+
+> Nota: las tablas intermedias (`category_event`, `event_user`, `follows`, `likes`) se dibujan como relaciones muchos-a-muchos; las detallo en la sección 3.
+
+---
+
+## 2. Tablas principales (entidades del dominio)
+
+### `users` — usuarios
+La tabla central. Un mismo usuario puede ser **espectador, artista o admin** (el rol lo gestiona Spatie, no una columna aquí).
+
+| Columna | Tipo | Notas |
+|---|---|---|
+| `id` | bigint | Clave primaria |
+| `name`, `surname`, `nickname` | string | Nombre (apellido y apodo opcionales) |
+| `email` | string, **único** | Login |
+| `email_verified_at` | timestamp, nullable | Si está a null, el usuario **no ha verificado** su correo |
+| `phone_number`, `phone_number_verified` | string / bool | Teléfono opcional |
+| `password` | string | Cifrada (hash) |
+| `avatar_url`, `city` | string, nullable | Foto y ciudad |
+| `last_connection` | timestamp | Última conexión |
+
+### `artist_profiles` — perfil de artista (1 a 1 con users)
+Datos extra que **solo tienen los artistas**. Se crea al registrarse como artista.
+
+| Columna | Tipo | Notas |
+|---|---|---|
+| `user_id` | FK → users | A quién pertenece |
+| `bio` | text | Biografía |
+| `spotify_url`, `instagram_url`, `youtube_url`, `tiktok_url` | string | Redes |
+| `donation_url` | string | Enlace de donación (Ko-fi, PayPal…) |
+| `bizum_phone` | string | Móvil para Bizum (opcional) |
+
+### `events` — eventos
+Lo que crea un artista.
+
+| Columna | Tipo | Notas |
+|---|---|---|
+| `user_id` | FK → users | El **artista** que lo crea |
+| `title`, `slug`, `description` | string/text | `slug` único para URLs |
+| `location`, `latitude`, `longitude` | string/decimal | Ubicación y coordenadas (para el mapa) |
+| `event_date` | datetime | Cuándo es |
+| `duration_hours` | smallint, nullable | Duración; sirve para calcular si está "en directo" o "terminado" |
+| `price` | decimal | Precio de la entrada |
+| `is_donation` | boolean | Si es de **donación voluntaria** (entrada gratis) |
+| `cover_image` | string | Portada |
+| `max_capacity` | int, nullable | Aforo máximo (opcional) |
+| `status_id` | FK → statuses | Estado base (borrador / publicado) |
+
+> **Atributos calculados (no son columnas):** el modelo Event añade en tiempo de ejecución `effective_status_name` (estado real calculado a partir de la fecha + duración: publicado → en directo → terminado), `signed_up` (si el usuario actual está apuntado) y `liked` (si le ha dado like). Se explican en el Informe 2.
+
+### `categories` — categorías de evento
+Catálogo fijo (Rock, Jazz, Pop, Clásica, Magia, Teatro, Danza, Circo, Otro). `name`, `slug` (único), `icon`, `color`.
+
+### `statuses` — estados base del evento
+Catálogo: `draft`, `published`, `live`, `finished`, `cancelled` (con un `color`).
+
+---
+
+## 3. Tablas intermedias (relaciones muchos-a-muchos)
+
+Aquí está la "chicha" del modelo, las relaciones N:M:
+
+| Tabla | Conecta | Datos extra | Para qué |
+|---|---|---|---|
+| `category_event` | events ↔ categories | — | Un evento tiene varias categorías y una categoría varios eventos |
+| `event_user` | events ↔ users | **`remind_me`** (bool), timestamps | Asistencia: quién se apunta a qué evento. `remind_me` decide si recibe el recordatorio por email |
+| `follows` | users ↔ users | timestamps | Seguimiento: `user_id` (quien sigue) → `artist_id` (a quién sigue) |
+| `likes` | users ↔ events | timestamps | "Me gusta" / guardar evento |
+
+> Detalle importante de `follows`: relaciona la tabla `users` **consigo misma** (un usuario sigue a otro usuario que es artista). Por eso el modelo User tiene dos relaciones: `following()` (a quién sigo) y `followers()` (quién me sigue), que son la misma tabla con las claves invertidas.
+
+---
+
+## 4. Relaciones en los modelos (Eloquent)
+
+Cada relación de la base de datos se traduce a un método en el modelo:
+
+```mermaid
+graph TD
+    U[User] -->|hasOne| AP[ArtistProfile]
+    U -->|hasMany createdEvents| E[Event]
+    U -->|belongsToMany events / attendees| E
+    U -->|belongsToMany likes| E
+    U -->|belongsToMany following/followers| U
+    E -->|belongsTo artist| U
+    E -->|belongsTo status| S[Status]
+    E -->|belongsToMany categories| C[Category]
+    E -->|belongsToMany likedBy| U
+```
+
+| Modelo | Relación | Tipo | Significado |
+|---|---|---|---|
+| **User** | `artistProfile` | hasOne | Su perfil de artista (si lo es) |
+| | `createdEvents` | hasMany | Eventos que ha creado |
+| | `events` / `attendees` | belongsToMany (`event_user`) | Eventos a los que asiste |
+| | `likes` | belongsToMany (`likes`) | Eventos que le gustan |
+| | `following` | belongsToMany (`follows`) | Artistas a los que sigue |
+| | `followers` | belongsToMany (`follows`) | Quién le sigue |
+| **Event** | `artist` | belongsTo | El artista creador |
+| | `status` | belongsTo | Estado base |
+| | `categories` | belongsToMany | Sus categorías |
+| | `attendees` | belongsToMany | Quién va |
+| | `likedBy` | belongsToMany | Quién le ha dado like |
+| **ArtistProfile** | `user` | belongsTo | Su dueño |
+| **Category / Status** | `events` | belongsToMany / hasMany | Eventos de esa categoría/estado |
+
+---
+
+## 5. Migraciones
+
+Las migraciones son el **historial versionado de la estructura** de la base de datos: cada una crea o modifica tablas. Al desplegar se ejecutan con `php artisan migrate` (y en producción el Procfile lo hace solo).
+
+| Migración | Qué hace |
+|---|---|
+| `create_users_table` | Tabla de usuarios |
+| `create_statuses_table` | Estados de evento |
+| `create_categories_table` | Categorías |
+| `create_events_table` | Eventos (con FK a users y statuses) |
+| `create_category_event_table` | Pivote eventos↔categorías |
+| `create_event_user_table` | Pivote asistencia (con `remind_me`) |
+| `create_artist_profiles_table` | Perfil de artista |
+| `create_follows_table` | Seguimientos |
+| `create_likes_table` | Me gusta |
+| `create_personal_access_tokens_table` | Tokens de Sanctum (login) |
+| `create_permission_tables` | Tablas de Spatie (roles y permisos) |
+| `add_duration_hours_to_events_table` | Añade la duración del evento |
+| `add_bizum_phone_to_artist_profiles_table` | Añade el Bizum del artista |
+| `add_is_donation_to_events_table` | Añade la donación voluntaria |
+| `create_cache_table`, `create_jobs_table` | Tablas internas de Laravel (caché y colas) |
+
+> Las tres últimas migraciones con prefijo `2026_05_29` son ampliaciones recientes (duración, Bizum y donación voluntaria): se ven en el historial como mejoras añadidas sin romper lo anterior.
+
+---
+
+## 6. Tablas de infraestructura (no son del dominio)
+
+Además de las tablas "de negocio", hay tablas que aporta el framework:
+
+- **`personal_access_tokens`** (Sanctum): guarda los tokens de sesión. Cuando un usuario hace login, aquí se crea su token Bearer.
+- **`password_reset_tokens`**: guarda el token temporal del flujo "olvidé mi contraseña" (ver Informe 3).
+- **`roles`, `permissions`, `model_has_roles`, `role_has_permissions`…** (Spatie): gestionan los tres roles (admin, artist, spectator) y sus permisos.
+- **`cache`, `jobs`**: caché y cola de trabajos internas de Laravel.
+
+---
+
+## 7. Seeders (datos iniciales)
+
+Los seeders rellenan la base de datos con los datos que la app **necesita para funcionar**:
+
+| Seeder | Qué inserta |
+|---|---|
+| `StatusSeeder` | Los 5 estados: draft, published, live, finished, cancelled |
+| `PermissionSeeder` | Los permisos del sistema |
+| `RoleSeeder` | Los 3 roles (admin, artist, spectator) y sus permisos |
+| `DatabaseSeeder` | **Solo para desarrollo**: datos de prueba (artistas, eventos y espectadores falsos) |
+| `ProductionSeeder` | **Para producción**: solo lo imprescindible (estados, roles, categorías reales y un usuario admin). Sin datos falsos. Es idempotente (se puede ejecutar varias veces sin duplicar) |
+
+> La separación entre `DatabaseSeeder` (desarrollo, con datos de relleno) y `ProductionSeeder` (producción, limpio) es a propósito: la web real arranca **vacía de contenido** pero con todo lo necesario para que la gente empiece a usarla.
+
+---
+
+## 8. Resumen
+
+- **5 entidades de dominio**: users, artist_profiles, events, categories, statuses.
+- **4 tablas intermedias** que modelan las relaciones N:M (asistencia, seguimiento, likes, categorías).
+- La asistencia (`event_user`) lleva el campo **`remind_me`**, que es lo que conecta esta base de datos con el **batch de recordatorios** (Informe 6).
+- Todo el acceso pasa por **Eloquent**: nunca escribo SQL a mano salvo casos puntuales y justificados (Informe 9).
+
+> Siguiente: **Informe 2 — Backend**, donde explico cómo los controladores usan estos modelos para responder a la API.
+
+</script>
+
+<script type="text/markdown" class="report-src">
+# Informe 2 — Backend
+
+> Este informe explica el **cerebro de la aplicación**: cómo Laravel recibe una petición de la API, la valida, ejecuta la lógica con los modelos del Informe 1 y devuelve una respuesta JSON. Aquí están los controladores, las rutas, los middleware, la validación y la lógica de negocio más importante.
+
+El backend es **Laravel 12 funcionando como API**: no genera HTML, solo responde **JSON** que consume el frontend (Informe 4).
+
+---
+
+## 1. Ciclo de vida de una petición
+
+Toda petición a la API pasa por la misma cadena:
+
+```mermaid
+flowchart LR
+    A[Petición HTTP<br/>/api/...] --> B[Middleware<br/>CORS · throttle · auth · rol]
+    B --> C[Form Request<br/>validación]
+    C --> D[Controlador<br/>lógica]
+    D --> E[Modelo Eloquent<br/>base de datos]
+    E --> D
+    D --> F[Respuesta JSON<br/>ReturnHelper]
+```
+
+1. **Middleware**: filtros que se ejecutan antes del controlador (¿hay token? ¿tiene el rol? ¿no ha hecho demasiadas peticiones?).
+2. **Form Request**: valida los datos de entrada antes de llegar al controlador.
+3. **Controlador**: ejecuta la lógica usando los modelos.
+4. **Modelo (Eloquent)**: habla con la base de datos.
+5. **Respuesta**: JSON con un formato consistente.
+
+---
+
+## 2. Las rutas (`routes/api.php`)
+
+Las rutas están organizadas por **nivel de acceso**:
+
+```mermaid
+flowchart TD
+    R[routes/api.php] --> P[Públicas<br/>sin token]
+    R --> A[Protegidas<br/>auth:sanctum]
+    A --> AR[Solo artista<br/>middleware artist]
+    A --> AD[Solo admin<br/>middleware admin]
+    A --> SP[Espectador / general]
+```
+
+- **Públicas**: login, registro, verificación de correo, ver eventos/artistas/usuarios, buscar eventos, catálogos (categorías, estados). Llevan rate-limit donde hace falta (login/registro).
+- **Protegidas** (`auth:sanctum`): todo lo que requiere estar logueado.
+  - **Artista** (`middleware('artist')`): CRUD de sus eventos, sus estadísticas, su perfil de artista.
+  - **Admin** (`middleware('admin')`): gestión de usuarios y eventos.
+  - **Espectador/general**: inscribirse a eventos, favoritos, feed, seguir artistas, likes, editar perfil.
+
+---
+
+## 3. Controladores
+
+Cada controlador agrupa la lógica de un recurso. Estos son los que **usa la API** de verdad:
+
+| Controlador | Responsabilidad | Métodos clave |
+|---|---|---|
+| **Api\AuthController** | Autenticación | `register`, `verify` (login), `logout` |
+| **Api\EmailVerificationController** | Verificación de correo | `verify` (enlace del email), `resend` |
+| **Api\PasswordResetController** | Recuperar contraseña | `forgot` (envía enlace), `reset` (cambia con token) |
+| **EventController** | Todo lo de eventos | `index`, `show`, `store`, `update`, `destroy`, `search`, `inscription`, `signedUp`, `remindMe`, `destroySignedUp`, `categories`, `status`, `uploadCover`, `favorites`, `allEventsForAdmin`, `destroyByAdmin` |
+| **FeedController** | El feed "Para Ti" | `index` |
+| **ArtistProfileController** | Perfil público de artista | `index` (listado), `show`, `update`, `statistics` |
+| **UserProfileController** | Perfil social de usuario | `show`, `followers`, `following` |
+| **ProfileController** | Cuenta del usuario logueado | `update`, `uploadAvatar`, `changePassword`, `destroy` |
+| **FollowerController** | Seguir/dejar de seguir | `store`, `destroy`, `index`, `followers` |
+| **LikeController** | Me gusta | `toggle` |
+| **CategoryController / StatusController** | Catálogos | `index` |
+| **AdminUserController** | Panel admin (usuarios) | `index`, `show`, `update`, `destroy` |
+
+> **Nota honesta:** la carpeta `app/Http/Controllers/Auth/` contiene los controladores **de scaffolding de Laravel Breeze** (login/registro web, reset de contraseña…). **El SPA no los usa**: la autenticación real va por `Api\AuthController` y `Api\EmailVerificationController`. Quedan ahí como restos de la plantilla inicial.
+
+### El controlador estrella: `EventController`
+Es el más grande porque concentra el núcleo del negocio. Algunos métodos destacados:
+- `store` / `update`: crean/editan un evento. Aquí está la lógica de **donación voluntaria** (si `is_donation`, el precio se fuerza a 0).
+- `show`: devuelve un evento; como es ruta pública, resuelve al usuario por su token **si lo trae** para indicar si ya está apuntado (`signed_up`) o le ha dado like.
+- `inscription` / `destroySignedUp`: apuntarse / darse de baja, validando el **aforo máximo**.
+- `remindMe`: activa/desactiva el recordatorio por email (campo `remind_me` de la tabla `event_user`).
+- `search`: búsqueda pública con filtros (texto, categoría, estado) y paginación.
+
+---
+
+## 4. Middleware (los "filtros")
+
+| Middleware | Qué comprueba |
+|---|---|
+| `auth:sanctum` | Que la petición traiga un **token válido** |
+| `admin` (AdminMiddleware) | Que el usuario tenga rol **admin**; si no → 403 |
+| `artist` (IsArtist) | Que tenga rol **artista** y un perfil de artista; si no → 403 |
+| `throttle:6,1` | Máximo 6 intentos/minuto (login, registro, reenvío de correo) |
+
+Ejemplo real (AdminMiddleware): si el usuario no está autenticado o no es admin, devuelve directamente un **403** sin llegar al controlador.
+
+---
+
+## 5. Validación: los Form Requests
+
+En vez de validar dentro del controlador, Laravel usa **clases Request** que validan **antes** de entrar:
+
+| Request | Valida |
+|---|---|
+| `StoreEventRequest` / `UpdateEventRequest` | Crear/editar evento (título, fecha, precio, `is_donation`, aforo, duración…) |
+| `CategoriesRequest` | Las categorías de un evento |
+| `StatusEventRequest` | El cambio de estado |
+| `RemindMeRequest` | El flag de recordatorio |
+| `ProfileUpdateRequest` | Datos del perfil |
+
+Si la validación falla, Laravel devuelve un **422** con los errores **en español** (ver Informe 3 sobre las traducciones), sin que el controlador llegue a ejecutarse.
+
+---
+
+## 6. Lógica de negocio destacada: el estado automático del evento
+
+La parte más "inteligente" del backend está en el **modelo Event**. El artista solo decide entre **borrador** y **publicado**; el resto (en directo, terminado) **se calcula solo** a partir de la fecha y la duración.
+
+```mermaid
+stateDiagram-v2
+    [*] --> draft: el artista lo crea
+    draft --> published: el artista publica
+    published --> live: llega la hora de inicio
+    live --> finished: pasa (inicio + duración)
+    published --> cancelled: el artista cancela
+    live --> cancelled: el artista cancela
+    note right of live
+        live y finished se calculan
+        solos con la fecha; no los
+        marca el artista a mano
+    end note
+```
+
+El cálculo (`getEffectiveStatusNameAttribute`):
+- **draft** y **cancelled** no se tocan nunca (son decisiones manuales).
+- Para el resto, con la fecha de inicio y la duración (2h por defecto):
+  - si ya pasó el final (inicio + duración) → **finished**
+  - si estamos entre el inicio y el final → **live**
+  - si aún no ha empezado → **published**
+
+Este estado calculado se expone como `effective_status_name` (un atributo "appended": viaja en el JSON aunque no sea una columna). Así el frontend siempre muestra el estado real sin que nadie tenga que actualizarlo a mano.
+
+---
+
+## 7. Respuestas consistentes: `ReturnHelper`
+
+Para que **toda la API responda igual**, uso un helper (`App\Util\ReturnHelper`) con métodos como:
+- `ReturnHelper::ok($mensaje, $datos)` → respuesta de éxito.
+- `ReturnHelper::error($mensaje, $status)` → respuesta de error.
+
+Así el frontend siempre recibe la misma estructura (`error`, `message`, `data`…) y puede tratarla de forma uniforme.
+
+---
+
+## 8. Resumen
+
+- El backend es una **API REST** en Laravel 12: recibe JSON, valida, ejecuta y responde JSON.
+- Las rutas se organizan por **acceso** (público / logueado / artista / admin) con middleware.
+- La validación vive en **Form Requests** separados, con mensajes en español.
+- La lógica más característica es el **estado automático del evento**, calculado en el modelo a partir de la fecha.
+- Toda la autenticación de verdad pasa por los controladores de `Api/` (los de `Auth/` son scaffolding sin usar).
+
+> Siguiente: **Informe 3 — Seguridad y autenticación**, donde explico a fondo los tokens, la verificación de correo, los roles y las protecciones (rate-limit, CORS, RGPD).
+
+</script>
+
+<script type="text/markdown" class="report-src">
+# Informe 3 — Seguridad y autenticación
+
+> Este informe explica **cómo protejo la aplicación y a sus usuarios**: cómo funciona el login, la verificación de correo, los roles, y todas las medidas de seguridad (límite de intentos, CORS, contraseñas, RGPD…). Es la parte que demuestra que el proyecto está pensado para usarse con datos reales.
+
+---
+
+## 1. Autenticación por token (Laravel Sanctum)
+
+Como el frontend (Vercel) y el backend (Railway) están en **dominios distintos**, no uso cookies de sesión, sino **tokens**:
+
+- Al iniciar sesión, el backend genera un **token Sanctum** y lo devuelve.
+- El frontend lo guarda en `localStorage` y lo envía en **cada petición** como cabecera `Authorization: Bearer <token>`.
+- Las rutas protegidas usan el middleware `auth:sanctum`, que comprueba que el token sea válido.
+- Al cerrar sesión, el token se **elimina** de la base de datos (`tokens()->delete()`), invalidándolo.
+
+> Decisión: token en vez de cookie evita problemas de CORS con credenciales entre dominios distintos.
+
+---
+
+## 2. Verificación de correo obligatoria
+
+El modelo `User` implementa `MustVerifyEmail`. El flujo completo:
+
+```mermaid
+sequenceDiagram
+    participant U as Usuario
+    participant F as Frontend
+    participant A as API
+    participant M as Email (Brevo)
+
+    U->>F: Se registra
+    F->>A: POST /api/register
+    A->>A: Crea usuario (sin verificar) — NO da token
+    A->>M: Envía correo con enlace FIRMADO
+    A-->>F: { needs_verification: true }
+    U->>M: Abre el correo, pulsa el enlace
+    M->>A: GET /api/email/verify/{id}/{hash} (firmado)
+    A->>A: Valida firma → marca verificado
+    A-->>U: Redirige a /email-verificado
+    U->>F: Ahora ya puede iniciar sesión
+```
+
+Puntos de seguridad clave:
+- **Al registrarse NO se entrega token**: hay que confirmar el correo primero.
+- **Al hacer login**, si el correo no está verificado, el backend responde **403** y no da token.
+- El enlace del correo es una **URL firmada y temporal** (`temporarySignedRoute`, caduca a los 60 min). El middleware `signed` valida que nadie la haya manipulado.
+- El reenvío de verificación (`/api/email/resend`) lleva **throttle** para que no se pueda abusar.
+
+> Detalle de producción: como Railway sirve detrás de un proxy, fuerzo HTTPS al generar URLs (`URL::forceScheme('https')`) y confío en el proxy (`trustProxies`), porque si no la firma del enlace no validaría (http vs https).
+
+---
+
+## 3. Recuperar contraseña por correo ("olvidé mi contraseña")
+
+Si un usuario no recuerda su contraseña, puede pedir un enlace para crear una nueva, **sin necesidad de saber la antigua**. La seguridad la da un **token secreto** que solo llega a su correo.
+
+```mermaid
+sequenceDiagram
+    participant U as Usuario
+    participant F as Frontend
+    participant A as API
+    participant M as Email (Brevo)
+
+    U->>F: "¿Olvidaste tu contraseña?" + email
+    F->>A: POST /api/forgot-password
+    A->>A: Genera token y lo guarda (password_reset_tokens)
+    A->>M: Envía correo con enlace al frontend
+    A-->>F: "Si existe, te hemos enviado el enlace"
+    U->>M: Abre el correo, pulsa el enlace
+    M->>F: /restablecer-contrasena?token=...&email=...
+    U->>F: Escribe la nueva contraseña
+    F->>A: POST /api/reset-password (token + nueva clave)
+    A->>A: Valida el token → cambia la contraseña + revoca sesiones
+    A-->>U: "Contraseña actualizada"
+```
+
+Puntos de seguridad:
+- Uso el **"Password Broker" de Laravel**, que genera y valida el token contra la tabla `password_reset_tokens`, con **caducidad**.
+- Al pedir el enlace, respondo **siempre igual** aunque el correo no exista → no revelo qué correos están registrados.
+- El enlace del correo apunta al **frontend** (no al backend), porque la app es un SPA.
+- Al cambiar la contraseña, **revoco todas las sesiones anteriores** (`tokens()->delete()`) por seguridad.
+- Ambos endpoints (`/forgot-password`, `/reset-password`) llevan **throttle** y la nueva contraseña exige **mínimo 8 caracteres**.
+
+> Diferencia con el "cambiar contraseña" del perfil: aquel **sí** pide la contraseña actual (el usuario la sabe); este **no**, porque precisamente la ha olvidado — por eso la seguridad recae en el token del enlace.
+
+---
+
+## 4. Roles y permisos (Spatie)
+
+Tres roles, gestionados con `spatie/laravel-permission`:
+
+| Rol | Puede |
+|---|---|
+| **spectator** | Ver, seguir artistas, apuntarse a eventos, likes |
+| **artist** | Todo lo anterior + crear/gestionar sus eventos, estadísticas, perfil de artista |
+| **admin** | Gestionar usuarios y eventos |
+
+La protección se hace con **middleware** en las rutas:
+- `middleware('admin')` → solo admin (si no, 403).
+- `middleware('artist')` → solo artista con perfil (si no, 403).
+
+Además, el rol se asigna de forma **segura en el registro**: aunque alguien manipule la petición, solo puede elegir entre `artist` o `spectator` (nunca `admin`).
+
+---
+
+## 5. Protección contra ataques
+
+| Medida | Cómo | Para qué |
+|---|---|---|
+| **Rate-limit** | `throttle:6,1` en login, registro y reenvío | Máx. 6 intentos/minuto por IP → frena la **fuerza bruta** |
+| **CORS restringido** | Solo `FRONTEND_URL`, localhost y previews de Vercel | Evita que otras webs usen la API |
+| **Contraseñas cifradas** | Cast `hashed` (bcrypt) | Nunca se guardan en texto plano |
+| **Contraseña mínima 8** | Validación back y front | Contraseñas más fuertes |
+| **APP_DEBUG=false** en producción | Variable de entorno | No filtra detalles internos en los errores |
+| **Validación de entrada** | Form Requests | Evita datos maliciosos o malformados |
+| **Secretos fuera del repo** | Variables de entorno | Tokens y claves nunca se suben a Git |
+
+---
+
+## 6. Protección específica del dominio
+
+Dos medidas pensadas para **proteger a los usuarios entre sí**:
+
+- **Enlaces de donación de confianza:** cuando un artista pone su enlace de donación, se valida contra una **lista blanca de dominios** (Ko-fi, PayPal, Buy Me a Coffee, Patreon, GoFundMe, Stripe, Twitch…). Así un artista no puede colar un enlace fraudulento a sus seguidores.
+- **Bizum bajo consentimiento:** el número de Bizum lo publica el artista voluntariamente y se le avisa de que será visible. Se valida que sea un móvil español real.
+
+---
+
+## 7. Privacidad y RGPD
+
+Al usarse con datos personales reales (en España), incluyo:
+
+- **Política de privacidad** (`/privacidad`) y **Términos de uso** (`/terminos`): explican qué datos recojo, para qué, con quién se comparten y los derechos del usuario.
+- **Derecho al borrado:** el usuario puede **eliminar su cuenta** desde su perfil (`ProfileController@destroy`), lo que borra sus datos y revoca sus tokens.
+- **No se procesan pagos:** las donaciones van por plataformas externas, así que **no guardo ningún dato bancario** → menos responsabilidad legal.
+- **Sin cookies de seguimiento:** solo uso `localStorage` para el token de sesión (fin técnico), no rastreo.
+
+---
+
+## 8. Resumen de la "capa de seguridad"
+
+```mermaid
+flowchart TD
+    P[Petición] --> C[CORS: ¿origen permitido?]
+    C --> T[Throttle: ¿demasiados intentos?]
+    T --> AU[auth:sanctum: ¿token válido?]
+    AU --> R[Rol: ¿admin / artista?]
+    R --> V[Form Request: ¿datos válidos?]
+    V --> OK[Controlador]
+```
+
+Cada petición sensible atraviesa varias capas antes de ejecutarse: origen permitido → no abusar → autenticado → con el rol correcto → con datos válidos.
+
+- **Autenticación:** tokens Sanctum + verificación de correo obligatoria.
+- **Autorización:** tres roles con Spatie y middleware.
+- **Defensa:** rate-limit, CORS, contraseñas fuertes y cifradas, validación.
+- **Cumplimiento:** privacidad, términos y borrado de cuenta (RGPD).
+
+> Siguiente: **Informe 4 — Frontend**, donde explico cómo el cliente React consume esta API de forma segura (token, guards de ruta, manejo de errores).
+
+</script>
+
+<script type="text/markdown" class="report-src">
+# Informe 4 — Frontend
+
+> Este informe explica el **lado del cliente**: la aplicación React que ve el usuario. Cómo está organizada, cómo habla con la API del backend (Informe 2), cómo gestiona el estado y cómo protege las rutas según el rol.
+
+El frontend es una **SPA (Single Page Application)** hecha con **React 19 + Vite**. Se despliega en Vercel y consume la API de Laravel por HTTP.
+
+---
+
+## 1. Cómo está organizado (capas)
+
+Todo vive en `frontend/src/`, separado por responsabilidad:
+
+```mermaid
+graph TD
+    M[main.jsx<br/>arranque] --> APP[App.jsx<br/>layout + providers]
+    APP --> RT[routes/<br/>enrutado + guards]
+    RT --> PG[pages/<br/>pantallas]
+    PG --> CMP[components/<br/>piezas reutilizables]
+    PG --> CTX[context/<br/>estado global]
+    PG --> HK[hooks/<br/>lógica reutilizable]
+    HK --> CFG[config/ · utils/<br/>API URL, validaciones]
+```
+
+| Carpeta | Qué contiene |
+|---|---|
+| `pages/` | Una "pantalla" por archivo (públicas y privadas) |
+| `components/` | Piezas reutilizables (tarjeta de evento, mapa, botones…) |
+| `context/` | Estado global compartido (sesión, eventos, mensajes) |
+| `hooks/` | Lógica reutilizable (llamadas a la API, acceso a los contextos) |
+| `routes/` | El enrutado y los "guards" que protegen rutas por rol |
+| `config/` | Configuración (URL base de la API, enlaces de mapas) |
+| `utils/` | Utilidades (validaciones de formularios, geocoding) |
+
+---
+
+## 2. La capa de comunicación con la API: `useAPI`
+
+Toda la comunicación con el backend pasa por **un único hook**, `useAPI`. Así no repito la misma lógica en cada componente:
+
+- Envuelve `fetch` y añade automáticamente el **token Bearer** (sacado de `localStorage`) y las cabeceras.
+- Expone helpers por verbo: `getData`, `save` (POST), `edit` (PUT), `patch`, `deleteData`, `uploadFile`.
+- **Traduce los errores a español amigable**: si el backend devuelve 500, 404, etc. o falla la red, el usuario ve un mensaje claro en vez de algo técnico.
+
+```mermaid
+flowchart LR
+    C[Componente] --> H[useAPI]
+    H -->|fetch + token| API[API Laravel]
+    API -->|JSON| H
+    H -->|datos o error amigable| C
+```
+
+> Detalle de seguridad: el geocoding (buscar direcciones) NO usa `useAPI`, sino un `fetch` "pelado", **a propósito**, para no enviar nuestro token de sesión a un servicio externo (OpenStreetMap).
+
+---
+
+## 3. Estado global: los tres contextos
+
+Para compartir datos entre muchos componentes sin pasarlos "a mano", uso **React Context**. Tengo tres:
+
+| Contexto | Qué guarda / hace | Hook para usarlo |
+|---|---|---|
+| **AuthProvider** | El usuario logueado, el token, y las acciones de sesión (login, logout, registro, recuperar verificación). Valida la sesión al arrancar | `useAuthContext` |
+| **EventProvider** | Los eventos del artista, el formulario de crear/editar, y los catálogos (categorías, estados) | `useEventContext` |
+| **MessageProvider** | El "toast" global (mensajes de éxito/error que aparecen arriba) | `useMessageContext` |
+
+Estos providers envuelven la app en `main.jsx`/`App.jsx`, así que cualquier componente puede acceder a la sesión, lanzar un mensaje, etc.
+
+---
+
+## 4. Enrutado y protección por rol (guards)
+
+El enrutado usa **React Router 7** con **carga diferida** (cada página se descarga solo al visitarla, ver Informe 9 sobre rendimiento). Las rutas se protegen con **guards**:
+
+```mermaid
+flowchart TD
+    URL[El usuario entra a una ruta] --> G{¿Qué guard?}
+    G -->|PublicRoute| P[Login/Registro:<br/>si ya estás logueado, te manda al inicio]
+    G -->|ProtectedRoute| PR[Requiere sesión:<br/>si no, te manda al login]
+    G -->|AdminRoute| AR[Requiere rol admin]
+    G -->|Sin guard| PUB[Público: cualquiera entra]
+```
+
+- **PublicRoute**: para login/registro/recuperar contraseña. Si ya tienes sesión, te redirige (no tiene sentido ver el login logueado).
+- **ProtectedRoute**: para lo que requiere sesión (feed, favoritos, mis eventos…). Si no hay sesión, al login.
+- **AdminRoute**: solo el admin entra al panel.
+
+> La seguridad **real** está en el backend (Informe 3); estos guards son la capa de **experiencia de usuario** (que no veas pantallas que no te corresponden).
+
+---
+
+## 5. Las páginas (`pages/`)
+
+Separadas en **públicas** y **privadas**:
+
+**Públicas** (cualquiera, sin sesión):
+- `Landing` / `Home` (vía `RootPage`: invitado ve Landing, logueado ve Home)
+- `Login`, `Register`, `ForgotPassword`, `ResetPassword`, `EmailVerified`
+- `ArtistProfile` (la página del QR del artista), `Artists` (explorar), `UserProfile`, `EventDetail`, `SearchEvents`
+- `About`, `Contact`, `PaymentsInfo`, `PrivacyPolicy`, `Terms`, `Error`
+
+**Privadas** (requieren sesión / rol):
+- `Feed` ("Para Ti"), `Favorites`, `MyAttendance` (espectador/artista)
+- `PageEvents` (Mis Eventos), `ArtistQR`, `ArtistStats` (artista)
+- `AdminDashboard` (admin)
+
+---
+
+## 6. Componentes reutilizables (`components/`)
+
+Organizados por temática:
+
+| Carpeta | Componentes destacados |
+|---|---|
+| **common** | `Event`/`MiniEvent` (tarjetas), `MapView` (mapa Leaflet), `PasswordInput` (con ojo), `ShareButton`, `FitText` (título que encoge), `ConfirmModal`, `Loading`/`Loader`/`LoadingDots`, `MessageApp` (toast), `ErrorBoundary`, `EmptyState`, `EventStatusBadge` |
+| **layout** | `Header`, `Footer`, `Container`, `Content` (la estructura común) |
+| **profile** | `ProfileHeader`, `ProfileForms`, `PasswordForm`, `ArtistEditForm`, `ArtistHero`, `BizumCard`… |
+| **admin** | `AdminTable`, `UserRow`, `EventRow`, `AdminActionButton` |
+| **auth** | `VerifyNotice` (aviso de "verifica tu correo") |
+
+Cada componente tiene su propio `.module.scss` (estilos encapsulados que no chocan con otros).
+
+---
+
+## 7. Flujo típico (ejemplo: dar "me gusta")
+
+```mermaid
+sequenceDiagram
+    participant U as Usuario
+    participant C as Componente (Event)
+    participant H as useAPI
+    participant A as API
+    participant T as Toast
+
+    U->>C: Pulsa el corazón
+    C->>C: Cambia el icono YA (optimista)
+    C->>H: save(/events/5/like)
+    H->>A: POST con token
+    A-->>H: JSON
+    H-->>C: ok / error
+    C->>T: Si falla, revierte y avisa
+```
+
+Patrón habitual: **actualización optimista** (la interfaz cambia al instante para que se sienta rápida) y, si el backend falla, se revierte y se muestra un mensaje.
+
+---
+
+## 8. Estilos y diseño
+
+- **CSS Modules con SCSS**: cada componente tiene su `.module.scss`; las clases se "hashean" para no colisionar.
+- **Design tokens**: en `index.scss` defino variables CSS (`--color-primary`, `--font-display`, fondo crema…). Todos los componentes las usan, así que cambiar la paleta es tocar un sitio. (Más en el Informe 11 sobre diseño.)
+
+---
+
+## 9. Robustez de la interfaz
+
+- **ErrorBoundary**: si algo revienta (p.ej. falla la descarga de un trozo de código), en vez de pantalla en blanco sale un aviso con botón de recargar (y recarga sola en fallos de carga).
+- **Estados de carga**: componentes `Loading`/`Loader`/skeletons mientras llegan los datos.
+- **Mensajes (toasts)**: feedback claro de éxito/error, con animación y barra de progreso.
+
+---
+
+## 10. Resumen
+
+- SPA en **React 19 + Vite**, desplegada en Vercel.
+- Toda la comunicación con el backend pasa por **un hook (`useAPI`)** con token y errores amigables.
+- El estado global vive en **tres contextos** (sesión, eventos, mensajes).
+- Las rutas se cargan **bajo demanda** y se protegen con **guards** según el rol.
+- Estilos **encapsulados** (CSS Modules) sobre un sistema de **tokens** de diseño.
+
+> Siguiente: **Informe 5 — Configuración y librerías externas**, donde detallo las dependencias y los ficheros de configuración de ambos lados.
+
+</script>
+
+<script type="text/markdown" class="report-src">
+# Informe 5 — Configuración y librerías externas
+
+> Este informe documenta **de qué me apoyo y cómo está configurado todo**: las dependencias externas (backend y frontend), qué hace cada una, los ficheros de configuración y las variables de entorno. También la configuración de la PWA.
+
+---
+
+## 1. Dependencias del backend (Composer)
+
+### De producción (`require`)
+
+| Librería | Para qué la uso |
+|---|---|
+| **laravel/framework** | El framework completo (rutas, Eloquent, validación…). Es la base. |
+| **laravel/sanctum** | Autenticación por **tokens** (el login del SPA). |
+| **spatie/laravel-permission** | **Roles y permisos** (admin, artista, espectador). |
+| **symfony/brevo-mailer** | Enviar los **correos** por la API de Brevo (verificación, recordatorios, contraseña). |
+| **symfony/http-client** | Cliente HTTP que necesita Brevo para hablar con su API. |
+| **laravel/tinker** | Consola interactiva para probar código (desarrollo/depuración). |
+
+### De desarrollo (`require-dev`) — no van a producción
+
+| Librería | Para qué |
+|---|---|
+| **phpunit/phpunit** | Ejecutar los **tests** automáticos. |
+| **fakerphp/faker** | Generar datos falsos en las factories/tests. |
+| **mockery/mockery** | Simular objetos en los tests. |
+| **laravel/sail** | **Docker** para el entorno de desarrollo local. |
+| **laravel/pint** | Formateador de estilo de código. |
+| **laravel/pail** | Ver los logs en vivo durante el desarrollo. |
+| **nunomaduro/collision** | Mostrar los errores de consola de forma legible. |
+| **laravel/breeze** | Scaffolding de autenticación inicial (quedan restos sin usar; ver Informe 2). |
+
+---
+
+## 2. Dependencias del frontend (npm)
+
+### De producción (`dependencies`)
+
+| Librería | Para qué la uso |
+|---|---|
+| **react** + **react-dom** | La librería de interfaz. El núcleo de la SPA. |
+| **react-router-dom** | El **enrutado** (navegación entre páginas sin recargar). |
+| **leaflet** + **react-leaflet** | Los **mapas** (OpenStreetMap, gratis y sin clave). |
+| **qrcode.react** | Generar el **QR** del artista en el navegador. |
+
+> Nota: **`axios` está instalado pero NO se usa.** Toda la comunicación con la API va con `fetch` encapsulado en el hook `useAPI`. Es una dependencia que quedó de pruebas iniciales.
+
+### De desarrollo (`devDependencies`)
+
+| Librería | Para qué |
+|---|---|
+| **vite** | El **bundler** y servidor de desarrollo (rápido). |
+| **@vitejs/plugin-react** | Soporte de React en Vite. |
+| **vite-plugin-pwa** | Convierte la web en **PWA instalable** (genera el service worker y el manifest). |
+| **sass** | Compilar los estilos **SCSS**. |
+| **eslint** + plugins (`@eslint/js`, `eslint-plugin-react-hooks`, `eslint-plugin-react-refresh`, `globals`) | El **linter**: detecta errores y malas prácticas en el código. |
+| **@types/react**, **@types/react-dom** | Tipados para mejor autocompletado. |
+
+---
+
+## 3. Ficheros de configuración del backend (`config/`)
+
+| Fichero | Qué configura |
+|---|---|
+| `app.php` | Nombre, **idioma (español)**, zona horaria (Europe/Madrid), `frontend_url`, y el forzado de HTTPS en producción. |
+| `auth.php` | Los guards y el **broker de contraseñas** (recuperar contraseña). |
+| `cors.php` | Los **orígenes permitidos** para la API (nuestro frontend y local). |
+| `database.php` | Las conexiones de base de datos (usamos **PostgreSQL**). |
+| `mail.php` | Los "mailers"; aquí está dado de alta el de **Brevo**. |
+| `sanctum.php` | Configuración de los **tokens** de sesión. |
+| `permission.php` | Configuración de **Spatie** (roles/permisos). |
+| `services.php`, `cache.php`, `queue.php`, `session.php`, `filesystems.php`, `logging.php` | Configuración interna de servicios de Laravel. |
+
+---
+
+## 4. Variables de entorno (las que usamos de verdad)
+
+Los **secretos y la configuración por entorno** no están en el código, sino en variables de entorno (en local en `.env`, en producción en el panel de Railway):
+
+| Variable | Para qué |
+|---|---|
+| `APP_KEY` | Clave de cifrado de la app |
+| `APP_ENV` / `APP_DEBUG` | Entorno (production) y modo depuración (false en prod) |
+| `APP_URL` | URL del backend (Railway) — importante para las URLs firmadas |
+| `APP_TIMEZONE` / `APP_LOCALE` | Europe/Madrid / es |
+| `FRONTEND_URL` | URL del frontend (Vercel) — para redirecciones y enlaces de los correos |
+| `DB_CONNECTION` / `DB_URL` | PostgreSQL (la cadena de conexión de Neon) |
+| `MAIL_MAILER` (`brevo`) / `BREVO_KEY` | Envío de correos por Brevo |
+| `MAIL_FROM_ADDRESS` / `MAIL_FROM_NAME` | Remitente de los correos |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` / `ADMIN_NAME` | El usuario admin que crea el seeder de producción |
+
+> Regla de oro: **ningún secreto se sube a Git.** Si alguien clonara el repo, no tendría acceso a la base de datos ni al correo.
+
+---
+
+## 5. Configuración de la PWA (web instalable)
+
+La PWA se configura en `vite.config.js` con **vite-plugin-pwa**:
+
+- **`manifest`**: los datos de la app (nombre "Libitum", color de marca teal, fondo crema, e **iconos** de 192 y 512 px). Esto es lo que el navegador usa para el "Instalar".
+- **`registerType: 'autoUpdate'`**: los usuarios reciben **siempre la última versión** automáticamente, sin tener que limpiar caché.
+- El plugin genera en el build un **service worker** (`sw.js`) que cachea la "shell" de la app, y lo registra solo.
+
+Además:
+- En `index.html` añadí las meta tags de **theme-color** y de **apple-touch-icon** (para el "Añadir a inicio" de iPhone).
+- Un componente **`InstallButton`** muestra el botón "📲 Instalar" solo cuando la app se puede instalar (y da instrucciones en iOS).
+
+> Requisito que ya cumplimos: una PWA necesita **HTTPS**, que Vercel da por defecto.
+
+---
+
+## 6. Resumen
+
+- **Backend:** pocas dependencias y bien elegidas — Laravel + Sanctum (auth) + Spatie (roles) + Brevo (correo). Las de desarrollo (tests, Docker, linter) no van a producción.
+- **Frontend:** React + Router + Leaflet (mapas) + qrcode, con Vite como motor y vite-plugin-pwa para hacerla **instalable**.
+- **Configuración:** los ficheros de `config/` ajustan cada servicio; los **secretos viven en variables de entorno**, nunca en el código.
+
+> Siguiente: **Informe 6 — Batch / tareas programadas**, donde explico a fondo el comando de recordatorios y el cron.
+
+</script>
+
+<script type="text/markdown" class="report-src">
+# Informe 6 — Batch / tareas programadas
+
+> Este informe explica el **proceso automático** de la aplicación: el comando que envía los **recordatorios de eventos por email**, cómo decide a quién avisar, y cómo se ejecuta solo una vez al día (el "cron"). Es la parte que funciona "por su cuenta", sin que nadie pulse nada.
+
+---
+
+## 1. ¿Qué es un "batch" aquí?
+
+Un **batch** (o tarea programada) es un trozo de código que **no se dispara por una petición del usuario**, sino que se ejecuta **automáticamente cada cierto tiempo**. En Libitum tengo uno: **`reminders:send`**, que recuerda a la gente los eventos a los que se ha apuntado.
+
+Es un **comando de Artisan** (`app/Console/Commands/SendEventReminders.php`) que se puede lanzar a mano (`php artisan reminders:send`) o programado.
+
+---
+
+## 2. Qué hace, paso a paso
+
+```mermaid
+flowchart TD
+    A[Se ejecuta reminders:send] --> B[Calcula la ventana:<br/>de ahora a +48h]
+    B --> C[Busca eventos en esa ventana<br/>con asistentes que tengan remind_me]
+    C --> D{¿Hay eventos?}
+    D -->|No| E[No hace nada y termina]
+    D -->|Sí| F[Por cada asistente con recordatorio:<br/>envía el email]
+    F --> G[Informa: 'Recordatorios enviados: N']
+```
+
+1. **Calcula una ventana de tiempo:** desde *ahora* hasta *dentro de 48 horas*.
+2. **Busca los eventos** cuya fecha cae en esa ventana **y** que tengan al menos un asistente con el recordatorio activado (`remind_me = true` en la tabla `event_user`).
+3. **Por cada asistente** con recordatorio, le **envía el email** (la plantilla de marca, ver Informe 3/5).
+4. Cuenta cuántos ha enviado y lo informa.
+
+> Eficiencia: cargo los asistentes filtrados con `with()` (eager loading) para no hacer una consulta por cada evento dentro del bucle. Eso evita el típico problema **N+1** de consultas.
+
+---
+
+## 3. La ventana de 48h: por qué avisa "día antes + mismo día"
+
+Este es el detalle más fino del batch. Como el comando se ejecuta **una vez al día**, una ventana de **48 horas** hace que **cada evento entre en dos ejecuciones seguidas**:
+
+```mermaid
+flowchart LR
+    subgraph Evento el día D
+    end
+    R1[Ejecución del día D-1<br/>ventana cubre hasta D+1] -->|avisa| A1["Aviso: 'mañana'"]
+    R2[Ejecución del día D<br/>ventana cubre hasta D+2] -->|avisa| A2["Aviso: 'hoy'"]
+```
+
+- En la ejecución del **día anterior**, el evento está dentro de las próximas 48h → manda el aviso (*"tu evento es mañana"*).
+- En la ejecución del **mismo día**, sigue dentro de la ventana → manda otro aviso (*"tu evento es hoy"*).
+
+Así el asistente recibe **dos recordatorios**: uno con antelación para prepararse y otro el día del evento. El correo dice **"hoy" o "mañana"** según la fecha real (no "mañana" siempre).
+
+> Si la ventana fuera de 24h, según la hora a la que corriese el cron, a veces avisaría con poco margen. Con 48h garantizamos el aviso del día antes.
+
+---
+
+## 4. ¿Cómo se ejecuta solo? (el cron)
+
+Hay **dos niveles** que conviene no confundir:
+
+### a) La definición en el código (`routes/console.php`)
+```php
+Schedule::command('reminders:send')->dailyAt('09:00');
+```
+Esto **declara** que el comando debería correr a las 9:00. Pero el programador de Laravel (`schedule:run`) necesita que **algo lo despierte cada minuto**.
+
+### b) Lo que de verdad lo dispara en producción: el **cron de Railway**
+En Railway tengo un **servicio de cron** que ejecuta directamente `php artisan reminders:send` **una vez al día** (a las 07:00 UTC ≈ 09:00 en España). Railway se encarga de "despertarlo"; no hace falta un proceso corriendo todo el rato.
+
+```mermaid
+flowchart LR
+    Cron[Cron de Railway<br/>1 vez al día] --> Cmd[php artisan reminders:send]
+    Cmd --> DB[(PostgreSQL/Neon)]
+    Cmd --> Brevo[Brevo envía los emails]
+```
+
+> Lanzarlo a mano: también puedo ejecutarlo en cualquier momento (botón **"Run now"** en el servicio de cron de Railway, o `php artisan reminders:send` en local). Muy útil para demostrarlo en directo.
+
+---
+
+## 5. A dónde llegan los correos
+
+- **En desarrollo** (`MAIL_MAILER=log`): el correo NO se envía de verdad, se escribe en `storage/logs/laravel.log`. Así pruebo sin spamear.
+- **En producción** (`MAIL_MAILER=brevo`): se envía de verdad por la **API de Brevo**.
+
+> Importante: el servicio del cron en Railway necesita las **mismas variables** que el backend (base de datos y Brevo). Si no, no encontraría ni los datos ni el correo.
+
+---
+
+## 6. Detalle técnico que tuve que resolver
+
+Al construir la consulta tuve un bug: dentro de `whereHas('attendees', ...)`, el método `wherePivot('remind_me', true)` **no generaba bien el SQL** (producía una condición incorrecta). La solución fue referenciar la columna de la tabla pivote **directamente**: `where('event_user.remind_me', true)`. (Más en el Informe 9.)
+
+---
+
+## 7. Está probado
+
+El batch tiene **tests automáticos** (Informe 7) que comprueban que:
+- Solo avisa a los asistentes con `remind_me` activado (no a los que lo tienen apagado).
+- Avisa de un evento dentro de la ventana de 48h.
+- NO avisa de eventos fuera de la ventana.
+
+---
+
+## 8. Resumen
+
+- Hay **un proceso automático**: `reminders:send`, que recuerda los eventos próximos por email.
+- Avisa de los eventos de las **próximas 48h** → cada asistente recibe un aviso el **día antes** y otro el **mismo día**.
+- Se ejecuta solo una vez al día gracias al **cron de Railway** (no a un proceso permanente).
+- En producción envía por **Brevo**; en desarrollo lo escribe en el log.
+
+> Siguiente: **Informe 7 — Tests**, donde explico la batería de pruebas automáticas que protege todo esto.
+
+</script>
+
+<script type="text/markdown" class="report-src">
+# Informe 7 — Tests
+
+> Este informe explica las **pruebas automáticas** del proyecto: qué son, cómo funcionan, qué cubren y por qué dan confianza para cambiar el código sin romper nada. La batería tiene **44 tests** que pasan en verde.
+
+---
+
+## 1. ¿Qué son y por qué importan?
+
+Un **test automático** es código que **prueba otro código**: simula una acción (por ejemplo, "un artista crea un evento") y comprueba que el resultado es el esperado. Se ejecutan todos de golpe con un comando.
+
+¿Para qué sirven? Para **cambiar el proyecto con red de seguridad**: si toco algo y rompo otra cosa sin querer, un test falla y me avisa al instante, antes de que llegue a producción. Varios de mis tests nacieron justo de **bugs reales** que arreglé y quise "blindar" para que no volvieran (ver Informe 9).
+
+Uso **PHPUnit** (el estándar de Laravel). Son **feature tests**: prueban la API "de fuera adentro", como lo haría un usuario real.
+
+---
+
+## 2. Cómo funcionan por dentro (la maquinaria)
+
+Todos los tests comparten el mismo patrón, que conviene entender:
+
+```mermaid
+flowchart LR
+    S[setUp: BD limpia + seeders] --> P[Simula una petición HTTP a la API]
+    P --> CK[Comprueba la respuesta y la base de datos]
+    CK --> R[RefreshDatabase revierte todo]
+```
+
+Las piezas clave:
+
+| Pieza | Qué hace |
+|---|---|
+| **RefreshDatabase** | Envuelve cada test en una transacción que se **revierte al terminar**: la base de datos queda limpia para el siguiente. Nunca se acumulan datos. |
+| **Seeders en `setUp`** | Antes de cada test se siembran roles, permisos y estados (para que existan al probar). |
+| **Factories** | Generan datos falsos rápido: `User::factory()->create()`, `Event::factory()->create([...])`. |
+| **`actingAs($user, 'sanctum')`** | Autentica al usuario **sin pasar por el login** (simula que ya tiene token). |
+| **`Mail::fake()` / `Notification::fake()`** | Interceptan los correos: comprueban que se "enviaron" **sin enviarlos de verdad**. |
+
+> Detalle importante: los tests corren contra **PostgreSQL** (igual que producción), no contra SQLite, porque uso consultas específicas de Postgres que en otra base no se comportarían igual.
+
+---
+
+## 3. Qué cubre cada bloque de tests
+
+| Fichero (tests) | Qué comprueba |
+|---|---|
+| **AuthTest** (5) | Registro crea usuario **sin verificar** y sin token; login **bloqueado** si no verificado; login OK si verificado; el enlace del correo verifica la cuenta; el reenvío manda la notificación |
+| **PasswordResetTest** (4) | "Olvidé mi contraseña": envía el correo, cambia la clave con token válido, **rechaza** token inválido y exige mínimo 8 caracteres |
+| **Auth/PasswordUpdateTest** (2) | Cambiar contraseña estando logueado (pide la actual) |
+| **EventTest** (5) | Crear evento (solo artista), espectador no puede, sin token no puede, no puedes editar el evento de otro, borrar el tuyo |
+| **EventPricingTest** (2) | La **donación voluntaria** fuerza precio 0; el precio fijo se guarda |
+| **InscriptionTest** (5) | Apuntarse, no dos veces (409), no si está lleno (409), y que el flag **`signed_up`** sale bien al ver el evento (logueado / invitado) |
+| **RemindersTest** (3) | El **batch** solo avisa a quien tiene `remind_me`, avisa dentro de la ventana de 48h y NO fuera de ella |
+| **FollowTest** (2) | Seguir y dejar de seguir a un artista |
+| **FeedTest** (3) | El feed no incluye borradores, el modo "siguiendo" solo muestra a quien sigues, y requiere sesión |
+| **ArtistListTest** (3) | El listado de artistas, la búsqueda **insensible a mayúsculas** y el flag `is_following` |
+| **ProfileTest** (4) | Cambio de contraseña (rechaza corta / acepta válida) y validación del **Bizum** (rechaza inválido / guarda válido) |
+| **AdminTest** (4) | El admin lista usuarios, cambia roles y borra eventos; un no-admin **no entra** |
+| **ExampleTest** (1+1) | Tests de ejemplo de la plantilla (la app responde) |
+
+---
+
+## 4. Ejemplo concreto
+
+Así se lee un test (el de "un espectador NO puede crear eventos"):
+
+```php
+$spectator = $this->makeSpectator();
+
+$response = $this->actingAs($spectator, 'sanctum')
+    ->postJson('/api/events', [ ...datos... ]);
+
+$response->assertForbidden();                       // espera un 403
+$this->assertDatabaseMissing('events', [...]);      // y que NO se guardó
+```
+
+Se lee casi como una frase: "actuando como espectador, intento crear un evento → debe devolver 403 y no guardarse".
+
+---
+
+## 5. Honestidad sobre la cobertura
+
+Para que quede claro y no me pillen:
+- Los 44 tests cubren el **backend (la API)**, que es donde está la lógica importante (seguridad, reglas de negocio, el batch…).
+- El **frontend NO tiene tests automáticos**: se ha probado **a mano** y se apoya en **ESLint** (el linter) para detectar errores de código. Añadir tests de frontend (con Vitest/React Testing Library) es una **mejora pendiente** reconocida (Informe 12).
+- No hay apenas "unit tests" puros: priorizo los **feature tests**, que prueban el comportamiento real de la API de punta a punta (más valor por test para un proyecto de este tamaño).
+
+---
+
+## 6. Cómo se ejecutan
+
+```bash
+php artisan test            # toda la batería
+php artisan test --filter=AuthTest   # solo un fichero
+```
+
+Resultado actual: **44 passed (103 assertions)**.
+
+---
+
+## 7. Resumen
+
+- **44 tests automáticos** que prueban la API de punta a punta y pasan en verde.
+- Cada test parte de una **base de datos limpia** (RefreshDatabase) y usa **factories** y **fakes** de correo.
+- Cubren **autenticación, seguridad, reglas de negocio, el batch y el admin**.
+- Varios nacieron de **bugs reales** para que no se repitan.
+- Cobertura honesta: backend sólido; frontend probado a mano (tests de frontend = mejora pendiente).
+
+> Siguiente: **Informe 8 — Despliegue**, donde explico cómo se publica todo (Railway, Vercel, Neon, Brevo) y el proceso de puesta en producción.
+
+</script>
+
+<script type="text/markdown" class="report-src">
+# Informe 8 — Despliegue
+
+> Este informe explica **cómo se publica la aplicación en internet** y cómo está montada en producción: dónde vive cada parte (frontend, backend, base de datos, correo), cómo se despliega sola al hacer `git push`, y los detalles importantes (Procfile, regiones, variables, persistencia de imágenes).
+
+---
+
+## 1. La arquitectura del despliegue
+
+Libitum está repartida en **cuatro servicios**, cada uno en su sitio:
+
+```mermaid
+graph TD
+    GH[GitHub<br/>repositorio] -->|push a develop| V[Vercel<br/>FRONTEND]
+    GH -->|push a develop| R[Railway<br/>BACKEND + CRON]
+    R -->|SQL| N[(Neon<br/>BASE DE DATOS)]
+    R -->|API HTTP| B[Brevo<br/>CORREO]
+    U[Usuario] -->|HTTPS| V
+    V -->|API REST| R
+```
+
+| Parte | Dónde | Por qué |
+|---|---|---|
+| **Frontend** (React) | **Vercel** | CDN global, despliegue automático, ideal para SPAs estáticas |
+| **Backend** (Laravel) | **Railway** | Despliega apps + base de datos fácil, con cron |
+| **Base de datos** (PostgreSQL) | **Neon** | Postgres gestionado con capa gratis |
+| **Correo** | **Brevo** | Envío por API (no SMTP) |
+
+Todo va por **HTTPS** (lo dan Vercel y Railway), que además es **requisito** para la PWA y las URLs firmadas.
+
+---
+
+## 2. Backend en Railway
+
+El repositorio tiene `backend/` y `frontend/` juntos (monorepo), así que en Railway configuro **Root Directory = `backend`** para que solo construya esa parte. Railway detecta que es PHP/Laravel (con **Nixpacks**) e instala las dependencias de Composer.
+
+### El `Procfile` (qué se ejecuta al arrancar)
+```
+web: php artisan migrate --force
+   && php artisan db:seed --class=ProductionSeeder --force
+   && php artisan config:cache && php artisan event:cache && php artisan view:cache
+   && php artisan storage:link --force
+   && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
+```
+
+Paso a paso:
+1. **`migrate --force`**: aplica las migraciones (crea/actualiza las tablas) en cada despliegue.
+2. **`db:seed ProductionSeeder`**: siembra lo imprescindible (estados, roles, categorías, admin). Es idempotente: no duplica.
+3. **`config:cache`, `event:cache`, `view:cache`**: cachean la configuración para que cada petición arranque **más rápido**.
+4. **`storage:link`**: crea el enlace para servir las imágenes subidas.
+5. **`serve`**: arranca el servidor en el puerto que indica Railway.
+
+### Detalles de producción
+- **Región: Europa (Ámsterdam)**, para estar cerca de la base de datos (Neon en Frankfurt) y de los usuarios → menos latencia.
+- **Volumen persistente**: como el disco de Railway es "efímero" (se borra en cada despliegue), monté un **volumen** en `storage/app/public` para que las **imágenes subidas no se pierdan**.
+
+> Nota honesta: uso `php artisan serve`, que es un servidor de **desarrollo** (atiende de una en una). Para el piloto y la presentación va bien; para tráfico alto habría que cambiarlo por un servidor de producción (php-fpm/Octane). Ver Informe 12.
+
+---
+
+## 3. El servicio del cron (recordatorios)
+
+Para el batch (Informe 6) tengo un **segundo servicio** en Railway, del mismo repo y Root Directory `backend`, pero con:
+- **Comando de arranque:** `php artisan reminders:send`
+- **Cron Schedule:** una vez al día (07:00 UTC ≈ 09:00 España)
+- Botón **"Run now"** para lanzarlo a mano (útil para la demo).
+
+Necesita las **mismas variables** que el backend (base de datos y correo).
+
+---
+
+## 4. Frontend en Vercel
+
+- **Root Directory = `frontend`** (igual que en Railway, por el monorepo). Vercel detecta **Vite** y hace `npm run build` → genera `dist/`.
+- **`vercel.json`** con una regla de **rewrite**: cualquier ruta (`/event/5`, `/artistas`…) sirve el `index.html`. Esto es necesario en una **SPA**: el enrutado lo lleva React en el cliente, así que todas las URLs deben cargar la misma página base.
+- **Variable de entorno:** `VITE_API_URL` apunta al backend de Railway (así el frontend sabe a dónde llamar).
+
+---
+
+## 5. Base de datos (Neon) y correo (Brevo)
+
+- **Neon**: PostgreSQL gestionado. Le doy al backend la cadena de conexión por la variable `DB_URL`. Está en la región de **Frankfurt** (Europa).
+- **Brevo**: el backend manda los correos por su **API** con una clave (`BREVO_KEY`) y un remitente verificado.
+
+---
+
+## 6. Despliegue continuo: "push y listo"
+
+No despliego a mano: está conectado a GitHub.
+
+```mermaid
+flowchart LR
+    C[git push a develop] --> R[Railway redespliega<br/>backend]
+    C --> V[Vercel redespliega<br/>frontend]
+    R --> L[En vivo en minutos]
+    V --> L
+```
+
+Cada vez que subo cambios a la rama `develop`, **Railway y Vercel se actualizan solos** en un par de minutos. Si algo falla en el build, lo veo en sus paneles (logs).
+
+---
+
+## 7. Variables de entorno en producción (resumen)
+
+| Servicio | Variables clave |
+|---|---|
+| **Railway (backend + cron)** | `APP_KEY`, `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL`, `APP_TIMEZONE`, `FRONTEND_URL`, `DB_CONNECTION=pgsql`, `DB_URL`, `MAIL_MAILER=brevo`, `BREVO_KEY`, `MAIL_FROM_*`, `ADMIN_*` |
+| **Vercel (frontend)** | `VITE_API_URL` |
+
+> Los secretos solo viven en estos paneles, **nunca en el código**.
+
+---
+
+## 8. Resumen
+
+- **4 servicios**: frontend (Vercel), backend + cron (Railway), base de datos (Neon), correo (Brevo), todos por HTTPS.
+- El backend usa **Nixpacks + Procfile** (migra, siembra, cachea y arranca) con **región EU** y **volumen** para que las imágenes persistan.
+- El frontend es estático en Vercel con **rewrites de SPA**.
+- **Despliegue continuo**: `git push` → todo se actualiza solo.
+- Limitación conocida: el servidor del backend (`artisan serve`) es de desarrollo; escalar es una mejora pendiente (Informe 12).
+
+> Siguiente: **Informe 9 — Problemas encontrados y soluciones**, donde cuento los bugs y decisiones técnicas más interesantes del proyecto.
+
+</script>
+
+<script type="text/markdown" class="report-src">
+# Informe 9 — Problemas encontrados y soluciones
+
+> Este informe recoge los **problemas reales** que surgieron durante el desarrollo y el despliegue, y **cómo los resolví**. Incluye un par de **cambios de tecnología** que tomé por buen criterio. Es la parte que demuestra que entiendo el proyecto de verdad: no solo qué hace, sino **por qué algunas cosas son como son**.
+
+Los agrupo en cuatro bloques: cambios de tecnología, problemas de PostgreSQL, problemas de despliegue/producción y bugs de lógica.
+
+---
+
+## 1. Cambios de tecnología (decisiones de criterio)
+
+### 1.1. De SMTP (Gmail) a Brevo (API)
+- **Síntoma:** al enviar correos en producción, la petición se quedaba colgada **30 segundos** y fallaba (`Connection timeout`).
+- **Causa:** **Railway bloquea las conexiones SMTP salientes** (puertos 465/587), una protección anti-spam típica de los hostings. Gmail por SMTP era imposible.
+- **Solución:** cambiar a **Brevo enviando por su API HTTP** (puerto 443, que nunca se bloquea). Implementé el transporte con `symfony/brevo-mailer`.
+- **Lección:** en un PaaS, mejor enviar correos por **API HTTP** que por SMTP.
+
+### 1.2. De Google Maps a OpenStreetMap
+- **Síntoma:** el mapa daba **403 Forbidden** y el buscador de direcciones no funcionaba.
+- **Causa:** la nueva **Places API de Google exige facturación** (tarjeta), aunque sea con capa gratis.
+- **Solución:** migrar a **OpenStreetMap** con **Leaflet** (mapas) y **Nominatim** (búsqueda de direcciones): **gratis, sin clave de API y sin tarjeta**. El "Cómo llegar" sigue abriendo Google Maps con un enlace normal (eso no necesita clave).
+- **Lección:** se puede tener mapas profesionales **sin coste ni dependencia de pago**.
+
+---
+
+## 2. Problemas específicos de PostgreSQL
+
+### 2.1. El operador `?` chocaba con los parámetros de la consulta
+- **Síntoma:** error 500 al cargar el feed.
+- **Causa:** PostgreSQL usa `?` como **operador JSON**, pero PDO usa `?` como **marcador de parámetro**. En una consulta con `whereRaw` chocaban.
+- **Solución:** reescribir la consulta usando aritmética de intervalos (`INTERVAL`) y `NOW()` directamente, evitando el conflicto.
+
+### 2.2. `wherePivot` dentro de `whereHas` generaba SQL roto
+- **Síntoma:** el batch de recordatorios no encontraba a los asistentes.
+- **Causa:** dentro de `whereHas('attendees', ...)`, el método `wherePivot('remind_me', true)` **no genera bien el SQL** (producía una condición inválida).
+- **Solución:** referenciar la columna de la tabla pivote **directamente**: `where('event_user.remind_me', true)`.
+
+### 2.3. La búsqueda de artistas era sensible a mayúsculas
+- **Síntoma:** buscar "mozart" no encontraba "Mozart".
+- **Causa:** el operador `LIKE` de PostgreSQL **distingue mayúsculas**.
+- **Solución:** usar `ILIKE` (la versión insensible de Postgres). Lo blindé con un test.
+
+---
+
+## 3. Problemas de despliegue y producción
+
+### 3.1. Las variables de diseño desaparecían en producción
+- **Síntoma:** en producción la web se veía "sin estilos" (todo descolocado), pero en local bien.
+- **Causa:** el fichero de **tokens de diseño** (`:root` con los colores y fuentes) era un **CSS Module** (`index.module.scss`) importado solo "por efecto". El build de producción se lo **cargaba por "tree-shaking"** (creía que era código muerto), dejando todas las variables sin definir.
+- **Solución:** renombrarlo a **`index.scss`** (hoja global, no CSS Module), que el build nunca elimina.
+
+### 3.2. Las imágenes subidas se borraban
+- **Síntoma:** los avatares y portadas aparecían rotos al cabo de un rato.
+- **Causa:** el disco de Railway es **efímero**: se borra en cada despliegue/reinicio.
+- **Solución:** montar un **volumen persistente** en `storage/app/public` para que los ficheros sobrevivan.
+
+### 3.3. La base de datos no conectaba (caía en SQLite)
+- **Síntoma:** en producción, error de conexión a una base SQLite que no existe.
+- **Causa:** Laravel 12 lee la variable **`DB_URL`**, no `DATABASE_URL` (que era la que había puesto). Sin ella, caía en la conexión por defecto (sqlite).
+- **Solución:** usar el nombre correcto, `DB_URL`, con la cadena de Neon.
+
+### 3.4. El enlace de verificación no validaba (proxy de Railway)
+- **Síntoma:** al pulsar el enlace del correo, salía un error de "firma inválida".
+- **Causa:** Railway sirve detrás de un **proxy**; Laravel veía la petición como `http` cuando la URL firmada se generó en `https` → la firma no coincidía.
+- **Solución:** **forzar HTTPS** al generar URLs (`URL::forceScheme('https')`) y **confiar en el proxy** (`trustProxies`) en producción.
+
+### 3.5. El cron usaba SQLite en vez de la base real
+- **Síntoma:** el batch de recordatorios fallaba con error de SQLite.
+- **Causa:** el **servicio del cron** en Railway no tenía las variables de la base de datos → caía en sqlite.
+- **Solución:** darle al servicio del cron las **mismas variables** que el backend.
+
+### 3.6. La imagen al compartir no salía
+- **Síntoma:** al compartir un enlace, no aparecía la imagen de previsualización.
+- **Causa (doble):** primero, las etiquetas apuntaban a `og-image.png` pero el archivo se llamaba `og-image.jpg`; segundo, las plataformas (WhatsApp/Facebook) **cachean** la previsualización.
+- **Solución:** corregir las etiquetas al nombre real y forzar el re-escaneo con el debugger de Facebook.
+
+---
+
+## 4. Bugs de lógica
+
+### 4.1. Salía "apuntarme" aunque ya estuvieras inscrito
+- **Síntoma:** al ver un evento al que ya iba, salía el botón "apuntarme" y, al pulsarlo, fallaba.
+- **Causa:** la ruta de ver el evento es **pública**, y usaba `Auth::id()`, que en una ruta pública es siempre `null` → el flag `signed_up` salía falso.
+- **Solución:** resolver al usuario por su **token** aunque la ruta sea pública (`$request->user('sanctum')`). Lo blindé con dos tests.
+
+### 4.2. El recordatorio decía "mañana" siempre
+- **Síntoma:** el correo del batch ponía "tu evento es mañana" aunque fuera hoy.
+- **Causa:** el texto estaba fijo, pero la ventana de 48h hace que a veces el evento sea **hoy**.
+- **Solución:** calcular "**hoy**" o "**mañana**" según la fecha real del evento.
+
+---
+
+## 5. Qué me llevo de todo esto
+
+- Muchos problemas no eran del código, sino del **entorno de producción** (proxy, disco efímero, bloqueo de SMTP, nombres de variables). Aprendí a **diagnosticar mirando los logs**, no a base de prueba y error.
+- Tomé **decisiones de cambiar de tecnología** cuando la elegida no encajaba (SMTP→API, Google Maps→OpenStreetMap), priorizando que fuera **gratis, sin fricción y mantenible**.
+- Cada bug importante lo **cerré con un test** para que no vuelva.
+
+> Siguiente: **Informe 10 — Decisiones de funcionalidad**, donde explico los cambios de rumbo en lo que hace la app y cómo se aplicaron.
+
+</script>
+
+<script type="text/markdown" class="report-src">
+# Informe 10 — Decisiones de funcionalidad
+
+> Este informe explica las **decisiones sobre lo que hace la app** y los cambios de rumbo que fui tomando: por qué la aplicación funciona como funciona y cómo apliqué cada decisión. No es el "cómo está hecho por dentro" (eso son los informes técnicos), sino **el porqué de las funcionalidades**.
+
+Las agrupo por área.
+
+---
+
+## 1. Acceso y entrada de usuarios
+
+### 1.1. Landing pública en vez de obligar a registrarse
+- **Decisión:** un visitante que no tiene cuenta ve una **página de presentación (Landing)** que le invita a registrarse, en lugar de mandarlo directo al login.
+- **Por qué:** obligar a iniciar sesión antes de ver nada espanta a la gente. Una carta de presentación convierte mejor.
+- **Cómo:** la ruta raíz (`/`) decide: si estás logueado, ves el panel **Home**; si no, la **Landing**.
+
+### 1.2. Verificación de correo obligatoria
+- **Decisión:** al registrarse hay que **confirmar el correo** antes de poder entrar.
+- **Por qué:** evita cuentas falsas y correos inventados, y asegura que los recordatorios lleguen a buzones reales.
+- **Cómo:** al registrar no se da token; se manda un correo con enlace firmado; el login bloquea a los no verificados.
+
+### 1.3. Recuperar contraseña por correo
+- **Decisión:** añadir el flujo "olvidé mi contraseña" (cambiarla con un enlace, sin saber la antigua).
+- **Por qué:** es básico en cualquier app real; sin esto, quien olvida su clave se queda fuera para siempre.
+
+---
+
+## 2. El modelo de eventos
+
+### 2.1. Estado del evento automático
+- **Decisión:** el artista **solo elige borrador o publicado**; que esté "en directo" o "terminado" lo **calcula la app** a partir de la fecha y la duración.
+- **Por qué:** pedirle al artista que marque a mano "ahora estoy en directo" es poco realista (está tocando, no mirando el móvil). Mejor que sea automático.
+- **Cómo:** un atributo calculado (`effective_status_name`) en el modelo Event (ver Informe 2).
+
+### 2.2. Cancelar y eliminar eventos
+- **Decisión:** el artista puede **cancelar** un evento publicado (con un botón) y **eliminar** sus eventos.
+- **Por qué:** los planes cambian; necesitaba dar control real sobre sus propios eventos.
+
+### 2.3. Duración del evento
+- **Decisión:** añadir un campo de **duración** (de horas a días).
+- **Por qué:** es lo que permite calcular cuándo un evento pasa de "en directo" a "terminado".
+
+---
+
+## 3. Monetización pensada para el artista
+
+> El planteamiento completo de pagos está en el Informe 14; aquí solo las **decisiones funcionales**.
+
+### 3.1. Donación voluntaria en vez de "precio 0"
+- **Decisión:** además de poner precio, el artista puede marcar el evento como **"donación voluntaria"** (entrada gratis, pasar la gorra).
+- **Por qué:** obligar a poner "0 €" no transmite bien que es gratis y que puedes colaborar. "Donación voluntaria" es el modelo natural del artista de calle.
+
+### 3.2. Bizum como alternativa a los enlaces de pago
+- **Decisión:** el artista puede poner su **Bizum** (su móvil), no solo un enlace de PayPal/Ko-fi.
+- **Por qué:** no todos tienen PayPal o Ko-fi, y esas plataformas cobran comisión. El Bizum es directo y sin comisión (lo más usado en España). Se hace bajo su responsabilidad (el número es público).
+
+### 3.3. Recomendaciones y guía de pagos
+- **Decisión:** avisar al artista de qué plataforma le conviene (recomendar **Ko-fi**, avisar de las comisiones de PayPal y del **mínimo de 1 €**) y crear una **guía de pagos** completa.
+- **Por qué:** quiero que el artista **gane más**, no solo darle un campo vacío.
+
+---
+
+## 4. Descubrir y socializar
+
+### 4.1. Feed "Para Ti"
+- **Decisión:** un feed con los eventos de los artistas que sigues (y un modo de descubrimiento).
+- **Por qué:** es el corazón del uso diario: abrir la app y ver qué hay.
+
+### 4.2. Página de explorar artistas
+- **Decisión:** añadir una página para **buscar artistas, seguirlos y ver su perfil**.
+- **Por qué:** faltaba la pieza para **descubrir gente nueva** y construir la comunidad. Sin ella solo podías seguir a quien ya conocías.
+
+### 4.3. Buscador de eventos público
+- **Decisión:** que buscar eventos sea **público** (sin sesión).
+- **Por qué:** para que cualquiera pueda descubrir eventos antes de registrarse.
+
+---
+
+## 5. Experiencia móvil y "modo app"
+
+### 5.1. Convertir la web en PWA (instalable)
+- **Decisión:** que los usuarios puedan **instalar Libitum** en el móvil como una app.
+- **Por qué:** el público es gente en la calle, en eventos, todo desde el móvil. Un icono en la pantalla de inicio que abre a pantalla completa es mucho más cómodo y profesional.
+
+### 5.2. Compartir el evento (no la ubicación)
+- **Decisión:** el botón de compartir comparte el **enlace público del evento**, no la ubicación.
+- **Por qué:** la página del evento es pública y desde ahí ya se accede al mapa, así que compartir el evento entero tiene más sentido y difunde más.
+
+### 5.3. Mapa del feed no interactivo
+- **Decisión:** en el feed, el mini-mapa es **fijo** (no se arrastra ni hace zoom).
+- **Por qué:** al hacer scroll en el móvil, tocar el mapa sin querer "secuestraba" el desplazamiento. Mejor que sea solo una vista previa; para llegar, el botón "Cómo llegar".
+
+---
+
+## 6. Administración
+
+- **Decisión:** el admin **no tiene perfil público** que ver/editar (se le quitó del menú).
+- **Por qué:** un administrador no es un artista ni un espectador; tener un perfil social no tiene sentido para su rol.
+
+---
+
+## 7. Resumen
+
+Las decisiones de funcionalidad siguen un hilo claro: **pensar en el uso real**.
+- Para el **visitante**: que pueda ver y descubrir antes de registrarse (Landing, buscar público).
+- Para el **artista**: control real de sus eventos (estado automático, cancelar/eliminar) y cobrar de la forma que más le conviene (donación voluntaria, Bizum, guía de pagos).
+- Para el **público**: descubrir (feed, explorar artistas) y usarlo cómodo en el móvil (PWA, compartir, mapa que no estorba).
+
+> Siguiente: **Informe 11 — Diseño y experiencia de usuario**, donde explico las decisiones visuales y de UX (la paleta, la tipografía, los detalles de interacción).
+
+</script>
+
+<script type="text/markdown" class="report-src">
+# Informe 11 — Diseño y experiencia de usuario
+
+> Este informe explica las **decisiones visuales y de interacción**: por qué la app se ve y se usa como se ve. No es código (eso está en el Informe 4), sino el **criterio de diseño** detrás de la interfaz.
+
+---
+
+## 1. La idea de diseño: artístico pero profesional
+
+El objetivo era una interfaz **original y viva**, con "efecto wow", que **no pareciera una web genérica más**, pero **sin perder profesionalidad**. Como Libitum es de arte callejero y música en vivo, el diseño tira de un estilo **editorial**: tipografía grande, bloques de color, alto contraste y un aire de cartel/fanzine.
+
+Un punto clave: que la marca se **reconozca por su color corporativo (el teal)**. Es el hilo que une toda la app.
+
+---
+
+## 2. Sistema de diseño (tokens)
+
+Para que todo sea coherente, defino unas **variables de diseño** en `index.scss` (`:root`). Todos los componentes las usan, así que la identidad es uniforme y cambiar la paleta es tocar **un solo sitio**.
+
+### Paleta
+| Token | Valor | Uso |
+|---|---|---|
+| `--color-primary` | **`#1a7d82`** (teal vivo) | Color corporativo, botones, acentos |
+| `--color-accent` | **`#ff8a5b`** (coral/salmón) | Contraste vivo, detalles, donación |
+| `--bg-main` | **`#f4efe3`** (crema cálido) | Fondo de toda la app |
+| `--text-primary` | **`#16181a`** (casi negro) | Texto principal |
+
+> La combinación **crema + teal + salmón** da ese aire cálido y artístico, lejos del típico "blanco + azul corporativo".
+
+### Tipografía
+- **Syne** (display): la fuente de los **títulos**, con carácter, en mayúsculas y tamaños grandes → el "efecto cartel".
+- **Inter** (body): la fuente del **texto normal**, muy legible.
+
+### Forma
+- **Radios** definidos (8 / 12 / 18 / 24 px y "pill" para botones redondeados) → esquinas suaves y consistentes.
+- Sombras suaves y bordes definidos según el elemento.
+
+---
+
+## 3. Decisiones de experiencia de usuario (UX)
+
+Más allá de lo visual, cuidé los **detalles de interacción** que hacen que se sienta pulida:
+
+| Detalle | Decisión | Por qué |
+|---|---|---|
+| **Botón "Volver" siempre visible** | Con variante clara para fondos oscuros | Que el usuario nunca se sienta "atrapado" en una pantalla |
+| **Mensajes (toasts)** | Avisos flotantes con color/icono según el tipo, animación de entrada/salida y barra de progreso, 5 s | Feedback claro de qué ha pasado, sin cortar la navegación |
+| **Errores en español** | Nunca mensajes técnicos ("HTTP 500"); siempre texto claro | Que cualquiera entienda qué falló |
+| **Estados de carga** | Loaders y "esqueletos" mientras llegan los datos | Que no parezca que la app se ha colgado |
+| **Actualización optimista** | Likes, seguir, apuntarse cambian al instante y se revierten si fallan | Sensación de rapidez |
+| **Título que se adapta** | Si el título del evento es muy largo, **encoge la letra** en vez de partirse feo | Que siempre se lea bien |
+| **Ojo en las contraseñas** | Botón para mostrar/ocultar lo escrito | Comodidad al teclear |
+| **Mapa del feed no interactivo** | Vista previa fija que no estorba el scroll | Mejor experiencia en móvil |
+| **Red de seguridad (ErrorBoundary)** | Si algo revienta, aviso amable con botón de recargar | Nunca una pantalla en blanco |
+
+---
+
+## 4. Responsive y "mobile-first"
+
+El público usa el móvil, así que **todo está pensado para que funcione bien en pantallas pequeñas**:
+- Uso `dvh` (altura real del visor) para que no se corten cosas con la barra del navegador móvil.
+- Tamaños fluidos con `clamp()` (las fuentes y espacios se adaptan al ancho).
+- Campos que se **apilan** en móvil para que no se solapen (ej. duración y visibilidad del evento).
+- El menú colapsa en un **desplegable** anclado a la derecha.
+- Y, como remate, la app es **instalable (PWA)** y se abre a pantalla completa como una app nativa.
+
+---
+
+## 5. Consistencia y mantenibilidad
+
+- **CSS Modules**: cada componente tiene sus estilos encapsulados (no chocan con los de otros).
+- **Tokens de diseño**: todos beben de las mismas variables, así que la identidad es coherente en toda la app y los cambios globales son fáciles.
+- Componentes reutilizables para los patrones repetidos (botones, tarjetas, loaders, modales de confirmación…), en vez de copiar y pegar.
+
+---
+
+## 6. Accesibilidad (lo básico bien hecho)
+
+- Textos alternativos en imágenes, etiquetas en los formularios, y atributos `aria-*` donde aporta.
+- Respeto a `prefers-reduced-motion`: si el usuario tiene desactivadas las animaciones, se reducen.
+- Contraste cuidado entre texto y fondo para que se lea bien.
+
+---
+
+## 7. Resumen
+
+- Diseño **editorial, vivo y reconocible** por su **teal corporativo**, con crema + salmón y tipografía Syne/Inter.
+- Un **sistema de tokens** que mantiene todo coherente y fácil de cambiar.
+- Muchos **detalles de UX** (toasts, loaders, errores en español, optimismo, título adaptable, ojo de contraseña…) que hacen que se sienta una app cuidada.
+- **Mobile-first** de verdad, hasta el punto de ser **instalable**.
+
+> Siguiente: **Informe 12 — Situación real y mejoras previstas**, donde explico en qué punto está la app de verdad y la hoja de ruta.
+
+</script>
+
+<script type="text/markdown" class="report-src">
+# Informe 12 — Situación real y mejoras previstas
+
+> Este informe es una **autoevaluación honesta**: en qué punto está Libitum de verdad, qué aguanta, qué limitaciones tiene y cuál es la hoja de ruta. Conocer lo que falta es tan importante como lo que está hecho.
+
+---
+
+## 1. ¿En qué punto está? (resumen honesto)
+
+Libitum está en estado de **MVP sólido / listo para piloto**. Es una aplicación **completa y funcional**, desplegada y usable con usuarios reales:
+
+- ✅ **Funcionalidad completa:** registro con verificación, login, recuperar contraseña, roles, eventos (con estado automático), seguir artistas, feed, búsqueda, asistencias con recordatorios por email, donaciones (enlace/Bizum), panel admin, PWA instalable.
+- ✅ **Desplegada de verdad** (Vercel + Railway + Neon + Brevo), por HTTPS.
+- ✅ **Con seguridad pensada para datos reales** (tokens, verificación, rate-limit, CORS, RGPD).
+- ✅ **Con tests** que protegen el backend.
+
+No es un prototipo de clase "que solo funciona en local": **funciona en internet y se puede recomendar a artistas reales** para un piloto.
+
+---
+
+## 2. ¿Cuánta gente aguanta? (capacidad real)
+
+La clave es distinguir **usuarios totales** de **usuarios a la vez**:
+
+- **Usuarios registrados:** pueden ser **miles** sin problema (es solo espacio en la base de datos).
+- **Usuarios simultáneos** (haciendo clic en el mismo momento): **ese es el límite real**, porque el backend usa un servidor de desarrollo (`php artisan serve`) que atiende de una en una.
+
+| Gente usándolo a la vez | Cómo va |
+|---|---|
+| Hasta ~20-30 simultáneos | Suave |
+| ~30-80 simultáneos | Usable, algún pico lento |
+| 100+ en el MISMO instante | Se atasca → tocaría servidor de producción |
+
+> El frontend (Vercel) escala "infinito" (es un CDN); el cuello de botella es solo el backend cuando muchos piden datos a la vez. Para el piloto y la presentación, **va sobrado**.
+
+---
+
+## 3. Coste de mantenimiento
+
+- **Vercel, Neon y Brevo:** capa **gratuita** suficiente para empezar.
+- **Railway:** el plan **Hobby (~5 €/mes)** da CPU decente, quita el límite de crédito, permite elegir **región Europa** (más rápido) y el **volumen** para que las imágenes persistan.
+
+Con **~5 €/mes** la app se mantiene cómoda para un uso real de piloto.
+
+---
+
+## 4. Limitaciones conocidas (honestidad total)
+
+Para que no me pillen, estas son las cosas a mejorar:
+
+| Limitación | Detalle |
+|---|---|
+| **Servidor de desarrollo** | `php artisan serve` atiende de una en una; para mucho tráfico simultáneo habría que pasar a php-fpm/Nginx o Laravel Octane |
+| **Sin tests de frontend** | El backend está bien cubierto; el frontend se ha probado a mano + ESLint |
+| **Sin monitorización ni backups propios** | No hay alertas de errores (Sentry) ni copias de seguridad automáticas más allá de las de Neon |
+| **Arranques fríos de la BD** | La capa gratis de Neon "duerme" tras inactividad; la primera carga tras un rato es algo más lenta |
+| **Imagen de compartir genérica** | Al compartir, sale la imagen de marca de Libitum, no la portada concreta de cada evento (eso necesitaría renderizado en servidor) |
+
+Ninguna impide el uso real para un piloto; son cosas de **escalar y endurecer**.
+
+---
+
+## 5. Hoja de ruta (mejoras previstas)
+
+### Técnicas (para escalar y robustez)
+- **Servidor de producción real** (php-fpm + Nginx o Laravel Octane) en lugar de `artisan serve`.
+- **Monitorización de errores** (Sentry) y **backups** de la base de datos.
+- **Mantener la BD despierta** (un ping periódico o Neon de pago) para quitar los arranques fríos.
+- **Tests de frontend** (Vitest + React Testing Library).
+
+### De producto (nuevas funcionalidades)
+- **Imagen de compartir por evento** (su portada al compartir el enlace).
+- **Notificaciones push** (aprovechando que ya es PWA) además de los emails.
+- **Estadísticas más ricas** para el artista.
+- **Mejoras en el descubrimiento** (recomendaciones, eventos cercanos por geolocalización).
+- **Moderación / reportes** más completos en el panel admin.
+
+---
+
+## 6. Conclusión honesta
+
+Libitum **no está "verde" ni es un juguete**: es un **producto funcional, desplegado y seguro**, listo para que un grupo de artistas lo use de verdad en eventos reales, por ~5 €/mes.
+
+Lo que le separa de un "SaaS comercial a gran escala" es trabajo de **endurecimiento** (servidor de producción, monitorización, backups, tests de frontend), no de **funcionalidad**. La base está bien hecha y la hoja de ruta es clara.
+
+> Siguiente: **Informe 13 — Monetización**, donde explico el enfoque empresarial del proyecto.
+
+</script>
+
+<script type="text/markdown" class="report-src">
+# Informe 13 — Monetización (enfoque empresarial)
+
+> Este informe explica **cómo podría ganar dinero Libitum** y, sobre todo, la **filosofía de negocio** detrás: monetizar **sin perjudicar al artista**. No es un plan de empresa cerrado, sino el modelo y las vías que tienen sentido para este proyecto.
+
+---
+
+## 1. La filosofía: no quitarle dinero al artista
+
+La decisión de negocio más importante es **deliberada**: Libitum **NO procesa las donaciones** ni se queda comisión de ellas. Cuando alguien apoya a un artista, el dinero va **directo** del donante al artista por su plataforma (PayPal, Ko-fi, Bizum…). Libitum solo conecta y muestra.
+
+¿Por qué?
+- **Por el artista:** el artista de calle vive de poco; quitarle una comisión de cada propina sería injusto y le echaría para atrás.
+- **Por simplicidad legal:** ser pasarela de pago implica obligaciones legales y técnicas enormes (licencias, antifraude, fiscalidad). Evitarlo mantiene el proyecto viable.
+
+**Consecuencia:** como las donaciones no son una vía de ingreso, la monetización tiene que venir de **otros sitios** que aporten valor sin restar al artista.
+
+---
+
+## 2. Vías de monetización actuales (implementadas)
+
+### 2.1. Merchandising del QR
+- **Qué:** fabricar material físico con el **QR del artista** (pegatinas, láminas, carteles, chapas) para que la gente lo encuentre y lo siga en la calle.
+- **Por qué funciona:** le da al artista algo **tangible y útil** (su QR en la funda de la guitarra, en el local…), y a Libitum un ingreso por la venta/fabricación.
+- **Cómo está montado:** una sección de merchandising en la página de Contacto, donde el artista lo solicita por correo.
+
+### 2.2. Apoyo a los desarrolladores
+- **Qué:** un botón discreto **"✨ Apoya el proyecto"** con un enlace de donación (PayPal) para quien quiera ayudar a mantener la web.
+- **Por qué:** cubre los **costes de mantenimiento** (los ~5 €/mes del hosting) de forma voluntaria, sin meter publicidad ni comisiones.
+
+---
+
+## 3. Vías de monetización futuras (ideas de negocio)
+
+Pensando a futuro, sin romper la filosofía de no cobrar al artista por sus propinas:
+
+| Vía | En qué consiste |
+|---|---|
+| **Freemium para artistas** | Cuenta gratis con lo esencial; cuenta "pro" de pago con extras: estadísticas avanzadas, página personalizada, más eventos destacados… |
+| **Eventos destacados** | El artista puede pagar (poco) por **destacar** un evento concreto en el feed/búsqueda durante unos días |
+| **Comisión del merchandising** | El margen de la venta del material físico (no de las propinas) |
+| **Acuerdos con locales** | Bares, salas y festivales que paguen por aparecer o por promocionar sus eventos |
+| **Patrocinios locales** | Marcas que apoyen la cultura de calle a cambio de visibilidad discreta |
+
+> El hilo común: el artista **siempre puede usar lo esencial gratis** y quedarse el 100% de sus donaciones; se cobra por **servicios de valor añadido** (merch, destacar, herramientas pro), no por su dinero.
+
+---
+
+## 4. Por qué este modelo tiene sentido
+
+```mermaid
+flowchart LR
+    A[Artista gana más<br/>100% de sus propinas] --> U[Usa y recomienda Libitum]
+    U --> P[Más artistas y público]
+    P --> M[Más demanda de merch<br/>y servicios pro]
+    M --> I[Ingresos para Libitum]
+    I --> A
+```
+
+Es un modelo **alineado**: Libitum gana **cuando el artista gana**. Si el artista prospera, usa más la plataforma, atrae público, y eso genera demanda de los servicios de pago (merch, pro). No es un modelo extractivo (quitarle al artista), sino de **crecer juntos**.
+
+---
+
+## 5. Costes vs ingresos (realista)
+
+- **Costes actuales:** mínimos (~5 €/mes de hosting). El proyecto es **sostenible desde el primer momento** con muy poco.
+- **Primeros ingresos realistas:** el **merchandising** es la vía más inmediata y concreta para empezar a generar algo, sin necesidad de mucha escala.
+- **Escalabilidad del negocio:** las vías de pago (freemium, destacados) solo tienen sentido **con masa de usuarios**; son para más adelante, cuando haya comunidad.
+
+---
+
+## 6. Resumen
+
+- Decisión clave: **no cobrar comisión de las donaciones** (el artista se queda el 100%) → ni perjudica al artista ni nos convierte en pasarela de pago.
+- Monetización por **valor añadido**: **merchandising** del QR (ya montado) y **apoyo voluntario** a los devs.
+- A futuro: **freemium**, **eventos destacados**, **comisión de merch** y **acuerdos con locales/patrocinios**.
+- Modelo **alineado**: Libitum gana cuando el artista gana.
+
+> Siguiente: **Informe 14 — Impacto en los artistas y planteamiento de pagos**, el cierre, donde explico el porqué humano del proyecto y todas las decisiones sobre los pagos.
+
+</script>
+
+<script type="text/markdown" class="report-src">
+# Informe 14 — Impacto en los artistas y planteamiento de pagos
+
+> Este es el informe de cierre: el **porqué humano** del proyecto. Explica para quién está pensado Libitum, cómo cada decisión gira en torno al artista, y todo el razonamiento detrás de los **pagos y donaciones** (lo más cuidado del proyecto).
+
+---
+
+## 1. El problema real que resuelve
+
+Un artista de calle toca, la gente disfruta… y se va. No hay forma fácil de **seguirle, saber dónde tocará la próxima vez, ni apoyarle** más allá de las monedas que caen en el momento. La conexión se pierde.
+
+Libitum existe para **cerrar esa brecha**:
+- El artista tiene una **página propia** y un **QR** que reparte.
+- La gente lo **escanea**, lo **sigue**, se entera de sus próximos eventos y puede **apoyarle** aunque ya no esté delante.
+
+El impacto buscado: que la **cultura de calle no se quede en el momento**, sino que se convierta en una comunidad que apoya a sus artistas de forma continuada.
+
+---
+
+## 2. Diseñar pensando en el artista de calle
+
+Cada decisión grande del proyecto se tomó **poniéndome en su lugar**:
+
+| Decisión | Pensando en que el artista… |
+|---|---|
+| **Estado del evento automático** | …está tocando, no mirando el móvil para marcar "en directo" |
+| **QR + merchandising físico** | …vive en la calle: necesita que le encuentren ahí, no solo online |
+| **Donación voluntaria** | …trabaja "a la gorra": gratis pero con opción de colaborar |
+| **Bizum** | …a lo mejor no tiene PayPal ni Ko-fi, pero sí un móvil |
+| **Guía de pagos** | …no tiene por qué saber de comisiones; le explico cómo ganar más |
+| **No cobrar comisión** | …necesita cada euro; no se lo quito |
+
+---
+
+## 3. El planteamiento de los pagos (lo más cuidado)
+
+Aquí está el detalle que demuestra que el proyecto **piensa de verdad** en el artista.
+
+### 3.1. Varias formas de cobrar (cubrir a todo el mundo)
+No todos los artistas ni todos los donantes son iguales, así que ofrezco **varias vías**:
+- **Enlace de pago** (Ko-fi, PayPal, Buy Me a Coffee…): para quien quiera pagar con tarjeta online.
+- **Bizum**: directo, instantáneo y muy usado en España.
+
+### 3.2. El mínimo de 1 € (un detalle que importa de verdad)
+- **El problema:** en donaciones muy pequeñas por **PayPal/tarjeta**, la **comisión se lo come casi todo**. Una donación de 0,10 € puede dejarle al artista **0 €**.
+- **La solución:** avisar de que se done **desde 1 €** (donde la comisión ya deja ~0,60 € al artista). Con **Bizum no pasa** (no tiene comisión), así que ahí vale cualquier cantidad.
+- Este aviso aparece junto al botón de donar y se explica en la **guía de pagos**.
+
+### 3.3. Recomendar la mejor plataforma
+- Recomiendo **Ko-fi** (con Stripe): el donante **paga con tarjeta sin crear cuenta** y **sin comisión** de plataforma.
+- Aviso de que **PayPal** cobra comisión y a veces obliga al donante a registrarse (fricción que reduce las donaciones).
+- Objetivo: que el artista elija con criterio y **gane más**.
+
+### 3.4. Bizum bajo su responsabilidad
+- El Bizum expone su **número de móvil** públicamente, así que se le **avisa** y lo activa **voluntariamente**. Transparencia total.
+
+---
+
+## 4. El QR y el merchandising: del online a la calle
+
+El **QR** es la pieza que une el mundo físico con la app: el artista lo enseña/reparte mientras toca, y quien lo escanea entra a su página. Para potenciarlo, Libitum ofrece **merchandising** con ese QR (pegatinas, láminas…) para que el artista lo lleve a la funda de su instrumento, lo pegue donde toca y la gente lo encuentre incluso cuando él no está.
+
+Es un círculo: **la calle lleva a la app, y la app mantiene la conexión** cuando la actuación termina.
+
+---
+
+## 5. El impacto en una frase
+
+> Libitum convierte un **momento** (ver a un artista en la calle) en una **relación** (seguirle, apoyarle, no perderse sus directos), y lo hace **sin quitarle nada al artista**.
+
+---
+
+## 6. Cierre de la serie de informes
+
+Con este informe se cierra la documentación completa de Libitum:
+
+| Bloque | Informes |
+|---|---|
+| **Visión y datos** | 0 (arquitectura), 1 (base de datos) |
+| **Backend y seguridad** | 2 (backend), 3 (seguridad) |
+| **Frontend y configuración** | 4 (frontend), 5 (configuración) |
+| **Procesos y calidad** | 6 (batch), 7 (tests), 8 (despliegue) |
+| **Decisiones** | 9 (problemas), 10 (funcionalidad), 11 (diseño) |
+| **Negocio e impacto** | 12 (situación), 13 (monetización), 14 (impacto y pagos) |
+
+Entre todos cubren el proyecto **de punta a punta**: qué es, cómo está hecho, por qué es así, en qué punto está y a dónde va.
+
+---
+
+> Libitum no es solo un trabajo técnico: es una plataforma pensada, de principio a fin, **para que los artistas de calle vivan mejor de su arte**.
+
+</script>
+<script>
+  mermaid.initialize({ startOnLoad:false, theme:'neutral', securityLevel:'loose' });
+  marked.setOptions({ gfm:true });
+  (async () => {
+    const srcs = document.querySelectorAll('script.report-src');
+    for (const s of srcs) {
+      const section = document.createElement('section');
+      section.className = 'report';
+      section.innerHTML = marked.parse(s.textContent);
+      section.querySelectorAll('pre > code.language-mermaid').forEach(code => {
+        const div = document.createElement('div');
+        div.className = 'mermaid';
+        div.textContent = code.textContent;
+        code.parentElement.replaceWith(div);
+      });
+      document.body.appendChild(section);
+    }
+    try { await mermaid.run({ querySelector: '.mermaid' }); } catch(e) { console.error(e); }
+  })();
+</script>
+</body>
+</html>
