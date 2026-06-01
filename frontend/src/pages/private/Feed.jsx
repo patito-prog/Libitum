@@ -38,6 +38,8 @@ const Feed = () => {
     const [feedEvents, setFeedEvents] = useState([]);
     const [mode, setMode] = useState("discover");
     const [statusFilter, setStatusFilter] = useState(null);
+    const [locating, setLocating] = useState(false);   // pidiendo la ubicación al navegador
+    const coordsRef = useRef(null);                     // {lat, lng} del usuario para "Cerca de mí"
     const [, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const [initialLoading, setInitialLoading] = useState(true);
@@ -56,8 +58,13 @@ const Feed = () => {
 
         try {
             const statusParam = currentStatus ? `&status=${currentStatus}` : '';
+            // En "Cerca de mí" mandamos la ubicación del usuario para que el backend
+            // calcule distancias y filtre por radio.
+            const nearParam = currentMode === 'near' && coordsRef.current
+                ? `&lat=${coordsRef.current.lat}&lng=${coordsRef.current.lng}`
+                : '';
             const response = await getData(
-                `${API_BASE}/api/feed?mode=${currentMode}&page=${pageNum}${statusParam}`
+                `${API_BASE}/api/feed?mode=${currentMode}&page=${pageNum}${statusParam}${nearParam}`
             );
             const paginator = response?.data;
             const newEvents = paginator?.data ?? [];
@@ -114,6 +121,28 @@ const Feed = () => {
         return () => observer.disconnect();
     }, [hasMore, mode, statusFilter, feedEvents.length, fetchEvents]);
 
+    // "Cerca de mí": pide la ubicación al navegador y, si hay permiso, cambia al modo near.
+    const handleNearMode = () => {
+        if (mode === 'near') return;
+        if (!('geolocation' in navigator)) {
+            showMessageWithTime('Tu navegador no permite usar la ubicación.', 'error');
+            return;
+        }
+        setLocating(true);
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                coordsRef.current = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                setLocating(false);
+                setMode('near');
+            },
+            () => {
+                setLocating(false);
+                showMessageWithTime('Necesito tu permiso de ubicación para enseñarte eventos cerca de ti.', 'error');
+            },
+            { enableHighAccuracy: false, timeout: 10000 }
+        );
+    };
+
     const handleInscribe = async (id, isSignedUp) => {
         if (!user) {
             showMessageWithTime('Para poder apuntarte debes registrarte primero', 'error');
@@ -167,6 +196,15 @@ const Feed = () => {
                     >
                         Para Ti
                     </button>
+                    <span className={styles.separator}>|</span>
+                    <button
+                        type="button"
+                        className={`${styles.navBtn} ${mode === 'near' ? styles.active : ''}`}
+                        onClick={handleNearMode}
+                        disabled={locating}
+                    >
+                        {locating ? 'Localizando…' : '📍 Cerca'}
+                    </button>
                 </div>
 
                 <div className={styles.filterBar}>
@@ -200,9 +238,17 @@ const Feed = () => {
                                 ? `No hay eventos con estado "${STATUS_FILTERS.find(s => s.value === statusFilter)?.label}" por ahora.`
                                 : mode === 'following'
                                     ? "No sigues a nadie aún."
-                                    : "No hay eventos nuevos por ahora."
+                                    : mode === 'near'
+                                        ? "No hay eventos cerca de ti ahora mismo."
+                                        : "No hay eventos nuevos por ahora."
                         }
-                        hint={mode === 'following' ? "Descubre nuevos artistas en 'Para Ti'." : undefined}
+                        hint={
+                            mode === 'following'
+                                ? "Descubre nuevos artistas en 'Para Ti'."
+                                : mode === 'near'
+                                    ? "Prueba 'Para Ti' para ver eventos de cualquier zona."
+                                    : undefined
+                        }
                     />
                 ) : (
                     <>

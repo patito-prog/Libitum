@@ -227,6 +227,12 @@
     &:hover { color: var(--color-primary); text-decoration: underline; }
 }
 
+/* Distancia en el modo "Cerca de mí": resaltada en el color de marca */
+.distance {
+    color: var(--color-primary) !important;
+    font-weight: 700;
+}
+
 .mapWrapper {
     display: flex;
     flex-direction: column;

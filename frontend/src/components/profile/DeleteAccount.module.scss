@@ -1,0 +1,119 @@
+.dangerZone {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+    padding: 1.1rem 1.3rem;
+    border: 1px solid rgba(232, 74, 64, 0.35);
+    background: rgba(232, 74, 64, 0.05);
+    border-radius: var(--radius-md);
+}
+
+.dangerInfo {
+    strong { color: var(--color-danger); font-size: 0.98rem; }
+    p { margin: 0.2rem 0 0; font-size: 0.85rem; color: var(--text-secondary); max-width: 46ch; line-height: 1.5; }
+}
+
+.dangerBtn {
+    flex-shrink: 0;
+    background: transparent;
+    color: var(--color-danger);
+    border: 1px solid var(--color-danger);
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 0.55rem 1.2rem;
+    cursor: pointer;
+    transition: background var(--transition-speed), color var(--transition-speed);
+
+    &:hover { background: var(--color-danger); color: #fff; }
+}
+
+/* Modal */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(22, 24, 26, 0.55);
+    backdrop-filter: blur(3px);
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.modal {
+    background: var(--bg-surface);
+    border-radius: var(--radius-lg);
+    padding: 1.6rem 1.75rem;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: var(--shadow-lg);
+    border-top: 5px solid var(--color-danger);
+
+    h3 {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 1.2rem;
+        color: var(--text-primary);
+        margin: 0 0 0.6rem;
+    }
+}
+
+.warn {
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin: 0 0 1.1rem;
+
+    strong { color: var(--color-danger); }
+}
+
+.input {
+    width: 100%;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    padding: 0.8rem 1rem;
+    font-size: 0.95rem;
+    font-family: inherit;
+
+    &:focus { outline: none; border-color: var(--color-danger); box-shadow: 0 0 0 3px rgba(232, 74, 64, 0.12); }
+}
+
+.actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.2rem;
+}
+
+.cancel {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-weight: 600;
+    padding: 0.7rem;
+    cursor: pointer;
+
+    &:hover { background: rgba(22, 24, 26, 0.04); }
+    &:disabled { opacity: 0.5; }
+}
+
+.delete {
+    flex: 1.4;
+    background: var(--color-danger);
+    border: none;
+    border-radius: var(--radius-md);
+    color: #fff;
+    font-weight: 700;
+    padding: 0.7rem;
+    cursor: pointer;
+
+    &:hover:not(:disabled) { background: var(--color-danger-hover); }
+    &:disabled { opacity: 0.6; cursor: wait; }
+}

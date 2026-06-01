@@ -99,8 +99,13 @@ const useAPI = () => {
     /** GET. @param {string} url @returns {Promise<Object>} */
     const getData = (url) => callAPI(url, {method:"GET"});
 
-    /** DELETE. @param {string} url @returns {Promise<Object>} */
-    const deleteData = (url) => callAPI(url, {method:"DELETE"});
+    /** DELETE (con body opcional). @param {string} url @param {Object} [body] */
+    const deleteData = (url, body) => callAPI(
+        url,
+        body !== undefined
+            ? { method: "DELETE", body: JSON.stringify(body) }
+            : { method: "DELETE" }
+    );
 
     /** POST con body JSON. @param {string} url @param {Object} body */
     const save = (url, body) => callAPI(url, {method:"POST", body: JSON.stringify(body)});

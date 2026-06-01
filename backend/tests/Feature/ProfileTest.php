@@ -88,4 +88,34 @@ class ProfileTest extends TestCase
             'bizum_phone' => '600112233',
         ]);
     }
+
+    /** Con la contraseña correcta, el usuario puede eliminar su cuenta. */
+    public function test_user_can_delete_own_account_with_correct_password(): void
+    {
+        $user = User::factory()->create([
+            'email_verified_at' => now(),
+            'password'          => Hash::make('password'),
+        ]);
+
+        $this->actingAs($user, 'sanctum')
+            ->deleteJson('/api/profile', ['password' => 'password'])
+            ->assertOk();
+
+        $this->assertDatabaseMissing('users', ['id' => $user->id]);
+    }
+
+    /** Sin la contraseña correcta, la cuenta NO se borra. */
+    public function test_account_deletion_fails_with_wrong_password(): void
+    {
+        $user = User::factory()->create([
+            'email_verified_at' => now(),
+            'password'          => Hash::make('password'),
+        ]);
+
+        $this->actingAs($user, 'sanctum')
+            ->deleteJson('/api/profile', ['password' => 'incorrecta'])
+            ->assertStatus(422);
+
+        $this->assertDatabaseHas('users', ['id' => $user->id]);
+    }
 }

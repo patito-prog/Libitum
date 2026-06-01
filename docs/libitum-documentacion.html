@@ -772,7 +772,7 @@ Dos medidas pensadas para **proteger a los usuarios entre sí**:
 Al usarse con datos personales reales (en España), incluyo:
 
 - **Política de privacidad** (`/privacidad`) y **Términos de uso** (`/terminos`): explican qué datos recojo, para qué, con quién se comparten y los derechos del usuario.
-- **Derecho al borrado:** el usuario puede **eliminar su cuenta** desde su perfil (`ProfileController@destroy`), lo que borra sus datos y revoca sus tokens.
+- **Derecho al borrado:** el usuario puede **eliminar su cuenta** desde la **"zona de peligro"** de su propio perfil. Por seguridad se le pide **confirmar la contraseña** antes de borrar (validación `current_password`), y el endpoint (`ProfileController@destroy`) elimina sus datos y **revoca todos sus tokens**.
 - **No se procesan pagos:** las donaciones van por plataformas externas, así que **no guardo ningún dato bancario** → menos responsabilidad legal.
 - **Sin cookies de seguimiento:** solo uso `localStorage` para el token de sesión (fin técnico), no rastreo.
 
@@ -1216,7 +1216,7 @@ El batch tiene **tests automáticos** (Informe 7) que comprueban que:
 <script type="text/markdown" class="report-src">
 # Informe 7 — Tests
 
-> Este informe explica las **pruebas automáticas** del proyecto: qué son, cómo funcionan, qué cubren y por qué dan confianza para cambiar el código sin romper nada. La batería tiene **44 tests** que pasan en verde.
+> Este informe explica las **pruebas automáticas** del proyecto: qué son, cómo funcionan, qué cubren y por qué dan confianza para cambiar el código sin romper nada. La batería tiene **47 tests** que pasan en verde.
 
 ---
 
@@ -1267,9 +1267,9 @@ Las piezas clave:
 | **InscriptionTest** (5) | Apuntarse, no dos veces (409), no si está lleno (409), y que el flag **`signed_up`** sale bien al ver el evento (logueado / invitado) |
 | **RemindersTest** (3) | El **batch** solo avisa a quien tiene `remind_me`, avisa dentro de la ventana de 48h y NO fuera de ella |
 | **FollowTest** (2) | Seguir y dejar de seguir a un artista |
-| **FeedTest** (3) | El feed no incluye borradores, el modo "siguiendo" solo muestra a quien sigues, y requiere sesión |
+| **FeedTest** (4) | El feed no incluye borradores, el modo "siguiendo" solo muestra a quien sigues, requiere sesión, y el modo **"cerca de mí"** solo trae los eventos dentro del radio de 30 km (y con su distancia) |
 | **ArtistListTest** (3) | El listado de artistas, la búsqueda **insensible a mayúsculas** y el flag `is_following` |
-| **ProfileTest** (4) | Cambio de contraseña (rechaza corta / acepta válida) y validación del **Bizum** (rechaza inválido / guarda válido) |
+| **ProfileTest** (6) | Cambio de contraseña (rechaza corta / acepta válida), validación del **Bizum** (rechaza inválido / guarda válido) y **eliminar cuenta** (borra con la contraseña correcta / NO borra con la incorrecta) |
 | **AdminTest** (4) | El admin lista usuarios, cambia roles y borra eventos; un no-admin **no entra** |
 | **ExampleTest** (1+1) | Tests de ejemplo de la plantilla (la app responde) |
 
@@ -1296,7 +1296,7 @@ Se lee casi como una frase: "actuando como espectador, intento crear un evento �
 ## 5. Honestidad sobre la cobertura
 
 Para que quede claro y no me pillen:
-- Los 44 tests cubren el **backend (la API)**, que es donde está la lógica importante (seguridad, reglas de negocio, el batch…).
+- Los 47 tests cubren el **backend (la API)**, que es donde está la lógica importante (seguridad, reglas de negocio, el batch…).
 - El **frontend NO tiene tests automáticos**: se ha probado **a mano** y se apoya en **ESLint** (el linter) para detectar errores de código. Añadir tests de frontend (con Vitest/React Testing Library) es una **mejora pendiente** reconocida (Informe 12).
 - No hay apenas "unit tests" puros: priorizo los **feature tests**, que prueban el comportamiento real de la API de punta a punta (más valor por test para un proyecto de este tamaño).
 
@@ -1309,13 +1309,13 @@ php artisan test            # toda la batería
 php artisan test --filter=AuthTest   # solo un fichero
 ```
 
-Resultado actual: **44 passed (103 assertions)**.
+Resultado actual: **47 passed (110 assertions)**.
 
 ---
 
 ## 7. Resumen
 
-- **44 tests automáticos** que prueban la API de punta a punta y pasan en verde.
+- **47 tests automáticos** que prueban la API de punta a punta y pasan en verde.
 - Cada test parte de una **base de datos limpia** (RefreshDatabase) y usa **factories** y **fakes** de correo.
 - Cubren **autenticación, seguridad, reglas de negocio, el batch y el admin**.
 - Varios nacieron de **bugs reales** para que no se repitan.
@@ -1628,6 +1628,12 @@ Las agrupo por área.
 - **Decisión:** que buscar eventos sea **público** (sin sesión).
 - **Por qué:** para que cualquiera pueda descubrir eventos antes de registrarse.
 
+### 4.4. "Cerca de mí" (pensado para turismo)
+- **Decisión:** una tercera pestaña en el feed, **"📍 Cerca"**, que muestra los eventos **a tu alrededor** (radio de 30 km) ordenados del más cercano al más lejano, y enseña la distancia en cada tarjeta ("🚶 a 1,2 km").
+- **Por qué:** pensando en alguien que está **de turismo** o que acaba de llegar a una ciudad: abre la app, pulsa "Cerca" y ve qué hay sonando alrededor **ahora mismo**, sin tener que buscar por nombre de ciudad. Convierte la app en una herramienta de descubrimiento *in situ*.
+- **Cómo:** al pulsar la pestaña, el navegador pide permiso de **ubicación** (`navigator.geolocation`) y manda mi posición a la API. El backend calcula la distancia a cada evento con la **fórmula de Haversine** (la distancia real sobre la esfera terrestre), descarta los que están a más de 30 km o sin coordenadas, y los ordena por cercanía. Los eventos se geocodifican al crearlos (guardan latitud/longitud), así que ya había con qué medir.
+- **Detalle honesto:** depende de que el usuario **dé permiso** de ubicación; si lo deniega, se le avisa y sigue usando "Para Ti" con normalidad.
+
 ---
 
 ## 5. Experiencia móvil y "modo app"
@@ -1658,7 +1664,7 @@ Las agrupo por área.
 Las decisiones de funcionalidad siguen un hilo claro: **pensar en el uso real**.
 - Para el **visitante**: que pueda ver y descubrir antes de registrarse (Landing, buscar público).
 - Para el **artista**: control real de sus eventos (estado automático, cancelar/eliminar) y cobrar de la forma que más le conviene (donación voluntaria, Bizum, guía de pagos).
-- Para el **público**: descubrir (feed, explorar artistas) y usarlo cómodo en el móvil (PWA, compartir, mapa que no estorba).
+- Para el **público**: descubrir (feed, explorar artistas, **eventos cerca** por geolocalización) y usarlo cómodo en el móvil (PWA, compartir, mapa que no estorba).
 
 > Siguiente: **Informe 11 — Diseño y experiencia de usuario**, donde explico las decisiones visuales y de UX (la paleta, la tipografía, los detalles de interacción).
 
@@ -2022,6 +2028,7 @@ Entre todos cubren el proyecto **de punta a punta**: qué es, cómo está hecho,
 > Libitum no es solo un trabajo técnico: es una plataforma pensada, de principio a fin, **para que los artistas de calle vivan mejor de su arte**.
 
 </script>
+
 <script>
   mermaid.initialize({ startOnLoad:false, theme:'neutral', securityLevel:'loose' });
   marked.setOptions({ gfm:true });

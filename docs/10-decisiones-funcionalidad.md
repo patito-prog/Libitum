@@ -73,6 +73,12 @@ Las agrupo por área.
 - **Decisión:** que buscar eventos sea **público** (sin sesión).
 - **Por qué:** para que cualquiera pueda descubrir eventos antes de registrarse.
 
+### 4.4. "Cerca de mí" (pensado para turismo)
+- **Decisión:** una tercera pestaña en el feed, **"📍 Cerca"**, que muestra los eventos **a tu alrededor** (radio de 30 km) ordenados del más cercano al más lejano, y enseña la distancia en cada tarjeta ("🚶 a 1,2 km").
+- **Por qué:** pensando en alguien que está **de turismo** o que acaba de llegar a una ciudad: abre la app, pulsa "Cerca" y ve qué hay sonando alrededor **ahora mismo**, sin tener que buscar por nombre de ciudad. Convierte la app en una herramienta de descubrimiento *in situ*.
+- **Cómo:** al pulsar la pestaña, el navegador pide permiso de **ubicación** (`navigator.geolocation`) y manda mi posición a la API. El backend calcula la distancia a cada evento con la **fórmula de Haversine** (la distancia real sobre la esfera terrestre), descarta los que están a más de 30 km o sin coordenadas, y los ordena por cercanía. Los eventos se geocodifican al crearlos (guardan latitud/longitud), así que ya había con qué medir.
+- **Detalle honesto:** depende de que el usuario **dé permiso** de ubicación; si lo deniega, se le avisa y sigue usando "Para Ti" con normalidad.
+
 ---
 
 ## 5. Experiencia móvil y "modo app"
@@ -103,6 +109,6 @@ Las agrupo por área.
 Las decisiones de funcionalidad siguen un hilo claro: **pensar en el uso real**.
 - Para el **visitante**: que pueda ver y descubrir antes de registrarse (Landing, buscar público).
 - Para el **artista**: control real de sus eventos (estado automático, cancelar/eliminar) y cobrar de la forma que más le conviene (donación voluntaria, Bizum, guía de pagos).
-- Para el **público**: descubrir (feed, explorar artistas) y usarlo cómodo en el móvil (PWA, compartir, mapa que no estorba).
+- Para el **público**: descubrir (feed, explorar artistas, **eventos cerca** por geolocalización) y usarlo cómodo en el móvil (PWA, compartir, mapa que no estorba).
 
 > Siguiente: **Informe 11 — Diseño y experiencia de usuario**, donde explico las decisiones visuales y de UX (la paleta, la tipografía, los detalles de interacción).

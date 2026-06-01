@@ -101,7 +101,7 @@ La identidad visual busca un estilo **editorial, vivo y artístico pero profesio
 | **Laravel Sanctum** | Autenticación por **tokens** (Bearer), ideal para un SPA en un dominio distinto al backend (evita problemas de CORS con cookies). |
 | **spatie/laravel-permission** | Gestión de **roles y permisos** (admin, artista, espectador) de forma limpia. |
 | **Symfony Brevo Mailer + HTTP Client** | Envío de **correos por API HTTP** (verificación, recordatorios, recuperar contraseña), porque el hosting bloquea el SMTP saliente. |
-| **PHPUnit** | **Tests** automáticos (44 pruebas) del backend. |
+| **PHPUnit** | **Tests** automáticos (47 pruebas) del backend. |
 
 ## 2.3. Descripción y justificación de la base de datos
 
@@ -157,7 +157,7 @@ Entidades principales:
 
 **Limitaciones reconocidas:**
 - El backend usa el servidor de desarrollo de Laravel (`artisan serve`), que atiende peticiones de una en una. Para mucho tráfico simultáneo habría que pasar a un servidor de producción (php-fpm/Nginx o Laravel Octane).
-- El **frontend no tiene tests automáticos** (se ha probado a mano + ESLint); el backend sí (44 tests).
+- El **frontend no tiene tests automáticos** (se ha probado a mano + ESLint); el backend sí (47 tests).
 - No hay **monitorización de errores ni backups propios** más allá de los de Neon.
 - Al compartir un evento, la imagen de previsualización es la **genérica de marca**, no la portada concreta del evento (requeriría renderizado en servidor).
 

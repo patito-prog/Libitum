@@ -29,6 +29,15 @@ const splitDate = (iso) => {
 };
 
 /**
+ * Formatea la distancia para el modo "Cerca de mí": en metros si es menos de
+ * 1 km, y si no en km con un decimal (con coma, formato español).
+ * @param {number} km Distancia en kilómetros
+ * @returns {string}
+ */
+const formatDistance = (km) =>
+    km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1).replace('.', ',')} km`;
+
+/**
  * Tarjeta de evento "grande" (cartel). Se usa en el detalle del evento y, en
  * versión `compact`, en el feed Para Ti.
  *
@@ -41,10 +50,12 @@ const splitDate = (iso) => {
  * @param {boolean}  [props.compact=false]  Versión reducida para el feed (mapa pequeño, descripción recortada)
  */
 const Event = ({ data, onBack, onLike, onInscribe, editable = false, compact = false }) => {
-    const { id, title, description, location, event_date, price, is_donation, cover_image, max_capacity, latitude, longitude, liked, artist, signed_up } = data;
+    const { id, title, description, location, event_date, price, is_donation, cover_image, max_capacity, latitude, longitude, liked, artist, signed_up, distance_km } = data;
     const statusName = getStatusName(data);
     const coords = latitude && longitude ? { lat: Number(latitude), lng: Number(longitude) } : null;
     const dateParts = splitDate(event_date);
+    // En el modo "Cerca de mí" el backend manda la distancia (puede venir como string desde SQL).
+    const distance = distance_km != null ? Number(distance_km) : null;
 
     const { toggleLike, setEventForEdit } = useEventContext();
 
@@ -119,6 +130,9 @@ const Event = ({ data, onBack, onLike, onInscribe, editable = false, compact = f
                         >
                             📍 {location}
                         </a>
+                    )}
+                    {distance != null && (
+                        <span className={styles.distance}>🚶 a {formatDistance(distance)}</span>
                     )}
                     {event_date  && <span>🗓 {formatDate(event_date)}</span>}
                     {is_donation

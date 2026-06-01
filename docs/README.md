@@ -15,7 +15,7 @@ Documentación completa del proyecto **Libitum**, una plataforma para artistas d
 | 4 | [Frontend](04-frontend.md) | Páginas, componentes, contextos, hooks, enrutado y guards |
 | 5 | [Configuración y librerías externas](05-configuracion-librerias.md) | Dependencias, ficheros de config, variables de entorno y la PWA |
 | 6 | [Batch / tareas programadas](06-batch-tareas-programadas.md) | El comando de recordatorios, la ventana de 48h y el cron |
-| 7 | [Tests](07-tests.md) | La batería de 44 tests automáticos y cómo funcionan |
+| 7 | [Tests](07-tests.md) | La batería de 47 tests automáticos y cómo funcionan |
 | 8 | [Despliegue](08-despliegue.md) | Railway, Vercel, Neon, Brevo y el despliegue continuo |
 | 9 | [Problemas encontrados y soluciones](09-problemas-soluciones.md) | Los bugs reales y los cambios de tecnología |
 | 10 | [Decisiones de funcionalidad](10-decisiones-funcionalidad.md) | El porqué de lo que hace la app |

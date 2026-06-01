@@ -41,6 +41,32 @@ class FeedController extends Controller
             // --- MODO "SIGUIENDO" ---
             $followingIds = $user->following()->pluck('artist_id');
             $query->whereIn('user_id', $followingIds)->latest(); // Los más recientes de quienes sigo
+        } elseif ($mode === 'near') {
+            // --- MODO "CERCA DE MÍ" (pensado para turismo) ---
+            // Recibimos la ubicación del usuario (lat/lng que da el navegador) y le
+            // mostramos los eventos dentro de un radio de 30 km, del más cercano al
+            // más lejano. La distancia la calcula PostgreSQL con la fórmula de
+            // Haversine. Inlinamos lat/lng ya casteados a float (con %F, que no mete
+            // coma decimal según el idioma) para no chocar con los placeholders ? de
+            // PDO; al ser floats no hay riesgo de inyección.
+            $lat = (float) $request->query('lat');
+            $lng = (float) $request->query('lng');
+
+            $haversine = sprintf(
+                '6371 * acos( LEAST(1, '
+                . 'cos(radians(%F)) * cos(radians(latitude)) * cos(radians(longitude) - radians(%F)) '
+                . '+ sin(radians(%F)) * sin(radians(latitude)) ))',
+                $lat,
+                $lng,
+                $lat
+            );
+
+            $query->where('user_id', '!=', $userId)   // los míos no me sirven de turista
+                  ->whereNotNull('latitude')          // sin coordenadas no puedo medir distancia
+                  ->whereNotNull('longitude')
+                  ->selectRaw("$haversine as distance_km")
+                  ->whereRaw("$haversine <= 30")       // radio de 30 km
+                  ->orderByRaw($haversine);            // del más cercano al más lejano
         } else {
             // --- MODO "DESCUBRIR / PARA TI" ---
             // Eventos de cualquiera (aleatorios), pero EXCLUIMOS los creados por el propio usuario

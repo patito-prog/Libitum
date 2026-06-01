@@ -116,4 +116,45 @@ class FeedTest extends TestCase
         $response = $this->getJson('/api/feed');
         $response->assertUnauthorized();
     }
+
+    /**
+     * El modo "cerca de mí" solo devuelve eventos dentro del radio de 30 km
+     * respecto a la ubicación del usuario, y además incluye la distancia.
+     */
+    public function test_feed_near_mode_only_returns_events_within_radius(): void
+    {
+        $spectator = $this->makeSpectator();
+        $artist    = $this->makeArtist();
+
+        $publishedId = Status::where('name', 'published')->first()->id;
+
+        // Ubicación del usuario: centro de Madrid.
+        $lat = 40.4168;
+        $lng = -3.7038;
+
+        // Uno cerquita (mismo Madrid, ~1 km) y otro lejos (Barcelona, ~500 km).
+        Event::factory()->create([
+            'user_id' => $artist->id, 'status_id' => $publishedId, 'title' => 'Concierto cerca',
+            'latitude' => 40.4200, 'longitude' => -3.7000,
+        ]);
+        Event::factory()->create([
+            'user_id' => $artist->id, 'status_id' => $publishedId, 'title' => 'Concierto lejos',
+            'latitude' => 41.3900, 'longitude' => 2.1600,
+        ]);
+
+        $response = $this->actingAs($spectator, 'sanctum')
+            ->getJson("/api/feed?mode=near&lat={$lat}&lng={$lng}");
+
+        $response->assertOk();
+
+        $events = collect($response->json('data.data'));
+        $titles = $events->pluck('title');
+
+        $this->assertTrue($titles->contains('Concierto cerca'),  'El evento dentro del radio SÍ debe aparecer');
+        $this->assertFalse($titles->contains('Concierto lejos'), 'El evento fuera del radio (30 km) NO debe aparecer');
+
+        // Y el backend debe devolver la distancia calculada.
+        $near = $events->firstWhere('title', 'Concierto cerca');
+        $this->assertNotNull($near['distance_km'] ?? null, 'El backend debe devolver la distancia (distance_km)');
+    }
 }
