@@ -1,37 +1,83 @@
-.dangerZone {
+.settings {
+    position: relative;
+    display: inline-block;
+}
+
+/* Botón disparador: mismo look "pill" que los botones del perfil */
+.trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1.4rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.88rem;
+    font-weight: 700;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-speed);
+
+    &:hover { border-color: var(--text-primary); color: var(--text-primary); }
+}
+
+.chevron {
+    font-size: 0.7rem;
+    transition: transform var(--transition-speed);
+}
+.up { transform: rotate(180deg); }
+
+/* Menú desplegable */
+.menu {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    z-index: 1200;
+    min-width: 220px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    padding: 0.4rem;
+    display: flex;
+    flex-direction: column;
+
+    @media (max-width: 520px) { left: 50%; transform: translateX(-50%); }
+}
+
+.item {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
-    margin-top: 2rem;
-    padding: 1.1rem 1.3rem;
-    border: 1px solid rgba(232, 74, 64, 0.35);
-    background: rgba(232, 74, 64, 0.05);
-    border-radius: var(--radius-md);
-}
-
-.dangerInfo {
-    strong { color: var(--color-danger); font-size: 0.98rem; }
-    p { margin: 0.2rem 0 0; font-size: 0.85rem; color: var(--text-secondary); max-width: 46ch; line-height: 1.5; }
-}
-
-.dangerBtn {
-    flex-shrink: 0;
+    gap: 0.55rem;
+    width: 100%;
+    text-align: left;
     background: transparent;
-    color: var(--color-danger);
-    border: 1px solid var(--color-danger);
-    border-radius: var(--radius-md);
-    font-weight: 700;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
     font-size: 0.9rem;
-    padding: 0.55rem 1.2rem;
+    font-weight: 600;
+    padding: 0.6rem 0.75rem;
     cursor: pointer;
-    transition: background var(--transition-speed), color var(--transition-speed);
+    transition: background var(--transition-speed);
 
-    &:hover { background: var(--color-danger); color: #fff; }
+    &:hover { background: rgba(22, 24, 26, 0.05); }
 }
 
-/* Modal */
+.divider {
+    height: 1px;
+    background: var(--border-color);
+    margin: 0.35rem 0.25rem;
+}
+
+/* Eliminar cuenta: discreto pero claramente destructivo */
+.danger {
+    color: var(--color-danger);
+
+    &:hover { background: rgba(232, 74, 64, 0.08); }
+}
+
+/* ─────────────  Modal de confirmación  ───────────── */
 .overlay {
     position: fixed;
     inset: 0;
@@ -84,7 +130,7 @@
     &:focus { outline: none; border-color: var(--color-danger); box-shadow: 0 0 0 3px rgba(232, 74, 64, 0.12); }
 }
 
-.actions {
+.modalActions {
     display: flex;
     gap: 0.75rem;
     margin-top: 1.2rem;

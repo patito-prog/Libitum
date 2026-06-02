@@ -131,7 +131,7 @@ Dos medidas pensadas para **proteger a los usuarios entre sí**:
 Al usarse con datos personales reales (en España), incluyo:
 
 - **Política de privacidad** (`/privacidad`) y **Términos de uso** (`/terminos`): explican qué datos recojo, para qué, con quién se comparten y los derechos del usuario.
-- **Derecho al borrado:** el usuario puede **eliminar su cuenta** desde la **"zona de peligro"** de su propio perfil. Por seguridad se le pide **confirmar la contraseña** antes de borrar (validación `current_password`), y el endpoint (`ProfileController@destroy`) elimina sus datos y **revoca todos sus tokens**.
+- **Derecho al borrado:** el usuario puede **eliminar su cuenta** desde el menú de **Ajustes** de su propio perfil. Por seguridad se le pide **confirmar la contraseña** antes de borrar (validación `current_password`), y el endpoint (`ProfileController@destroy`) elimina sus datos y **revoca todos sus tokens**.
 - **No se procesan pagos:** las donaciones van por plataformas externas, así que **no guardo ningún dato bancario** → menos responsabilidad legal.
 - **Sin cookies de seguimiento:** solo uso `localStorage` para el token de sesión (fin técnico), no rastreo.
 

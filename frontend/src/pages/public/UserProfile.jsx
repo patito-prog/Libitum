@@ -9,7 +9,6 @@ import UserListModal from "../../components/common/UserListModal.jsx";
 import ProfileHeader from "../../components/profile/ProfileHeader.jsx";
 import ProfileForms from "../../components/profile/ProfileForms.jsx";
 import PasswordForm from "../../components/profile/PasswordForm.jsx";
-import DeleteAccount from "../../components/profile/DeleteAccount.jsx";
 import ProfileEventsGrid from "../../components/profile/ProfileEventsGrid.jsx";
 import API_BASE from "../../config/api.js";
 import styles from "./UserProfile.module.scss";
@@ -265,9 +264,6 @@ const UserProfile = () => {
                     ? <ProfileEventsGrid events={profile.events} />
                     : <p className={styles.empty}>Este usuario no está apuntado a ningún evento todavía.</p>
             )}
-
-            {/* Zona de peligro: solo en tu propio perfil */}
-            {isOwnProfile && <DeleteAccount />}
 
             {modal && (
                 <UserListModal
